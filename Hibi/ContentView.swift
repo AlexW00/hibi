@@ -58,10 +58,12 @@ struct ContentView: View {
 
                 Tab("Week", systemImage: "text.alignleft", value: CalendarTab.stream) {
                     StreamView(
-                        year: displayedYear,
-                        month: displayedMonth,
+                        displayedYear: $displayedYear,
+                        displayedMonth: $displayedMonth,
                         scrollToNowToken: scrollToNowToken,
-                        onPickDay: { day in
+                        onPickDay: { year, month, day in
+                            displayedYear = year
+                            displayedMonth = month
                             selectedDay = day
                             selection = .day
                         },

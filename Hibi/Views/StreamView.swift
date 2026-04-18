@@ -2,18 +2,38 @@ import EventKit
 import SwiftUI
 
 struct StreamView: View {
-    let year: Int
-    let month: Int
+    @Binding var displayedYear: Int
+    @Binding var displayedMonth: Int
     let scrollToNowToken: Int
-    let onPickDay: (Int) -> Void
+    let onPickDay: (Int, Int, Int) -> Void
     let onTapEvent: (CalendarEvent) -> Void
 
     @Environment(EventStore.self) private var eventStore
-    @State private var visibleDay: Int?
+    @State private var window: StreamWindow
+    @State private var position = ScrollPosition(idType: Int.self)
+
+    init(
+        displayedYear: Binding<Int>,
+        displayedMonth: Binding<Int>,
+        scrollToNowToken: Int,
+        onPickDay: @escaping (Int, Int, Int) -> Void,
+        onTapEvent: @escaping (CalendarEvent) -> Void
+    ) {
+        self._displayedYear = displayedYear
+        self._displayedMonth = displayedMonth
+        self.scrollToNowToken = scrollToNowToken
+        self.onPickDay = onPickDay
+        self.onTapEvent = onTapEvent
+
+        let y = displayedYear.wrappedValue
+        let m = displayedMonth.wrappedValue
+        let isTodayMonth = y == SampleData.todayYear && m == SampleData.todayMonth
+        let seedDay = isTodayMonth ? SampleData.todayDay : 15
+        let seed = DayKey(year: y, month: m, day: seedDay)
+        _window = State(initialValue: StreamWindow(center: seed))
+    }
 
     var body: some View {
-        let totalDays = SampleData.daysInMonth(year: year, month: month)
-
         ScrollView {
             if !eventStore.showsCalendarContent {
                 CalendarAccessPrompt(status: eventStore.authorization) {
@@ -24,31 +44,155 @@ struct StreamView: View {
             }
 
             LazyVStack(spacing: 0) {
-                ForEach(1...totalDays, id: \.self) { day in
+                ForEach(window.days) { key in
                     StreamDayRow(
-                        year: year,
-                        month: month,
-                        day: day,
-                        onPickDay: onPickDay,
+                        year: key.year,
+                        month: key.month,
+                        day: key.day,
+                        onPickDay: { d in onPickDay(key.year, key.month, d) },
                         onTapEvent: onTapEvent
                     )
-                    .id(day)
                 }
             }
             .scrollTargetLayout()
             .padding(.top, 4)
             .padding(.bottom, 160)
         }
-        .scrollPosition(id: $visibleDay, anchor: .top)
+        .scrollPosition($position, anchor: .center)
         .scrollTargetBehavior(.viewAligned)
-        .sensoryFeedback(.selection, trigger: visibleDay)
-        .onAppear {
-            if SampleData.todayYear == year && SampleData.todayMonth == month {
-                visibleDay = SampleData.todayDay
+        .defaultScrollAnchor(.center)
+        .sensoryFeedback(.selection, trigger: position.viewID(type: Int.self))
+        .onScrollPhaseChange { _, newPhase in
+            if newPhase == .idle {
+                window.extendIfNearEdge(visibleID: position.viewID(type: Int.self))
             }
         }
+        .onChange(of: position.viewID(type: Int.self)) { _, newID in
+            guard let newID else { return }
+            window.visibleDayID = newID
+            let y = newID / 10_000
+            let m = (newID / 100) % 100
+            if y != displayedYear { displayedYear = y }
+            if m != displayedMonth { displayedMonth = m }
+        }
         .onChange(of: scrollToNowToken) { _, _ in
-            visibleDay = SampleData.todayDay
+            let today = DayKey(
+                year: SampleData.todayYear,
+                month: SampleData.todayMonth,
+                day: SampleData.todayDay
+            )
+            window.recenter(on: today)
+            withAnimation(.snappy(duration: 0.35)) {
+                position.scrollTo(id: today.id)
+            }
+        }
+    }
+}
+
+struct DayKey: Hashable, Identifiable {
+    let year: Int
+    let month: Int
+    let day: Int
+    var id: Int { year * 10_000 + month * 100 + day }
+
+    static func offset(_ delta: Int, from base: DayKey) -> DayKey {
+        var comps = DateComponents()
+        comps.year = base.year
+        comps.month = base.month
+        comps.day = base.day
+        let cal = Calendar(identifier: .gregorian)
+        guard let date = cal.date(from: comps),
+              let shifted = cal.date(byAdding: .day, value: delta, to: date) else {
+            return base
+        }
+        return DayKey(
+            year: cal.component(.year, from: shifted),
+            month: cal.component(.month, from: shifted),
+            day: cal.component(.day, from: shifted)
+        )
+    }
+}
+
+@MainActor
+@Observable
+final class StreamWindow {
+    private(set) var days: [DayKey]
+    var visibleDayID: DayKey.ID?
+
+    private var isExtending = false
+    private let windowRadius: Int
+    private let extendBatch: Int
+    private let maxWindow: Int
+
+    init(
+        center: DayKey,
+        windowRadius: Int = 60,
+        extendBatch: Int = 60,
+        maxWindow: Int = 240
+    ) {
+        self.windowRadius = windowRadius
+        self.extendBatch = extendBatch
+        self.maxWindow = maxWindow
+        self.days = (-windowRadius...windowRadius).map {
+            DayKey.offset($0, from: center)
+        }
+        self.visibleDayID = center.id
+    }
+
+    func extendIfNearEdge(visibleID: DayKey.ID?) {
+        guard !isExtending,
+              let id = visibleID,
+              let idx = days.firstIndex(where: { $0.id == id }) else { return }
+
+        let neededAbove = windowRadius - idx
+        let neededBelow = windowRadius - (days.count - 1 - idx)
+        let cap = extendBatch
+
+        if neededAbove > 0, let first = days.first {
+            isExtending = true
+            let count = min(neededAbove, cap)
+            let prepended = (1...count).reversed().map {
+                DayKey.offset(-$0, from: first)
+            }
+            days.insert(contentsOf: prepended, at: 0)
+            trimTrailingIfOverflow()
+            isExtending = false
+        } else if neededBelow > 0, let last = days.last {
+            isExtending = true
+            let count = min(neededBelow, cap)
+            let appended = (1...count).map { DayKey.offset($0, from: last) }
+            days.append(contentsOf: appended)
+            trimLeadingIfOverflow()
+            isExtending = false
+        }
+    }
+
+    func recenter(on key: DayKey) {
+        if days.contains(where: { $0.id == key.id }) { return }
+        days = (-windowRadius...windowRadius).map {
+            DayKey.offset($0, from: key)
+        }
+        visibleDayID = key.id
+    }
+
+    private func trimLeadingIfOverflow() {
+        let excess = days.count - maxWindow
+        guard excess > 0 else { return }
+        let pinnedIdx = days.firstIndex { $0.id == visibleDayID } ?? (days.count / 2)
+        let safeTrim = min(excess, max(0, pinnedIdx - windowRadius))
+        if safeTrim > 0 {
+            days.removeFirst(safeTrim)
+        }
+    }
+
+    private func trimTrailingIfOverflow() {
+        let excess = days.count - maxWindow
+        guard excess > 0 else { return }
+        let pinnedIdx = days.firstIndex { $0.id == visibleDayID } ?? (days.count / 2)
+        let distanceToTail = days.count - 1 - pinnedIdx
+        let safeTrim = min(excess, max(0, distanceToTail - windowRadius))
+        if safeTrim > 0 {
+            days.removeLast(safeTrim)
         }
     }
 }
@@ -126,6 +270,9 @@ private struct StreamDayRow: View {
                     .fill(.quaternary)
                     .frame(height: 0.5)
             }
+        }
+        .task(id: MonthKey(year: year, month: month)) {
+            eventStore.ensureLoaded(year: year, month: month)
         }
     }
 

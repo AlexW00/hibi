@@ -138,11 +138,25 @@ struct MonthsScrollView: View {
     let scrollToNowToken: Int
     var onPickDay: (Int, Int, Int) -> Void
 
-    @State private var window = CalendarWindow(
-        center: MonthKey(year: SampleData.todayYear, month: SampleData.todayMonth)
-    )
-    @State private var scrollTarget: MonthKey?
-    @State private var didInitialScroll = false
+    @State private var window: CalendarWindow
+    @State private var position = ScrollPosition(idType: Int.self)
+
+    init(
+        displayedYear: Binding<Int>,
+        displayedMonth: Binding<Int>,
+        scrollToNowToken: Int,
+        onPickDay: @escaping (Int, Int, Int) -> Void
+    ) {
+        self._displayedYear = displayedYear
+        self._displayedMonth = displayedMonth
+        self.scrollToNowToken = scrollToNowToken
+        self.onPickDay = onPickDay
+        let seed = MonthKey(
+            year: displayedYear.wrappedValue,
+            month: displayedMonth.wrappedValue
+        )
+        _window = State(initialValue: CalendarWindow(center: seed))
+    }
 
     var body: some View {
         ScrollView {
@@ -155,35 +169,34 @@ struct MonthsScrollView: View {
                             onPickDay(key.year, key.month, day)
                         }
                     )
-                    .id(key)
                 }
             }
             .padding(.bottom, 120)
             .scrollTargetLayout()
         }
-        .scrollPosition(id: $scrollTarget, anchor: .center)
+        .scrollPosition($position, anchor: .center)
         .scrollTargetBehavior(.viewAligned)
-        .sensoryFeedback(.selection, trigger: scrollTarget)
+        .defaultScrollAnchor(.center)
+        .sensoryFeedback(.selection, trigger: position.viewID(type: Int.self))
         .onScrollPhaseChange { _, newPhase in
             if newPhase == .idle {
-                window.extendIfNearEdge(visibleID: scrollTarget?.id)
+                window.extendIfNearEdge(visibleID: position.viewID(type: Int.self))
             }
         }
-        .task(id: didInitialScroll) {
-            guard !didInitialScroll else { return }
-            scrollTarget = MonthKey(year: displayedYear, month: displayedMonth)
-            didInitialScroll = true
-        }
-        .onChange(of: scrollTarget) { _, newValue in
-            guard let newValue else { return }
-            window.visibleMonthID = newValue.id
-            displayedYear = newValue.year
-            displayedMonth = newValue.month
+        .onChange(of: position.viewID(type: Int.self)) { _, newID in
+            guard let newID else { return }
+            window.visibleMonthID = newID
+            let y = newID / 100
+            let m = newID % 100
+            if y != displayedYear { displayedYear = y }
+            if m != displayedMonth { displayedMonth = m }
         }
         .onChange(of: scrollToNowToken) { _, _ in
             let today = MonthKey(year: SampleData.todayYear, month: SampleData.todayMonth)
             window.recenter(on: today)
-            scrollTarget = today
+            withAnimation(.snappy(duration: 0.35)) {
+                position.scrollTo(id: today.id)
+            }
         }
     }
 }
