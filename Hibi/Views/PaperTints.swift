@@ -2,27 +2,28 @@ import SwiftUI
 import UIKit
 
 /// Progressive paper tints — depth cue for the tear stack.
-/// Light: white → off-white → beige.
-/// Dark: warm near-blacks → slightly lighter, preserving the same depth ordering.
+/// Light: white → off-white → beige (lower layers recede warmer).
+/// Dark: "high-contrast stack" — front is lightest, back layers melt into
+/// pure black so depth reads as recession, not illumination.
 enum PaperTints {
     static let card1 = dynamic(
         light: (0.984, 0.980, 0.969),
-        dark:  (0.105, 0.100, 0.090)
+        dark:  (0.141, 0.141, 0.141)   // #242424
     )
     static let card2 = dynamic(
         light: (0.960, 0.953, 0.938),
-        dark:  (0.135, 0.128, 0.115)
+        dark:  (0.078, 0.078, 0.078)   // #141414
     )
     static let card3 = dynamic(
         light: (0.937, 0.929, 0.901),
-        dark:  (0.165, 0.155, 0.138)
+        dark:  (0.000, 0.000, 0.000)   // #000000 — matches app background
     )
 
     /// Color used for binding-hole fill — sits on top of the paper, matches
     /// a slightly deeper tint of card3 in each appearance.
     static let bindingHole = dynamic(
         light: (0.898, 0.882, 0.839),
-        dark:  (0.060, 0.055, 0.048)
+        dark:  (0.000, 0.000, 0.000)
     )
 
     private static func dynamic(

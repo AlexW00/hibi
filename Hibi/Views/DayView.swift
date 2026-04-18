@@ -10,6 +10,7 @@ struct DayView: View {
 
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
+    @Environment(\.colorScheme) private var colorScheme
     @State private var dragY: CGFloat = 0
     @State private var isTearing: Bool = false
     @State private var cardShiftAmount: CGFloat = 0
@@ -220,9 +221,24 @@ struct DayView: View {
         let weather = weatherStore.weather(year: dayInfo.year, month: dayInfo.month, day: dayInfo.day)
         let isToday = SampleData.isToday(year: dayInfo.year, month: dayInfo.month, day: dayInfo.day)
 
+        // Hairline border for cards behind the front — defines the card
+        // silhouette against the background (critical in dark mode where
+        // the back card is pitch black) and reads as subtle paper edge in
+        // light mode. Fades out as a card shifts forward and takes over
+        // the front role, which has no border.
+        let edgeHighlightAmount = 1 - chromeAmount
+        let borderColor: Color = colorScheme == .dark
+            ? Color.white.opacity(0.12)
+            : Color.black.opacity(0.08)
+
         let card = shape
             .fill(baseFill)
             .overlay { shape.fill(overlayFill).opacity(overlayOpacity) }
+            .overlay {
+                shape
+                    .strokeBorder(borderColor, lineWidth: 1)
+                    .opacity(edgeHighlightAmount)
+            }
             .overlay(alignment: .top) {
                 if chromeAmount > 0 { BindingHoles().opacity(chromeAmount) }
             }
