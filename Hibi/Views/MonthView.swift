@@ -139,7 +139,7 @@ struct MonthsScrollView: View {
     var onPickDay: (Int, Int, Int) -> Void
 
     @State private var window: CalendarWindow
-    @State private var position = ScrollPosition(idType: Int.self)
+    @State private var position: ScrollPosition
 
     init(
         displayedYear: Binding<Int>,
@@ -156,31 +156,38 @@ struct MonthsScrollView: View {
             month: displayedMonth.wrappedValue
         )
         _window = State(initialValue: CalendarWindow(center: seed))
+        var initial = ScrollPosition(idType: Int.self)
+        initial.scrollTo(id: seed.id, anchor: .center)
+        _position = State(initialValue: initial)
     }
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 32) {
-                ForEach(window.months) { key in
-                    MonthView(
-                        year: key.year,
-                        month: key.month,
-                        onPickDay: { day in
-                            onPickDay(key.year, key.month, day)
-                        }
-                    )
+            VStack(spacing: 0) {
+                EndOfListIndicator()
+                LazyVStack(alignment: .leading, spacing: 32) {
+                    ForEach(window.months) { key in
+                        MonthView(
+                            year: key.year,
+                            month: key.month,
+                            onPickDay: { day in
+                                onPickDay(key.year, key.month, day)
+                            }
+                        )
+                    }
                 }
+                .scrollTargetLayout()
+                EndOfListIndicator()
             }
             .padding(.bottom, 120)
-            .scrollTargetLayout()
         }
         .scrollPosition($position, anchor: .center)
         .scrollTargetBehavior(.viewAligned)
-        .defaultScrollAnchor(.center)
         .sensoryFeedback(.selection, trigger: position.viewID(type: Int.self))
         .onScrollPhaseChange { _, newPhase in
             if newPhase == .idle {
-                window.extendIfNearEdge(visibleID: position.viewID(type: Int.self))
+                let id = position.viewID(type: Int.self) ?? window.visibleMonthID
+                window.extendIfNearEdge(visibleID: id)
             }
         }
         .onChange(of: position.viewID(type: Int.self)) { _, newID in
@@ -198,6 +205,31 @@ struct MonthsScrollView: View {
                 position.scrollTo(id: today.id)
             }
         }
+    }
+}
+
+struct EndOfListIndicator: View {
+    var body: some View {
+        TimelineView(.animation) { ctx in
+            let t = ctx.date.timeIntervalSinceReferenceDate
+            HStack(spacing: 6) {
+                ForEach(0..<3) { i in
+                    Circle()
+                        .fill(.tertiary)
+                        .frame(width: 4, height: 4)
+                        .opacity(dotOpacity(index: i, t: t))
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 28)
+    }
+
+    private func dotOpacity(index: Int, t: Double) -> Double {
+        let cycle = 1.4
+        let offset = Double(index) * (cycle / 3.0)
+        let phase = ((t + offset).truncatingRemainder(dividingBy: cycle)) / cycle
+        return 0.25 + 0.75 * (0.5 + 0.5 * sin(phase * 2 * .pi))
     }
 }
 

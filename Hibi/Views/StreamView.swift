@@ -10,7 +10,7 @@ struct StreamView: View {
 
     @Environment(EventStore.self) private var eventStore
     @State private var window: StreamWindow
-    @State private var position = ScrollPosition(idType: Int.self)
+    @State private var position: ScrollPosition
 
     init(
         displayedYear: Binding<Int>,
@@ -31,6 +31,9 @@ struct StreamView: View {
         let seedDay = isTodayMonth ? SampleData.todayDay : 15
         let seed = DayKey(year: y, month: m, day: seedDay)
         _window = State(initialValue: StreamWindow(center: seed))
+        var initial = ScrollPosition(idType: Int.self)
+        initial.scrollTo(id: seed.id, anchor: .center)
+        _position = State(initialValue: initial)
     }
 
     var body: some View {
@@ -43,28 +46,32 @@ struct StreamView: View {
                 .padding(.top, 40)
             }
 
-            LazyVStack(spacing: 0) {
-                ForEach(window.days) { key in
-                    StreamDayRow(
-                        year: key.year,
-                        month: key.month,
-                        day: key.day,
-                        onPickDay: { d in onPickDay(key.year, key.month, d) },
-                        onTapEvent: onTapEvent
-                    )
+            VStack(spacing: 0) {
+                EndOfListIndicator()
+                LazyVStack(spacing: 0) {
+                    ForEach(window.days) { key in
+                        StreamDayRow(
+                            year: key.year,
+                            month: key.month,
+                            day: key.day,
+                            onPickDay: { d in onPickDay(key.year, key.month, d) },
+                            onTapEvent: onTapEvent
+                        )
+                    }
                 }
+                .scrollTargetLayout()
+                EndOfListIndicator()
             }
-            .scrollTargetLayout()
             .padding(.top, 4)
             .padding(.bottom, 160)
         }
         .scrollPosition($position, anchor: .center)
         .scrollTargetBehavior(.viewAligned)
-        .defaultScrollAnchor(.center)
         .sensoryFeedback(.selection, trigger: position.viewID(type: Int.self))
         .onScrollPhaseChange { _, newPhase in
             if newPhase == .idle {
-                window.extendIfNearEdge(visibleID: position.viewID(type: Int.self))
+                let id = position.viewID(type: Int.self) ?? window.visibleDayID
+                window.extendIfNearEdge(visibleID: id)
             }
         }
         .onChange(of: position.viewID(type: Int.self)) { _, newID in

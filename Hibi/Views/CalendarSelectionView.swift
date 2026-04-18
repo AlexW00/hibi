@@ -89,5 +89,6 @@ private struct CalendarRow: View {
                     .foregroundStyle(.primary)
             }
         }
+        .tint(.green)
     }
 }
