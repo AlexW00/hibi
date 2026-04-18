@@ -79,7 +79,7 @@ extension CalendarEvent {
 
         if useDemoTimeOfDay,
            let y = listYear, let m = listMonth, let d = listDay,
-           SampleData.isToday(year: y, month: m, day: d) {
+           SampleData.isDemoAnchor(year: y, month: m, day: d) {
             var cal = Calendar(identifier: .gregorian)
             cal.timeZone = .current
             let startM = cal.component(.hour, from: s) * 60 + cal.component(.minute, from: s)

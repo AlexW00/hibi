@@ -2,9 +2,26 @@ import Foundation
 import SwiftUI
 
 enum SampleData {
-    static let todayYear = 2026
-    static let todayMonth = 4
-    static let todayDay = 18
+    /// The device's current date, split into gregorian components in the user's
+    /// current time zone. Recomputed on each access so crossing midnight is
+    /// reflected the next time a view reads these.
+    static var todayYear: Int { todayComponents.year }
+    static var todayMonth: Int { todayComponents.month }
+    static var todayDay: Int { todayComponents.day }
+
+    /// Fixed anchor for DEBUG demo mode: the date the curated `DemoFixtures`
+    /// events and the demo-time-of-day branch in `CalendarEvent.progress` treat
+    /// as "today" for screenshots.
+    static let demoAnchorYear = 2026
+    static let demoAnchorMonth = 4
+    static let demoAnchorDay = 18
+
+    private static var todayComponents: (year: Int, month: Int, day: Int) {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = .current
+        let c = cal.dateComponents([.year, .month, .day], from: Date())
+        return (c.year ?? demoAnchorYear, c.month ?? demoAnchorMonth, c.day ?? demoAnchorDay)
+    }
 
     static func firstWeekday(year: Int, month: Int) -> Int {
         var comps = DateComponents()
@@ -37,7 +54,14 @@ enum SampleData {
     }
 
     static func isToday(year: Int, month: Int, day: Int) -> Bool {
-        year == todayYear && month == todayMonth && day == todayDay
+        let t = todayComponents
+        return year == t.year && month == t.month && day == t.day
+    }
+
+    /// True when the given (y, m, d) matches the fixed demo anchor date.
+    /// Used only by the demo-time-of-day branch in `CalendarEvent.progress`.
+    static func isDemoAnchor(year: Int, month: Int, day: Int) -> Bool {
+        year == demoAnchorYear && month == demoAnchorMonth && day == demoAnchorDay
     }
 }
 

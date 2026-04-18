@@ -24,7 +24,7 @@ Two `@Observable` `@MainActor` stores own all non-view state. Views are passed t
 
 - **`EventStore`** — wraps `EKEventStore`. Caches events per `MonthKey` in `eventsByMonth`. Lazy-loads via `ensureLoaded(year:month:)` when a view scrolls into a new month. Watches `.EKEventStoreChanged` and reloads the months it already had. Owns the hidden-calendars set (persisted in `UserDefaults`) and a DEBUG-only demo mode that swaps in `DemoFixtures`.
 - **`WeatherStore`** — `CLLocationManager` + `WeatherService`. 30-minute self-throttle. Keys daily forecasts by `(year, month, day)`. Also reverse-geocodes the location into a city name for the Day masthead.
-- **`SampleData`** — a *fixed* "today" of 2026-04-18. It's the anchor for demo screenshots and the initial scroll position when the real today is out of the sample range. `isToday(...)` is used to trigger demo-mode time-of-day progress in `CalendarEvent.progress(...)`.
+- **`SampleData`** — `todayYear/Month/Day` are computed from `Date()` in the device's current time zone so views pick up the real "today." A separate `demoAnchorYear/Month/Day` (2026-04-18) is the fixed anchor for DEBUG demo screenshots; `isDemoAnchor(...)` is what triggers demo-mode time-of-day progress in `CalendarEvent.progress(...)`.
 
 State flow for the three tabs lives on `ContentView`: `displayedYear/Month`, `selectedDay`, and a `scrollToNowToken` that views observe via `.onChange` to scroll back to today when the active tab is re-tapped.
 
