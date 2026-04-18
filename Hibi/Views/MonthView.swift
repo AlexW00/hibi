@@ -138,27 +138,16 @@ struct MonthsScrollView: View {
     let scrollToNowToken: Int
     var onPickDay: (Int, Int, Int) -> Void
 
+    @State private var window = CalendarWindow(
+        center: MonthKey(year: SampleData.todayYear, month: SampleData.todayMonth)
+    )
     @State private var scrollTarget: MonthKey?
     @State private var didInitialScroll = false
 
-    private static let monthsBefore = 12
-    private static let monthsAfter = 24
-
-    private var months: [MonthKey] {
-        let baseYear = SampleData.todayYear
-        let baseMonth = SampleData.todayMonth
-        let start = -Self.monthsBefore
-        let end = Self.monthsAfter
-        return (start...end).map { offset in
-            let total = (baseYear * 12 + (baseMonth - 1)) + offset
-            return MonthKey(year: total / 12, month: (total % 12) + 1)
-        }
-    }
-
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 32) {
-                ForEach(months) { key in
+            LazyVStack(alignment: .leading, spacing: 32) {
+                ForEach(window.months) { key in
                     MonthView(
                         year: key.year,
                         month: key.month,
@@ -172,9 +161,14 @@ struct MonthsScrollView: View {
             .padding(.bottom, 120)
             .scrollTargetLayout()
         }
-        .scrollPosition(id: $scrollTarget, anchor: .top)
+        .scrollPosition(id: $scrollTarget, anchor: .center)
         .scrollTargetBehavior(.viewAligned)
         .sensoryFeedback(.selection, trigger: scrollTarget)
+        .onScrollPhaseChange { _, newPhase in
+            if newPhase == .idle {
+                window.extendIfNearEdge(visibleID: scrollTarget?.id)
+            }
+        }
         .task(id: didInitialScroll) {
             guard !didInitialScroll else { return }
             scrollTarget = MonthKey(year: displayedYear, month: displayedMonth)
@@ -182,11 +176,14 @@ struct MonthsScrollView: View {
         }
         .onChange(of: scrollTarget) { _, newValue in
             guard let newValue else { return }
+            window.visibleMonthID = newValue.id
             displayedYear = newValue.year
             displayedMonth = newValue.month
         }
         .onChange(of: scrollToNowToken) { _, _ in
-            scrollTarget = MonthKey(year: SampleData.todayYear, month: SampleData.todayMonth)
+            let today = MonthKey(year: SampleData.todayYear, month: SampleData.todayMonth)
+            window.recenter(on: today)
+            scrollTarget = today
         }
     }
 }
@@ -195,4 +192,95 @@ struct MonthKey: Hashable, Identifiable {
     let year: Int
     let month: Int
     var id: Int { year * 100 + month }
+
+    static func offset(_ delta: Int, from base: MonthKey) -> MonthKey {
+        let total = (base.year * 12 + (base.month - 1)) + delta
+        return MonthKey(year: total / 12, month: (total % 12) + 1)
+    }
+}
+
+@MainActor
+@Observable
+final class CalendarWindow {
+    private(set) var months: [MonthKey]
+    var visibleMonthID: MonthKey.ID?
+
+    private var isExtending = false
+    private let windowRadius: Int
+    private let extendBatch: Int
+    private let maxWindow: Int
+
+    init(
+        center: MonthKey,
+        windowRadius: Int = 24,
+        extendBatch: Int = 24,
+        maxWindow: Int = 96
+    ) {
+        self.windowRadius = windowRadius
+        self.extendBatch = extendBatch
+        self.maxWindow = maxWindow
+        self.months = (-windowRadius...windowRadius).map {
+            MonthKey.offset($0, from: center)
+        }
+        self.visibleMonthID = center.id
+    }
+
+    func extendIfNearEdge(visibleID: MonthKey.ID?) {
+        guard !isExtending,
+              let id = visibleID,
+              let idx = months.firstIndex(where: { $0.id == id }) else { return }
+
+        let neededAbove = windowRadius - idx
+        let neededBelow = windowRadius - (months.count - 1 - idx)
+        let cap = extendBatch
+
+        if neededAbove > 0, let first = months.first {
+            isExtending = true
+            let count = min(neededAbove, cap)
+            let prepended = (1...count).reversed().map {
+                MonthKey.offset(-$0, from: first)
+            }
+            months.insert(contentsOf: prepended, at: 0)
+            trimTrailingIfOverflow()
+            isExtending = false
+        } else if neededBelow > 0, let last = months.last {
+            isExtending = true
+            let count = min(neededBelow, cap)
+            let appended = (1...count).map {
+                MonthKey.offset($0, from: last)
+            }
+            months.append(contentsOf: appended)
+            trimLeadingIfOverflow()
+            isExtending = false
+        }
+    }
+
+    func recenter(on key: MonthKey) {
+        if months.contains(where: { $0.id == key.id }) { return }
+        months = (-windowRadius...windowRadius).map {
+            MonthKey.offset($0, from: key)
+        }
+        visibleMonthID = key.id
+    }
+
+    private func trimLeadingIfOverflow() {
+        let excess = months.count - maxWindow
+        guard excess > 0 else { return }
+        let pinnedIdx = months.firstIndex { $0.id == visibleMonthID } ?? (months.count / 2)
+        let safeTrim = min(excess, max(0, pinnedIdx - windowRadius))
+        if safeTrim > 0 {
+            months.removeFirst(safeTrim)
+        }
+    }
+
+    private func trimTrailingIfOverflow() {
+        let excess = months.count - maxWindow
+        guard excess > 0 else { return }
+        let pinnedIdx = months.firstIndex { $0.id == visibleMonthID } ?? (months.count / 2)
+        let distanceToTail = months.count - 1 - pinnedIdx
+        let safeTrim = min(excess, max(0, distanceToTail - windowRadius))
+        if safeTrim > 0 {
+            months.removeLast(safeTrim)
+        }
+    }
 }
