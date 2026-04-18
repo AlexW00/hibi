@@ -19,9 +19,9 @@ struct DayView: View {
     private let offScreen: CGFloat = 700
 
     // Progressive paper tints — white → off-white → beige (depth cue).
-    private let card1Fill = Color(.displayP3, red: 0.984, green: 0.980, blue: 0.969)
-    private let card2Fill = Color(.displayP3, red: 0.960, green: 0.953, blue: 0.938)
-    private let card3Fill = Color(.displayP3, red: 0.937, green: 0.929, blue: 0.901)
+    private let card1Fill = PaperTints.card1
+    private let card2Fill = PaperTints.card2
+    private let card3Fill = PaperTints.card3
 
     var body: some View {
         VStack(spacing: 0) {
@@ -48,11 +48,14 @@ struct DayView: View {
     }
 
     /// Opacity applied to the event rows only — the "SCHEDULE" header stays opaque.
-    /// During drag: fades out with the pull. During tear: reflects `scheduleFadeIn`
+    /// During drag: fades toward a minimum (events stay legible, matching the
+    /// paper's own partial fade). During tear: reflects `scheduleFadeIn`
     /// which is animated 0 → 1 concurrently with the tear animation.
     private var eventsOpacity: Double {
         if isTearing { return scheduleFadeIn }
-        return 1 - min(Double(abs(dragY)) / tearThreshold, 1)
+        let minOpacity = 0.35
+        let progress = min(Double(abs(dragY)) / tearThreshold, 1)
+        return 1 - progress * (1 - minOpacity)
     }
 
     /// "Pull to tear" hint — fades out as the paper is pulled, back in after tear settles.
@@ -191,7 +194,7 @@ struct DayView: View {
         let card = shape
             .fill(baseFill)
             .overlay { shape.fill(overlayFill).opacity(overlayOpacity) }
-            .overlay(alignment: .top) { if showChrome { bindingHoles } }
+            .overlay(alignment: .top) { if showChrome { BindingHoles() } }
             .overlay {
                 PageContent(
                     day: dayInfo.day,
@@ -203,7 +206,7 @@ struct DayView: View {
                 )
                 .allowsHitTesting(false)
             }
-            .overlay(alignment: .bottom) { if showChrome { perforationEdge } }
+            .overlay(alignment: .bottom) { if showChrome { PerforationEdge() } }
             .clipShape(shape)
 
         return card
@@ -217,34 +220,6 @@ struct DayView: View {
             )
             .padding(.horizontal, horizontalInset)
             .padding(.bottom, bottomPeek)
-    }
-
-    private var bindingHoles: some View {
-        HStack(spacing: 80) {
-            ForEach(0..<2, id: \.self) { _ in
-                Circle()
-                    .fill(Color(.displayP3, red: 0.898, green: 0.882, blue: 0.839))
-                    .frame(width: 10, height: 10)
-                    .overlay {
-                        Circle()
-                            .stroke(Color.black.opacity(0.1), lineWidth: 0.5)
-                    }
-            }
-        }
-        .padding(.top, 10)
-    }
-
-    private var perforationEdge: some View {
-        HStack(spacing: 3) {
-            ForEach(0..<60, id: \.self) { _ in
-                Rectangle()
-                    .fill(.quaternary)
-                    .frame(width: 3, height: 8)
-            }
-        }
-        .opacity(0.6)
-        .frame(maxWidth: .infinity)
-        .clipped()
     }
 
     // MARK: - Schedule
