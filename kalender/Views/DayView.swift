@@ -11,6 +11,7 @@ struct DayView: View {
     @State private var tearDirection: Int = 1  // +1 = next (drag up), -1 = prev (drag down)
     @State private var scheduleOpacity: Double = 1  // driven directly during tear (old fades out → new fades in)
     @State private var scheduleShowsIncomingDay: Bool = false  // flips mid-tear when old events are fully hidden
+    @State private var tearCommitCount: Int = 0
 
     // MARK: - Layout constants
 
@@ -30,15 +31,31 @@ struct DayView: View {
             tearStack
                 .padding(.horizontal, 16)
                 .padding(.bottom, 4)
+                .sensoryFeedback(.impact(weight: .medium), trigger: tearCommitCount)
             pullToTearHint
+            scheduleHeader
+                .padding(.horizontal, 20)
             ScrollView {
-                scheduleSection
+                scheduleEvents
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 100)
+                    .padding(.top, 28)
+                    .padding(.bottom, 120)
             }
             .scrollIndicators(.hidden)
+            .mask(scrollFadeMask)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+
+    private var scrollFadeMask: some View {
+        VStack(spacing: 0) {
+            LinearGradient(
+                colors: [.black.opacity(0), .black],
+                startPoint: .top, endPoint: .bottom
+            )
+            .frame(height: 24)
+            Rectangle().fill(.black)
+        }
     }
 
     /// Day used by the schedule section. Stays on the current day during the
@@ -231,38 +248,37 @@ struct DayView: View {
 
     // MARK: - Schedule
 
-    private var scheduleSection: some View {
-        let events = SampleData.events(forDay: scheduleDay)
-        return VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 10) {
-                Rectangle().fill(.quaternary).frame(height: 0.5)
-                Text("SCHEDULE")
-                    .font(.system(size: 10, weight: .semibold))
-                    .tracking(2.2)
-                    .foregroundStyle(.secondary)
-                Rectangle().fill(.quaternary).frame(height: 0.5)
-            }
-            .padding(.horizontal, 4)
-            .padding(.bottom, 10)
-            .padding(.top, 14)
+    private var scheduleHeader: some View {
+        HStack(spacing: 10) {
+            Rectangle().fill(.quaternary).frame(height: 0.5)
+            Text("SCHEDULE")
+                .font(.system(size: 10, weight: .semibold))
+                .tracking(2.2)
+                .foregroundStyle(.secondary)
+            Rectangle().fill(.quaternary).frame(height: 0.5)
+        }
+        .padding(.bottom, 10)
+        .padding(.top, 4)
+    }
 
-            Group {
-                if events.isEmpty {
-                    Text("An open day.")
-                        .font(.custom(AppFont.serifItalic, size: 20))
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 40)
-                } else {
-                    VStack(spacing: 6) {
-                        ForEach(events) { e in
-                            DayEventRow(event: e)
-                        }
+    private var scheduleEvents: some View {
+        let events = SampleData.events(forDay: scheduleDay)
+        return Group {
+            if events.isEmpty {
+                Text("An open day.")
+                    .font(.custom(AppFont.serifItalic, size: 20))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 40)
+            } else {
+                VStack(spacing: 6) {
+                    ForEach(events) { e in
+                        DayEventRow(event: e)
                     }
                 }
             }
-            .opacity(eventsOpacity)
         }
+        .opacity(eventsOpacity)
     }
 
     // MARK: - Day math
@@ -311,6 +327,7 @@ struct DayView: View {
     }
 
     private func tear(to destination: CGFloat, next: Bool) {
+        tearCommitCount &+= 1
         tearDirection = next ? 1 : -1
 
         // Seed scheduleOpacity with the drag's current value so the fade-out
@@ -368,6 +385,10 @@ struct DayView: View {
                 cardShiftAmount = 0
                 scheduleShowsIncomingDay = false
                 scheduleOpacity = 1
+            }
+            // Flip isTearing outside the disabled-animation transaction so the
+            // pull-to-tear hint fades in with the new day instead of popping.
+            withAnimation(.easeOut(duration: 0.32)) {
                 isTearing = false
             }
         }
@@ -444,7 +465,8 @@ private struct PageContent: View {
                 .foregroundStyle(.primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
-                .frame(minWidth: 180)
+                .padding(.horizontal, 10)
+                .frame(minWidth: 200)
                 .overlay(alignment: .bottom) {
                     if isToday {
                         Rectangle()

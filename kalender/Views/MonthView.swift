@@ -166,6 +166,8 @@ struct MonthsScrollView: View {
             .scrollTargetLayout()
         }
         .scrollPosition(id: $scrollTarget, anchor: .top)
+        .scrollTargetBehavior(.viewAligned)
+        .sensoryFeedback(.selection, trigger: scrollTarget)
         .onAppear {
             guard !didInitialScroll else { return }
             didInitialScroll = true

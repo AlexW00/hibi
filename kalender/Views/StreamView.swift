@@ -4,28 +4,28 @@ struct StreamView: View {
     let year: Int
     let month: Int
 
+    @State private var visibleDay: Int?
+
     var body: some View {
         let totalDays = SampleData.daysInMonth(year: year, month: month)
 
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(1...totalDays, id: \.self) { day in
-                        StreamDayRow(year: year, month: month, day: day)
-                            .id(day)
-                    }
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(1...totalDays, id: \.self) { day in
+                    StreamDayRow(year: year, month: month, day: day)
+                        .id(day)
                 }
-                .padding(.top, 4)
-                .padding(.bottom, 160)
             }
-            .onAppear {
-                if SampleData.todayYear == year && SampleData.todayMonth == month {
-                    DispatchQueue.main.async {
-                        withAnimation(.none) {
-                            proxy.scrollTo(SampleData.todayDay, anchor: .center)
-                        }
-                    }
-                }
+            .scrollTargetLayout()
+            .padding(.top, 4)
+            .padding(.bottom, 160)
+        }
+        .scrollPosition(id: $visibleDay, anchor: .top)
+        .scrollTargetBehavior(.viewAligned)
+        .sensoryFeedback(.selection, trigger: visibleDay)
+        .onAppear {
+            if SampleData.todayYear == year && SampleData.todayMonth == month {
+                visibleDay = SampleData.todayDay
             }
         }
     }
