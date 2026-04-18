@@ -19,7 +19,6 @@ struct MonthView: View {
             grid(cells: padded)
         }
         .padding(.horizontal, 20)
-        .padding(.bottom, 120)
     }
 
     private func header(weekCount: Int) -> some View {
@@ -85,7 +84,8 @@ private struct DayCell: View {
     let day: Int
 
     var body: some View {
-        let events = SampleData.events(forDay: day)
+        let hasSampleEvents = (year == SampleData.todayYear && month == SampleData.todayMonth)
+        let events = hasSampleEvents ? SampleData.events(forDay: day) : []
         let isToday = SampleData.isToday(year: year, month: month, day: day)
 
         ZStack(alignment: .top) {
@@ -124,4 +124,63 @@ private struct DayCell: View {
         .frame(maxWidth: .infinity, minHeight: 60)
         .contentShape(Rectangle())
     }
+}
+
+struct MonthsScrollView: View {
+    @Binding var displayedYear: Int
+    @Binding var displayedMonth: Int
+    var onPickDay: (Int, Int, Int) -> Void
+
+    @State private var scrollTarget: MonthKey?
+    @State private var didInitialScroll = false
+
+    private static let monthsBefore = 12
+    private static let monthsAfter = 24
+
+    private var months: [MonthKey] {
+        let baseYear = SampleData.todayYear
+        let baseMonth = SampleData.todayMonth
+        let start = -Self.monthsBefore
+        let end = Self.monthsAfter
+        return (start...end).map { offset in
+            let total = (baseYear * 12 + (baseMonth - 1)) + offset
+            return MonthKey(year: total / 12, month: (total % 12) + 1)
+        }
+    }
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 32) {
+                ForEach(months) { key in
+                    MonthView(
+                        year: key.year,
+                        month: key.month,
+                        onPickDay: { day in
+                            onPickDay(key.year, key.month, day)
+                        }
+                    )
+                    .id(key)
+                }
+            }
+            .padding(.bottom, 120)
+            .scrollTargetLayout()
+        }
+        .scrollPosition(id: $scrollTarget, anchor: .top)
+        .onAppear {
+            guard !didInitialScroll else { return }
+            didInitialScroll = true
+            scrollTarget = MonthKey(year: displayedYear, month: displayedMonth)
+        }
+        .onChange(of: scrollTarget) { _, newValue in
+            guard let newValue else { return }
+            displayedYear = newValue.year
+            displayedMonth = newValue.month
+        }
+    }
+}
+
+struct MonthKey: Hashable, Identifiable {
+    let year: Int
+    let month: Int
+    var id: Int { year * 100 + month }
 }

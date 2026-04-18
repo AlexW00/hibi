@@ -9,7 +9,8 @@ struct DayView: View {
     @State private var isTearing: Bool = false
     @State private var cardShiftAmount: CGFloat = 0
     @State private var tearDirection: Int = 1  // +1 = next (drag up), -1 = prev (drag down)
-    @State private var scheduleFadeIn: Double = 1  // 0 right after tear, animates to 1
+    @State private var scheduleOpacity: Double = 1  // driven directly during tear (old fades out → new fades in)
+    @State private var scheduleShowsIncomingDay: Bool = false  // flips mid-tear when old events are fully hidden
 
     // MARK: - Layout constants
 
@@ -40,19 +41,18 @@ struct DayView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 
-    /// Day used by the schedule section. During a tear it points to the
-    /// incoming day so the new events can fade in *while* the paper animates
-    /// in (rather than after the swap completes).
+    /// Day used by the schedule section. Stays on the current day during the
+    /// fade-out phase, flips to the incoming day once old events are hidden.
     private var scheduleDay: Int {
-        isTearing ? dayInfo(offsetBy: tearDirection).day : day
+        scheduleShowsIncomingDay ? dayInfo(offsetBy: tearDirection).day : day
     }
 
     /// Opacity applied to the event rows only — the "SCHEDULE" header stays opaque.
     /// During drag: fades toward a minimum (events stay legible, matching the
-    /// paper's own partial fade). During tear: reflects `scheduleFadeIn`
-    /// which is animated 0 → 1 concurrently with the tear animation.
+    /// paper's own partial fade). During tear: `scheduleOpacity` is driven
+    /// through a two-phase animation (current → 0 → 1 for the incoming day).
     private var eventsOpacity: Double {
-        if isTearing { return scheduleFadeIn }
+        if isTearing { return scheduleOpacity }
         let minOpacity = 0.35
         let progress = min(Double(abs(dragY)) / tearThreshold, 1)
         return 1 - progress * (1 - minOpacity)
@@ -111,8 +111,8 @@ struct DayView: View {
                     overlayOpacity: 0,
                     horizontalInset: narrowStep * 2,
                     bottomPeek: 0,
-                    showShadow: false,
-                    showChrome: false
+                    shadowAmount: 0,
+                    chromeAmount: 0
                 )
                 .opacity(cardShiftAmount)
 
@@ -125,12 +125,15 @@ struct DayView: View {
                     overlayOpacity: cardShiftAmount,
                     horizontalInset: narrowStep * (2 - cardShiftAmount),
                     bottomPeek: peekAmount * cardShiftAmount,
-                    showShadow: false,
-                    showChrome: false
+                    shadowAmount: 0,
+                    chromeAmount: 0
                 )
 
                 // Card 2 (middle): rest inset = narrowStep, peek = peekAmount.
                 // During tear: inset → 0, peek → 2·peekAmount (shifts into Card 1 slot).
+                // Shadow + chrome fade in smoothly with the shift so there's no
+                // boolean pop mid-animation and the hand-off to Card 1 at reset
+                // has matching intensity.
                 paperCard(
                     dayInfo: dayInfo(offsetBy: tearDirection),
                     baseFill: card2Fill,
@@ -138,8 +141,8 @@ struct DayView: View {
                     overlayOpacity: cardShiftAmount,
                     horizontalInset: narrowStep * (1 - cardShiftAmount),
                     bottomPeek: peekAmount * (1 + cardShiftAmount),
-                    showShadow: cardShiftAmount > 0.5,
-                    showChrome: cardShiftAmount > 0.5
+                    shadowAmount: Double(cardShiftAmount),
+                    chromeAmount: Double(cardShiftAmount)
                 )
 
                 // Card 1 (front): widest, shortest (reveals cards behind peeking below).
@@ -150,8 +153,8 @@ struct DayView: View {
                     overlayOpacity: 0,
                     horizontalInset: 0,
                     bottomPeek: peekAmount * 2,
-                    showShadow: true,
-                    showChrome: true
+                    shadowAmount: 1,
+                    chromeAmount: 1
                 )
                 .offset(y: dragY)
                 .rotationEffect(.degrees(Double(dragY * 0.02)), anchor: dragY > 0 ? .top : .bottom)
@@ -184,8 +187,8 @@ struct DayView: View {
         overlayOpacity: CGFloat,
         horizontalInset: CGFloat,
         bottomPeek: CGFloat,
-        showShadow: Bool,
-        showChrome: Bool
+        shadowAmount: Double,   // 0 = no shadow, 1 = full
+        chromeAmount: Double    // 0 = no holes/perforation, 1 = full
     ) -> some View {
         let shape = RoundedRectangle(cornerRadius: 18)
         let weather = SampleData.weather(forDay: dayInfo.day)
@@ -194,7 +197,9 @@ struct DayView: View {
         let card = shape
             .fill(baseFill)
             .overlay { shape.fill(overlayFill).opacity(overlayOpacity) }
-            .overlay(alignment: .top) { if showChrome { BindingHoles() } }
+            .overlay(alignment: .top) {
+                if chromeAmount > 0 { BindingHoles().opacity(chromeAmount) }
+            }
             .overlay {
                 PageContent(
                     day: dayInfo.day,
@@ -202,20 +207,22 @@ struct DayView: View {
                     year: dayInfo.year,
                     isToday: isToday,
                     weather: weather,
-                    preview: !showChrome
+                    preview: chromeAmount < 1
                 )
                 .allowsHitTesting(false)
             }
-            .overlay(alignment: .bottom) { if showChrome { PerforationEdge() } }
+            .overlay(alignment: .bottom) {
+                if chromeAmount > 0 { PerforationEdge().opacity(chromeAmount) }
+            }
             .clipShape(shape)
 
         return card
             .shadow(
-                color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(showShadow ? 0.18 : 0),
+                color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18 * shadowAmount),
                 radius: 22, x: 0, y: 18
             )
             .shadow(
-                color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(showShadow ? 0.08 : 0),
+                color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.08 * shadowAmount),
                 radius: 4, x: 0, y: 2
             )
             .padding(.horizontal, horizontalInset)
@@ -304,42 +311,63 @@ struct DayView: View {
     }
 
     private func tear(to destination: CGFloat, next: Bool) {
-        isTearing = true
         tearDirection = next ? 1 : -1
 
-        // Snap scheduleFadeIn to 0 without animation — the schedule section
-        // switches to the new day's events instantly, all at opacity 0,
-        // and will fade in over the tear duration.
+        // Seed scheduleOpacity with the drag's current value so the fade-out
+        // starts smoothly from the release point (~0.35) rather than snapping.
+        let startingOpacity = eventsOpacity
         var snap = Transaction()
         snap.disablesAnimations = true
         withTransaction(snap) {
-            scheduleFadeIn = 0
+            scheduleOpacity = startingOpacity
+            scheduleShowsIncomingDay = false
+            isTearing = true
         }
 
         // Front page slides off.
         withAnimation(.easeIn(duration: 0.28)) {
             dragY = destination
         }
-        // Back cards shift forward one depth simultaneously.
-        withAnimation(.easeOut(duration: 0.26)) {
+        // Back cards shift forward one depth simultaneously — same duration
+        // as dragY so all paper motion lands together.
+        withAnimation(.easeOut(duration: 0.28)) {
             cardShiftAmount = 1.0
         }
-        // New events fade in concurrently with the paper animation.
-        withAnimation(.easeOut(duration: 0.26)) {
-            scheduleFadeIn = 1
+
+        // Two-phase schedule animation:
+        // Phase 1 — fade old events fully out (current opacity → 0).
+        // Phase 2 — swap to incoming day, fade 0 → 1.
+        let fadeOut: TimeInterval = 0.14
+        let fadeIn: TimeInterval = 0.14
+        withAnimation(.easeIn(duration: fadeOut)) {
+            scheduleOpacity = 0
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + fadeOut) {
+            var t = Transaction()
+            t.disablesAnimations = true
+            withTransaction(t) {
+                scheduleShowsIncomingDay = true
+            }
+            withAnimation(.easeOut(duration: fadeIn)) {
+                scheduleOpacity = 1
+            }
         }
 
         // After the tear, swap `day` and reset state without animation.
         // Because the static cards at cardShiftAmount=0 render the same content
         // as the shifted overlays at cardShiftAmount=1 once `day` advances,
         // the reset is pixel-identical — no pop.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
+        // 40ms settle buffer past the 0.28s animation guarantees the
+        // interpolation engine is at rest before we flip state.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.32) {
             var t = Transaction()
             t.disablesAnimations = true
             withTransaction(t) {
                 advance(next: next)
                 dragY = 0
                 cardShiftAmount = 0
+                scheduleShowsIncomingDay = false
+                scheduleOpacity = 1
                 isTearing = false
             }
         }

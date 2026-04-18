@@ -17,16 +17,16 @@ struct ContentView: View {
         NavigationStack {
             TabView(selection: $selection) {
                 Tab("Month", systemImage: "square.grid.3x3", value: CalendarTab.month) {
-                    ScrollView {
-                        MonthView(
-                            year: displayedYear,
-                            month: displayedMonth,
-                            onPickDay: { day in
-                                selectedDay = day
-                                selection = .day
-                            }
-                        )
-                    }
+                    MonthsScrollView(
+                        displayedYear: $displayedYear,
+                        displayedMonth: $displayedMonth,
+                        onPickDay: { year, month, day in
+                            displayedYear = year
+                            displayedMonth = month
+                            selectedDay = day
+                            selection = .day
+                        }
+                    )
                 }
 
                 Tab("Stream", systemImage: "text.alignleft", value: CalendarTab.stream) {
