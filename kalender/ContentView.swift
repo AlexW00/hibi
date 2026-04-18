@@ -1,25 +1,52 @@
+import EventKit
 import SwiftUI
 
 enum CalendarTab: Hashable {
-    case month, stream, day, search
+    case month, stream, day
 }
 
 struct ContentView: View {
     @State private var selection: CalendarTab = .stream
-    @State private var searchText = ""
+    @State private var scrollToNowToken: Int = 0
     @State private var showSettings = false
     @State private var displayedYear = SampleData.todayYear
     @State private var displayedMonth = SampleData.todayMonth
     @State private var selectedDay = SampleData.todayDay
+    @State private var eventStore = EventStore()
+    @State private var weatherStore = WeatherStore()
+    @State private var editorMode: EventEditorSheet.Mode?
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearanceRaw: String = SettingsView.Appearance.system.rawValue
+
+    private var selectionBinding: Binding<CalendarTab> {
+        Binding(
+            get: { selection },
+            set: { newValue in
+                if newValue == selection {
+                    returnToNow()
+                }
+                selection = newValue
+            }
+        )
+    }
+
+    private func returnToNow() {
+        withAnimation(.snappy(duration: 0.35)) {
+            displayedYear = SampleData.todayYear
+            displayedMonth = SampleData.todayMonth
+            selectedDay = SampleData.todayDay
+        }
+        scrollToNowToken &+= 1
+    }
 
     var body: some View {
         NavigationStack {
-            TabView(selection: $selection) {
+            TabView(selection: selectionBinding) {
                 Tab("Month", systemImage: "square.grid.3x3", value: CalendarTab.month) {
                     MonthsScrollView(
                         displayedYear: $displayedYear,
                         displayedMonth: $displayedMonth,
+                        scrollToNowToken: scrollToNowToken,
                         onPickDay: { year, month, day in
                             displayedYear = year
                             displayedMonth = month
@@ -30,20 +57,29 @@ struct ContentView: View {
                 }
 
                 Tab("Stream", systemImage: "text.alignleft", value: CalendarTab.stream) {
-                    StreamView(year: displayedYear, month: displayedMonth)
+                    StreamView(
+                        year: displayedYear,
+                        month: displayedMonth,
+                        scrollToNowToken: scrollToNowToken,
+                        onPickDay: { day in
+                            selectedDay = day
+                            selection = .day
+                        },
+                        onTapEvent: openEditor(for:)
+                    )
                 }
 
                 Tab("Day", systemImage: "calendar", value: CalendarTab.day) {
-                    DayView(year: displayedYear, month: displayedMonth, day: $selectedDay)
-                }
-
-                Tab(value: CalendarTab.search, role: .search) {
-                    SearchResultsView(query: searchText,
-                                      year: displayedYear,
-                                      month: displayedMonth)
+                    DayView(
+                        year: displayedYear,
+                        month: displayedMonth,
+                        day: $selectedDay,
+                        scrollToNowToken: scrollToNowToken,
+                        onTapEvent: openEditor(for:)
+                    )
                 }
             }
-            .searchable(text: $searchText, prompt: "Search events")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -59,19 +95,65 @@ struct ContentView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        // TODO: present create event sheet
+                        startNewEvent()
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .disabled(eventStore.authorization != .fullAccess)
                 }
             }
             .background(backgroundGradient.ignoresSafeArea())
         }
+        .environment(eventStore)
+        .environment(weatherStore)
         .sheet(isPresented: $showSettings) {
             SettingsView()
+                .environment(eventStore)
+        }
+        .sheet(item: $editorMode) { mode in
+            EventEditorSheet(store: eventStore.ekStore, mode: mode) {
+                editorMode = nil
+            }
+            .ignoresSafeArea()
+        }
+        .task {
+            if eventStore.authorization != .fullAccess {
+                await eventStore.requestAccess()
+            }
+            eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
+            weatherStore.requestAccess()
+            weatherStore.refresh()
+        }
+        .onChange(of: displayedYear) { _, _ in
+            eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
+        }
+        .onChange(of: displayedMonth) { _, _ in
+            eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { weatherStore.refresh() }
         }
         .preferredColorScheme(colorScheme)
         .tint(.primary)
+    }
+
+    private func openEditor(for event: CalendarEvent) {
+        guard let ek = eventStore.ekEvent(matching: event) else { return }
+        editorMode = .edit(ek)
+    }
+
+    private func startNewEvent() {
+        let (y, m, d): (Int, Int, Int)
+        switch selection {
+        case .day:
+            (y, m, d) = (displayedYear, displayedMonth, selectedDay)
+        default:
+            (y, m, d) = (SampleData.todayYear, SampleData.todayMonth, SampleData.todayDay)
+        }
+        var comps = DateComponents(year: y, month: m, day: d, hour: 9, minute: 0)
+        comps.calendar = Calendar(identifier: .gregorian)
+        guard let date = comps.date else { return }
+        editorMode = .new(defaultStart: date)
     }
 
     @ViewBuilder
@@ -111,15 +193,14 @@ struct ContentView: View {
 
 private struct SearchResultsView: View {
     let query: String
-    let year: Int
-    let month: Int
+    @Environment(EventStore.self) private var eventStore
 
     var body: some View {
-        let matches: [CalendarEvent] = {
+        let matches: [(year: Int, month: Int, event: CalendarEvent)] = {
             guard !query.isEmpty else { return [] }
-            return SampleData.events.filter {
-                $0.title.localizedCaseInsensitiveContains(query) ||
-                ($0.location?.localizedCaseInsensitiveContains(query) ?? false)
+            return eventStore.allLoadedEvents().filter { item in
+                item.event.title.localizedCaseInsensitiveContains(query) ||
+                (item.event.location?.localizedCaseInsensitiveContains(query) ?? false)
             }
         }()
 
@@ -133,15 +214,15 @@ private struct SearchResultsView: View {
             } else if matches.isEmpty {
                 ContentUnavailableView.search(text: query)
             } else {
-                List(matches) { event in
+                List(matches, id: \.event.id) { item in
                     HStack(spacing: 12) {
                         RoundedRectangle(cornerRadius: 2)
-                            .fill(event.category.tint)
+                            .fill(item.event.tint)
                             .frame(width: 3)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(event.title)
+                            Text(item.event.title)
                                 .font(.body)
-                            Text(subtitle(for: event))
+                            Text(subtitle(for: item))
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
@@ -152,14 +233,14 @@ private struct SearchResultsView: View {
         }
     }
 
-    private func subtitle(for event: CalendarEvent) -> String {
-        let monthShort = MonthNames.short[month - 1]
-        let date = "\(monthShort) \(event.day)"
-        if event.allDay {
+    private func subtitle(for item: (year: Int, month: Int, event: CalendarEvent)) -> String {
+        let monthShort = MonthNames.short[item.month - 1]
+        let date = "\(monthShort) \(item.event.day)"
+        if item.event.allDay {
             return "\(date) · All day"
         }
-        let time = "\(event.start ?? "")–\(event.end ?? "")"
-        if let loc = event.location {
+        let time = "\(item.event.start ?? "")–\(item.event.end ?? "")"
+        if let loc = item.event.location {
             return "\(date) · \(time) · \(loc)"
         }
         return "\(date) · \(time)"

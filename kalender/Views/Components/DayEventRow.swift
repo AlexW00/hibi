@@ -2,45 +2,65 @@ import SwiftUI
 
 struct DayEventRow: View {
     let event: CalendarEvent
+    /// 0 before the event starts, 1 after it ends, linear in between.
+    /// Ignored for all-day events — those always render fully filled.
+    var progress: Double = 0
+
+    private var fillAmount: Double {
+        event.allDay ? 1 : max(0, min(1, progress))
+    }
 
     var body: some View {
         HStack(spacing: 0) {
-            Text(event.allDay ? "ALL DAY" : (event.start ?? ""))
-                .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                .tracking(0.3)
-                .foregroundStyle(event.category.tint.mix(with: .black, by: 0.15))
-                .multilineTextAlignment(.center)
-                .frame(width: 76)
-                .frame(maxHeight: .infinity)
-                .background(event.category.tint.opacity(0.22))
-                .overlay(alignment: .trailing) {
-                    Rectangle()
-                        .fill(event.category.tint.opacity(0.25))
-                        .frame(width: 0.5)
-                }
-
-            VStack(alignment: .leading, spacing: 1) {
-                Text(event.title)
-                    .font(.system(size: 13.5, weight: .medium))
-                    .tracking(-0.15)
-                    .foregroundStyle(.primary)
-                if let loc = event.location {
-                    Text(loc)
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 9)
+            timeLabel(event.allDay ? "ALL DAY" : (event.start ?? ""))
+            Rectangle()
+                .fill(event.tint.opacity(0.4))
+                .frame(width: 1)
+            titleBlock
             Spacer(minLength: 0)
         }
         .frame(minHeight: 48)
-        .background(event.category.tint.opacity(0.08))
+        // Two stacked backgrounds: the progress fill sits above the base tint,
+        // so the row shows a subtle category color by default and darkens
+        // left-to-right as the event elapses.
+        .background(alignment: .leading) {
+            GeometryReader { geo in
+                event.tint.opacity(0.22)
+                    .frame(width: geo.size.width * CGFloat(fillAmount))
+            }
+        }
+        .background(event.tint.opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(event.category.tint.opacity(0.22), lineWidth: 0.5)
+                .strokeBorder(event.tint.opacity(0.22), lineWidth: 0.5)
         )
+    }
+
+    private func timeLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+            .tracking(0.3)
+            .foregroundStyle(event.tint.mix(with: .black, by: 0.15))
+            .multilineTextAlignment(.center)
+            .frame(width: 76)
+            .frame(maxHeight: .infinity)
+    }
+
+    private var titleBlock: some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text(event.title)
+                .font(.system(size: 13.5, weight: .medium))
+                .tracking(-0.15)
+                .foregroundStyle(.primary)
+            if let loc = event.location {
+                Text(loc)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
     }
 }
 

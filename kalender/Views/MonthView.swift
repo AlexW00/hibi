@@ -5,6 +5,8 @@ struct MonthView: View {
     let month: Int
     var onPickDay: (Int) -> Void
 
+    @Environment(EventStore.self) private var eventStore
+
     var body: some View {
         let totalDays = SampleData.daysInMonth(year: year, month: month)
         let firstWeekday = SampleData.firstWeekday(year: year, month: month)
@@ -19,6 +21,9 @@ struct MonthView: View {
             grid(cells: padded)
         }
         .padding(.horizontal, 20)
+        .task(id: MonthKey(year: year, month: month)) {
+            eventStore.ensureLoaded(year: year, month: month)
+        }
     }
 
     private func header(weekCount: Int) -> some View {
@@ -83,9 +88,10 @@ private struct DayCell: View {
     let month: Int
     let day: Int
 
+    @Environment(EventStore.self) private var eventStore
+
     var body: some View {
-        let hasSampleEvents = (year == SampleData.todayYear && month == SampleData.todayMonth)
-        let events = hasSampleEvents ? SampleData.events(forDay: day) : []
+        let events = eventStore.events(year: year, month: month, day: day)
         let isToday = SampleData.isToday(year: year, month: month, day: day)
 
         ZStack(alignment: .top) {
@@ -106,7 +112,7 @@ private struct DayCell: View {
                 HStack(spacing: 2.5) {
                     ForEach(events.prefix(4)) { e in
                         Circle()
-                            .fill(e.category.tint)
+                            .fill(e.tint)
                             .frame(width: 4, height: 4)
                             .opacity(0.9)
                     }
@@ -129,6 +135,7 @@ private struct DayCell: View {
 struct MonthsScrollView: View {
     @Binding var displayedYear: Int
     @Binding var displayedMonth: Int
+    let scrollToNowToken: Int
     var onPickDay: (Int, Int, Int) -> Void
 
     @State private var scrollTarget: MonthKey?
@@ -150,7 +157,7 @@ struct MonthsScrollView: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 32) {
+            VStack(alignment: .leading, spacing: 32) {
                 ForEach(months) { key in
                     MonthView(
                         year: key.year,
@@ -168,15 +175,18 @@ struct MonthsScrollView: View {
         .scrollPosition(id: $scrollTarget, anchor: .top)
         .scrollTargetBehavior(.viewAligned)
         .sensoryFeedback(.selection, trigger: scrollTarget)
-        .onAppear {
+        .task(id: didInitialScroll) {
             guard !didInitialScroll else { return }
-            didInitialScroll = true
             scrollTarget = MonthKey(year: displayedYear, month: displayedMonth)
+            didInitialScroll = true
         }
         .onChange(of: scrollTarget) { _, newValue in
             guard let newValue else { return }
             displayedYear = newValue.year
             displayedMonth = newValue.month
+        }
+        .onChange(of: scrollToNowToken) { _, _ in
+            scrollTarget = MonthKey(year: SampleData.todayYear, month: SampleData.todayMonth)
         }
     }
 }

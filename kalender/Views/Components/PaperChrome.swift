@@ -6,7 +6,7 @@ struct BindingHoles: View {
         HStack(spacing: 80) {
             ForEach(0..<2, id: \.self) { _ in
                 Circle()
-                    .fill(Color(.displayP3, red: 0.898, green: 0.882, blue: 0.839))
+                    .fill(PaperTints.bindingHole)
                     .frame(width: 10, height: 10)
                     .overlay {
                         Circle()

@@ -1,10 +1,15 @@
+import EventKit
 import SwiftUI
 
 struct DayView: View {
     let year: Int
     let month: Int
     @Binding var day: Int
+    let scrollToNowToken: Int
+    let onTapEvent: (CalendarEvent) -> Void
 
+    @Environment(EventStore.self) private var eventStore
+    @Environment(WeatherStore.self) private var weatherStore
     @State private var dragY: CGFloat = 0
     @State private var isTearing: Bool = false
     @State private var cardShiftAmount: CGFloat = 0
@@ -39,12 +44,15 @@ struct DayView: View {
                 scheduleEvents
                     .padding(.horizontal, 16)
                     .padding(.top, 28)
-                    .padding(.bottom, 120)
+                    .padding(.bottom, 140)
             }
             .scrollIndicators(.hidden)
+            .scrollBounceBehavior(.basedOnSize)
             .mask(scrollFadeMask)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .ignoresSafeArea(.container, edges: .bottom)
+        .sensoryFeedback(.selection, trigger: scrollToNowToken)
     }
 
     private var scrollFadeMask: some View {
@@ -101,6 +109,7 @@ struct DayView: View {
                 .tracking(1.8)
                 .textCase(.uppercase)
                 .foregroundStyle(.secondary)
+                .contentTransition(.numericText(value: Double(day)))
             Spacer()
             Text("est. MMXXVI")
                 .font(.custom(AppFont.serifItalic, size: 13))
@@ -208,7 +217,7 @@ struct DayView: View {
         chromeAmount: Double    // 0 = no holes/perforation, 1 = full
     ) -> some View {
         let shape = RoundedRectangle(cornerRadius: 18)
-        let weather = SampleData.weather(forDay: dayInfo.day)
+        let weather = weatherStore.weather(year: dayInfo.year, month: dayInfo.month, day: dayInfo.day)
         let isToday = SampleData.isToday(year: dayInfo.year, month: dayInfo.month, day: dayInfo.day)
 
         let card = shape
@@ -224,6 +233,7 @@ struct DayView: View {
                     year: dayInfo.year,
                     isToday: isToday,
                     weather: weather,
+                    locationName: weatherStore.locationName,
                     preview: chromeAmount < 1
                 )
                 .allowsHitTesting(false)
@@ -262,24 +272,37 @@ struct DayView: View {
     }
 
     private var scheduleEvents: some View {
-        let events = SampleData.events(forDay: scheduleDay)
+        let events = eventStore.events(year: year, month: month, day: scheduleDay)
         return Group {
-            if events.isEmpty {
+            if eventStore.authorization != .fullAccess {
+                CalendarAccessPrompt(status: eventStore.authorization) {
+                    Task { await eventStore.requestAccess() }
+                }
+            } else if events.isEmpty {
                 Text("An open day.")
                     .font(.custom(AppFont.serifItalic, size: 20))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 40)
             } else {
-                VStack(spacing: 6) {
-                    ForEach(events) { e in
-                        DayEventRow(event: e)
+                // Tick once a minute so the progress fill advances with the day.
+                TimelineView(.periodic(from: .now, by: 60)) { ctx in
+                    VStack(spacing: 6) {
+                        ForEach(events) { e in
+                            Button {
+                                onTapEvent(e)
+                            } label: {
+                                DayEventRow(event: e, progress: e.progress(at: ctx.date))
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                 }
             }
         }
         .opacity(eventsOpacity)
     }
+
 
     // MARK: - Day math
 
@@ -412,7 +435,15 @@ private struct PageContent: View {
     let year: Int
     let isToday: Bool
     let weather: DayWeather?
+    let locationName: String?
     let preview: Bool
+
+    private static let sunFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "de_DE")
+        f.dateFormat = "HH:mm"
+        return f
+    }()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -433,11 +464,12 @@ private struct PageContent: View {
                 Image(systemName: "sunrise")
                     .font(.system(size: 16))
                     .foregroundStyle(.secondary)
-                Text("06:14")
+                Text(weather?.sunrise.map { Self.sunFormatter.string(from: $0) } ?? "")
                     .font(.system(size: 9.5, design: .monospaced))
                     .tracking(0.6)
                     .foregroundStyle(.secondary)
             }
+            .opacity(weather?.sunrise == nil ? 0 : 1)
             Spacer()
             Text(DayNames.full[SampleData.weekday(year: year, month: month, day: day)])
                 .font(.custom(AppFont.serifItalic, size: 19))
@@ -448,11 +480,12 @@ private struct PageContent: View {
                 Image(systemName: "sunset")
                     .font(.system(size: 16))
                     .foregroundStyle(.secondary)
-                Text("20:42")
+                Text(weather?.sunset.map { Self.sunFormatter.string(from: $0) } ?? "")
                     .font(.system(size: 9.5, design: .monospaced))
                     .tracking(0.6)
                     .foregroundStyle(.secondary)
             }
+            .opacity(weather?.sunset == nil ? 0 : 1)
         }
         .frame(height: 44)
     }
@@ -461,18 +494,16 @@ private struct PageContent: View {
         VStack(spacing: 2) {
             Text("\(day)")
                 .font(.custom(AppFont.serifRegular, size: 180))
-                .tracking(-6)
                 .foregroundStyle(.primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
-                .padding(.horizontal, 10)
-                .frame(minWidth: 200)
+                .contentTransition(.numericText(value: Double(day)))
+                .frame(maxWidth: .infinity, alignment: .center)
                 .overlay(alignment: .bottom) {
                     if isToday {
                         Rectangle()
                             .fill(.primary)
-                            .frame(height: 1.5)
-                            .padding(.horizontal, 12)
+                            .frame(width: 80, height: 1.5)
                             .offset(y: -8)
                     }
                 }
@@ -483,6 +514,7 @@ private struct PageContent: View {
                 .padding(.top, 2)
                 .frame(height: 18)
         }
+        .frame(maxWidth: .infinity)
     }
 
     private var bottomRow: some View {
@@ -503,7 +535,7 @@ private struct PageContent: View {
                             .foregroundStyle(.secondary)
                     }
                     .foregroundStyle(.primary)
-                    Text("COPENHAGEN")
+                    Text(locationName?.uppercased() ?? "")
                         .font(.system(size: 9.5))
                         .tracking(1.4)
                         .foregroundStyle(.secondary)

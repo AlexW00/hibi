@@ -1,7 +1,9 @@
+import EventKit
 import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(EventStore.self) private var eventStore
     @AppStorage("appearance") private var appearanceRaw: String = Appearance.system.rawValue
 
     enum Appearance: String, CaseIterable, Identifiable {
@@ -28,9 +30,12 @@ struct SettingsView: View {
                     .pickerStyle(.segmented)
                 }
 
-                Section("Calendar") {
-                    LabeledContent("Apple Calendar", value: "Not connected")
-                    LabeledContent("Default Category", value: "Work")
+                Section("Calendars") {
+                    NavigationLink {
+                        CalendarSelectionView()
+                    } label: {
+                        LabeledContent("Calendars", value: calendarSummary)
+                    }
                 }
 
                 Section {
@@ -45,5 +50,12 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    private var calendarSummary: String {
+        guard eventStore.authorization == .fullAccess else { return "Not connected" }
+        let all = eventStore.allCalendars()
+        let visible = all.filter { !eventStore.isHidden($0) }.count
+        return "\(visible) of \(all.count)"
     }
 }

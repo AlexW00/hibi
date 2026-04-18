@@ -2,6 +2,12 @@ import SwiftUI
 
 struct EventCard: View {
     let event: CalendarEvent
+    /// 0 before the event starts, 1 after it ends. Ignored for all-day events.
+    var progress: Double = 0
+
+    private var fillAmount: Double {
+        event.allDay ? 1 : max(0, min(1, progress))
+    }
 
     var body: some View {
         if event.allDay {
@@ -14,7 +20,7 @@ struct EventCard: View {
     private var allDayCard: some View {
         HStack(spacing: 10) {
             RoundedRectangle(cornerRadius: 2)
-                .fill(event.category.tint)
+                .fill(event.tint)
                 .frame(width: 4, height: 14)
             VStack(alignment: .leading, spacing: 1) {
                 Text(event.title)
@@ -23,26 +29,23 @@ struct EventCard: View {
                 Text("ALL DAY")
                     .font(.system(size: 10, weight: .semibold))
                     .tracking(1.1)
-                    .foregroundStyle(event.category.tint)
+                    .foregroundStyle(event.tint)
             }
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(event.category.tint.opacity(0.12))
-        )
+        .background(filledBackground(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(event.category.tint.opacity(0.30), lineWidth: 0.5)
+                .strokeBorder(event.tint.opacity(0.30), lineWidth: 0.5)
         )
     }
 
     private var timedCard: some View {
         HStack(alignment: .top, spacing: 10) {
             RoundedRectangle(cornerRadius: 2)
-                .fill(event.category.tint)
+                .fill(event.tint)
                 .frame(width: 3)
                 .padding(.vertical, 2)
             VStack(alignment: .leading, spacing: 2) {
@@ -71,13 +74,23 @@ struct EventCard: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 9)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(.regularMaterial)
-        )
+        .background(filledBackground(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(.quaternary, lineWidth: 0.5)
+                .strokeBorder(event.tint.opacity(0.22), lineWidth: 0.5)
         )
+    }
+
+    /// Light category tint underneath, progress-driven tint on top, clipped
+    /// to the card's rounded rectangle. Matches the DayEventRow styling.
+    private func filledBackground(cornerRadius: CGFloat) -> some View {
+        ZStack(alignment: .leading) {
+            event.tint.opacity(0.08)
+            GeometryReader { geo in
+                event.tint.opacity(0.22)
+                    .frame(width: geo.size.width * CGFloat(fillAmount))
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
     }
 }

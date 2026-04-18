@@ -1,31 +1,5 @@
 import SwiftUI
 
-enum EventCategory: String, CaseIterable, Identifiable, Hashable {
-    case work, life, focus, health, social
-
-    var id: String { rawValue }
-
-    var label: String {
-        switch self {
-        case .work: "Work"
-        case .life: "Life"
-        case .focus: "Focus"
-        case .health: "Health"
-        case .social: "Social"
-        }
-    }
-
-    var tint: Color {
-        switch self {
-        case .work:   Color(.displayP3, red: 0.235, green: 0.557, blue: 0.831)
-        case .life:   Color(.displayP3, red: 0.914, green: 0.565, blue: 0.424)
-        case .focus:  Color(.displayP3, red: 0.553, green: 0.486, blue: 0.804)
-        case .health: Color(.displayP3, red: 0.310, green: 0.686, blue: 0.522)
-        case .social: Color(.displayP3, red: 0.788, green: 0.612, blue: 0.341)
-        }
-    }
-}
-
 enum WeatherCode: String, Hashable {
     case sun, pcloud, cloud, rain, wind, storm
 
@@ -42,29 +16,55 @@ enum WeatherCode: String, Hashable {
 }
 
 struct CalendarEvent: Identifiable, Hashable {
-    let id = UUID()
+    let id: String
+    let eventIdentifier: String?
     let day: Int
     let start: String?
     let end: String?
+    /// Absolute start/end — kept separate from the HH:mm strings so progress
+    /// computation works for events that span into another day.
+    let startDate: Date?
+    let endDate: Date?
     let title: String
-    let category: EventCategory
+    /// Pastel-transformed tint derived from the source EKCalendar's color.
+    /// Dynamic: resolves differently in light vs dark appearance.
+    let tint: Color
     let location: String?
     let allDay: Bool
 
-    init(day: Int,
+    init(id: String = UUID().uuidString,
+         eventIdentifier: String? = nil,
+         day: Int,
          start: String? = nil,
          end: String? = nil,
+         startDate: Date? = nil,
+         endDate: Date? = nil,
          title: String,
-         category: EventCategory,
+         tint: Color,
          location: String? = nil,
          allDay: Bool = false) {
+        self.id = id
+        self.eventIdentifier = eventIdentifier
         self.day = day
         self.start = start
         self.end = end
+        self.startDate = startDate
+        self.endDate = endDate
         self.title = title
-        self.category = category
+        self.tint = tint
         self.location = location
         self.allDay = allDay
+    }
+}
+
+extension CalendarEvent {
+    /// 0 before the event starts, 1 after it ends, linear in between.
+    /// All-day events return 0 here — each row decides how to render those.
+    func progress(at now: Date) -> Double {
+        guard !allDay, let s = startDate, let e = endDate, e > s else { return 0 }
+        if now <= s { return 0 }
+        if now >= e { return 1 }
+        return now.timeIntervalSince(s) / e.timeIntervalSince(s)
     }
 }
 
@@ -72,4 +72,6 @@ struct DayWeather: Hashable {
     let high: Int
     let low: Int
     let code: WeatherCode
+    let sunrise: Date?
+    let sunset: Date?
 }

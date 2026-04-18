@@ -1,19 +1,38 @@
+import EventKit
 import SwiftUI
 
 struct StreamView: View {
     let year: Int
     let month: Int
+    let scrollToNowToken: Int
+    let onPickDay: (Int) -> Void
+    let onTapEvent: (CalendarEvent) -> Void
 
+    @Environment(EventStore.self) private var eventStore
     @State private var visibleDay: Int?
 
     var body: some View {
         let totalDays = SampleData.daysInMonth(year: year, month: month)
 
         ScrollView {
+            if eventStore.authorization != .fullAccess {
+                CalendarAccessPrompt(status: eventStore.authorization) {
+                    Task { await eventStore.requestAccess() }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 40)
+            }
+
             LazyVStack(spacing: 0) {
                 ForEach(1...totalDays, id: \.self) { day in
-                    StreamDayRow(year: year, month: month, day: day)
-                        .id(day)
+                    StreamDayRow(
+                        year: year,
+                        month: month,
+                        day: day,
+                        onPickDay: onPickDay,
+                        onTapEvent: onTapEvent
+                    )
+                    .id(day)
                 }
             }
             .scrollTargetLayout()
@@ -28,6 +47,9 @@ struct StreamView: View {
                 visibleDay = SampleData.todayDay
             }
         }
+        .onChange(of: scrollToNowToken) { _, _ in
+            visibleDay = SampleData.todayDay
+        }
     }
 }
 
@@ -35,17 +57,28 @@ private struct StreamDayRow: View {
     let year: Int
     let month: Int
     let day: Int
+    let onPickDay: (Int) -> Void
+    let onTapEvent: (CalendarEvent) -> Void
+
+    @Environment(EventStore.self) private var eventStore
+    @Environment(WeatherStore.self) private var weatherStore
 
     var body: some View {
-        let events = SampleData.events(forDay: day)
-        let wx = SampleData.weather(forDay: day)
+        let events = eventStore.events(year: year, month: month, day: day)
+        let wx = weatherStore.weather(year: year, month: month, day: day)
         let weekday = SampleData.weekday(year: year, month: month, day: day)
         let isToday = SampleData.isToday(year: year, month: month, day: day)
         let isMondayOrFirst = (weekday == 1) || (day == 1)
 
         HStack(alignment: .top, spacing: 0) {
-            dateRail(weekday: weekday, isToday: isToday)
-                .frame(width: 64, alignment: .leading)
+            Button {
+                onPickDay(day)
+            } label: {
+                dateRail(weekday: weekday, isToday: isToday)
+                    .frame(width: 64, alignment: .leading)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
 
             VStack(spacing: 6) {
                 if events.isEmpty {
@@ -57,8 +90,16 @@ private struct StreamDayRow: View {
                         .padding(.horizontal, 4)
                         .padding(.vertical, 10)
                 } else {
-                    ForEach(events) { event in
-                        EventCard(event: event)
+                    // Tick once a minute so the fill advances with the day.
+                    TimelineView(.periodic(from: .now, by: 60)) { ctx in
+                        ForEach(events) { event in
+                            Button {
+                                onTapEvent(event)
+                            } label: {
+                                EventCard(event: event, progress: event.progress(at: ctx.date))
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                 }
             }
