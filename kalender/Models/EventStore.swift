@@ -8,12 +8,20 @@ import SwiftUI
 final class EventStore {
     let ekStore = EKEventStore()
     private(set) var authorization: EKAuthorizationStatus
+    /// Debug demo mode: fixture data only, persisted. Release UI toggle is `#if DEBUG` only.
+    private(set) var isDemoMode: Bool
     private(set) var eventsByMonth: [MonthKey: [Int: [CalendarEvent]]] = [:]
     private(set) var hiddenCalendarIDs: Set<String>
     private var loadedMonths: Set<MonthKey> = []
     @ObservationIgnored nonisolated(unsafe) private var observerToken: NSObjectProtocol?
 
     private static let hiddenIDsDefaultsKey = "hiddenCalendarIDs"
+    private static let demoModeDefaultsKey = "demoMode"
+
+    /// Month/stream/day views use this instead of checking `authorization` alone so demo works without EventKit.
+    var showsCalendarContent: Bool {
+        isDemoMode || authorization == .fullAccess
+    }
 
     private let calendar: Calendar = {
         var c = Calendar(identifier: .gregorian)
@@ -30,9 +38,17 @@ final class EventStore {
 
     init() {
         self.authorization = EKEventStore.authorizationStatus(for: .event)
+        #if DEBUG
+        self.isDemoMode = UserDefaults.standard.bool(forKey: Self.demoModeDefaultsKey)
+        #else
+        self.isDemoMode = false
+        #endif
         self.hiddenCalendarIDs = Set(
             UserDefaults.standard.stringArray(forKey: Self.hiddenIDsDefaultsKey) ?? []
         )
+        if isDemoMode {
+            applyDemoFixtures()
+        }
         observerToken = NotificationCenter.default.addObserver(
             forName: .EKEventStoreChanged,
             object: ekStore,
@@ -42,6 +58,28 @@ final class EventStore {
                 self?.reloadAll()
             }
         }
+    }
+
+    func setDemoMode(_ enabled: Bool) {
+        #if !DEBUG
+        guard !enabled else { return }
+        #endif
+        UserDefaults.standard.set(enabled, forKey: Self.demoModeDefaultsKey)
+        isDemoMode = enabled
+        eventsByMonth = [:]
+        loadedMonths = []
+        if enabled {
+            applyDemoFixtures()
+        } else {
+            for key in DemoFixtures.events.keys {
+                reload(year: key.year, month: key.month)
+            }
+        }
+    }
+
+    private func applyDemoFixtures() {
+        eventsByMonth = DemoFixtures.events
+        loadedMonths = Set(DemoFixtures.events.keys)
     }
 
     deinit {
@@ -68,15 +106,18 @@ final class EventStore {
 
     /// All event calendars known to EventKit, across every account source.
     func allCalendars() -> [EKCalendar] {
+        guard !isDemoMode else { return [] }
         guard authorization == .fullAccess else { return [] }
         return ekStore.calendars(for: .event)
     }
 
     func isHidden(_ calendar: EKCalendar) -> Bool {
-        hiddenCalendarIDs.contains(calendar.calendarIdentifier)
+        guard !isDemoMode else { return false }
+        return hiddenCalendarIDs.contains(calendar.calendarIdentifier)
     }
 
     func setCalendar(_ calendar: EKCalendar, hidden: Bool) {
+        guard !isDemoMode else { return }
         let id = calendar.calendarIdentifier
         let wasHidden = hiddenCalendarIDs.contains(id)
         if hidden == wasHidden { return }
@@ -92,12 +133,14 @@ final class EventStore {
     // MARK: - Loading
 
     func ensureLoaded(year: Int, month: Int) {
+        guard !isDemoMode else { return }
         let key = MonthKey(year: year, month: month)
         guard !loadedMonths.contains(key) else { return }
         reload(year: year, month: month)
     }
 
     func reload(year: Int, month: Int) {
+        guard !isDemoMode else { return }
         guard authorization == .fullAccess else { return }
         let key = MonthKey(year: year, month: month)
 
@@ -137,6 +180,7 @@ final class EventStore {
     }
 
     private func reloadAll() {
+        guard !isDemoMode else { return }
         for key in loadedMonths {
             reload(year: key.year, month: key.month)
         }
@@ -153,6 +197,7 @@ final class EventStore {
     }
 
     func ekEvent(matching event: CalendarEvent) -> EKEvent? {
+        guard !isDemoMode else { return nil }
         guard let identifier = event.eventIdentifier else { return nil }
         return ekStore.event(withIdentifier: identifier)
     }

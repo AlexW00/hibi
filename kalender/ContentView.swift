@@ -56,7 +56,7 @@ struct ContentView: View {
                     )
                 }
 
-                Tab("Stream", systemImage: "text.alignleft", value: CalendarTab.stream) {
+                Tab("Week", systemImage: "text.alignleft", value: CalendarTab.stream) {
                     StreamView(
                         year: displayedYear,
                         month: displayedMonth,
@@ -99,7 +99,7 @@ struct ContentView: View {
                     } label: {
                         Image(systemName: "plus")
                     }
-                    .disabled(eventStore.authorization != .fullAccess)
+                    .disabled(eventStore.isDemoMode || eventStore.authorization != .fullAccess)
                 }
             }
             .background(backgroundGradient.ignoresSafeArea())
@@ -117,7 +117,7 @@ struct ContentView: View {
             .ignoresSafeArea()
         }
         .task {
-            if eventStore.authorization != .fullAccess {
+            if eventStore.authorization != .fullAccess, !eventStore.isDemoMode {
                 await eventStore.requestAccess()
             }
             eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
@@ -138,6 +138,7 @@ struct ContentView: View {
     }
 
     private func openEditor(for event: CalendarEvent) {
+        guard !eventStore.isDemoMode else { return }
         guard let ek = eventStore.ekEvent(matching: event) else { return }
         editorMode = .edit(ek)
     }

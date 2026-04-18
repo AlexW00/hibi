@@ -9,7 +9,7 @@ struct CalendarSelectionView: View {
 
     var body: some View {
         Group {
-            if eventStore.authorization == .fullAccess {
+            if eventStore.authorization == .fullAccess || eventStore.isDemoMode {
                 content
             } else {
                 CalendarAccessPrompt(status: eventStore.authorization) {

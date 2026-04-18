@@ -38,6 +38,15 @@ struct SettingsView: View {
                     }
                 }
 
+                #if DEBUG
+                Section("Debug") {
+                    Toggle("Demo Mode", isOn: Binding(
+                        get: { eventStore.isDemoMode },
+                        set: { eventStore.setDemoMode($0) }
+                    ))
+                }
+                #endif
+
                 Section {
                     LabeledContent("Version", value: "1.0 (1)")
                 }
@@ -53,6 +62,7 @@ struct SettingsView: View {
     }
 
     private var calendarSummary: String {
+        if eventStore.isDemoMode { return "Demo" }
         guard eventStore.authorization == .fullAccess else { return "Not connected" }
         let all = eventStore.allCalendars()
         let visible = all.filter { !eventStore.isHidden($0) }.count

@@ -274,7 +274,7 @@ struct DayView: View {
     private var scheduleEvents: some View {
         let events = eventStore.events(year: year, month: month, day: scheduleDay)
         return Group {
-            if eventStore.authorization != .fullAccess {
+            if !eventStore.showsCalendarContent {
                 CalendarAccessPrompt(status: eventStore.authorization) {
                     Task { await eventStore.requestAccess() }
                 }
@@ -292,7 +292,16 @@ struct DayView: View {
                             Button {
                                 onTapEvent(e)
                             } label: {
-                                DayEventRow(event: e, progress: e.progress(at: ctx.date))
+                                DayEventRow(
+                                    event: e,
+                                    progress: e.progress(
+                                        at: ctx.date,
+                                        useDemoTimeOfDay: eventStore.isDemoMode,
+                                        listYear: year,
+                                        listMonth: month,
+                                        listDay: scheduleDay
+                                    )
+                                )
                             }
                             .buttonStyle(.plain)
                         }

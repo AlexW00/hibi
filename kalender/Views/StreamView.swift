@@ -15,7 +15,7 @@ struct StreamView: View {
         let totalDays = SampleData.daysInMonth(year: year, month: month)
 
         ScrollView {
-            if eventStore.authorization != .fullAccess {
+            if !eventStore.showsCalendarContent {
                 CalendarAccessPrompt(status: eventStore.authorization) {
                     Task { await eventStore.requestAccess() }
                 }
@@ -96,7 +96,16 @@ private struct StreamDayRow: View {
                             Button {
                                 onTapEvent(event)
                             } label: {
-                                EventCard(event: event, progress: event.progress(at: ctx.date))
+                                EventCard(
+                                    event: event,
+                                    progress: event.progress(
+                                        at: ctx.date,
+                                        useDemoTimeOfDay: eventStore.isDemoMode,
+                                        listYear: year,
+                                        listMonth: month,
+                                        listDay: day
+                                    )
+                                )
                             }
                             .buttonStyle(.plain)
                         }
