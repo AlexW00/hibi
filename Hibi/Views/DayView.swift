@@ -104,7 +104,7 @@ struct DayView: View {
 
     private var masthead: some View {
         HStack {
-            Text("Kalender · No. \(String(format: "%03d", day))")
+            Text("Hibi · No. \(String(format: "%03d", day))")
                 .font(.system(size: 11, weight: .medium))
                 .tracking(1.8)
                 .textCase(.uppercase)

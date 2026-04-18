@@ -2,7 +2,7 @@ import SwiftUI
 import CoreText
 
 @main
-struct kalenderApp: App {
+struct HibiApp: App {
     init() {
         Self.registerFonts()
     }

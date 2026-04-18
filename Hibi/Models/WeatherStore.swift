@@ -18,7 +18,7 @@ final class WeatherStore: NSObject {
 
     @ObservationIgnored private let manager = CLLocationManager()
     @ObservationIgnored private let weatherService = WeatherService.shared
-    @ObservationIgnored private let log = Logger(subsystem: "me.alexweichart.kalender", category: "weather")
+    @ObservationIgnored private let log = Logger(subsystem: "me.alexweichart.hibi", category: "weather")
 
     private let calendar: Calendar = {
         var c = Calendar(identifier: .gregorian)
