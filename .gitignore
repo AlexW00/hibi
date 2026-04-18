@@ -1,0 +1,44 @@
+# Xcode / build products
+build/
+DerivedData/
+*.ipa
+*.dSYM
+*.dSYM.zip
+*.xcarchive
+
+# Xcode user-specific (schemes, breakpoints, window state)
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+*.moved-aside
+*.hmap
+
+# Swift Package Manager (local package checkouts / build)
+.swiftpm/configuration/registries.json
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.build/
+
+# CocoaPods (uncomment if you add a Podfile)
+# Pods/
+
+# Carthage (uncomment if you use Carthage)
+# Carthage/Build/
+
+# fastlane (uncomment if you add fastlane)
+# fastlane/report.xml
+# fastlane/Preview.html
+# fastlane/screenshots/**/*.png
+# fastlane/test_output
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Accio dependency management (legacy)
+Dependencies/
+.accio/
+
+# Code Injection / tooling
+iOSInjectionProject/
