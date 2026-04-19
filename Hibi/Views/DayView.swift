@@ -11,6 +11,7 @@ struct DayView: View {
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
     @Environment(\.colorScheme) private var colorScheme
+    @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @State private var dragY: CGFloat = 0
     @State private var isTearing: Bool = false
@@ -92,7 +93,9 @@ struct DayView: View {
     }
 
     private var pullToTearHint: some View {
-        Text("PULL TO TEAR · ↑ NEXT · ↓ PREV")
+        Text(invertDaySwipe
+             ? "PULL TO TEAR · ↑ PREV · ↓ NEXT"
+             : "PULL TO TEAR · ↑ NEXT · ↓ PREV")
             .font(.system(size: 10))
             .tracking(1.2)
             .foregroundStyle(.secondary.opacity(0.6))
@@ -193,8 +196,10 @@ struct DayView: View {
                             guard !isTearing else { return }
                             dragY = g.translation.height
                             if abs(g.translation.height) > 2 {
-                                // Drag up → next (+1); drag down → prev (-1).
-                                tearDirection = g.translation.height < 0 ? 1 : -1
+                                // Default: drag up → next (+1), drag down → prev (-1).
+                                // Inverted: drag up → prev (-1), drag down → next (+1).
+                                let dragUp = g.translation.height < 0
+                                tearDirection = (dragUp != invertDaySwipe) ? 1 : -1
                             }
                         }
                         .onEnded { _ in handleRelease() }
@@ -363,11 +368,11 @@ struct DayView: View {
 
     private func handleRelease() {
         if dragY < -tearThreshold {
-            // Pull up → next day
-            tear(to: -offScreen, next: true)
+            // Default: pull up → next. Inverted: pull up → previous.
+            tear(to: -offScreen, next: !invertDaySwipe)
         } else if dragY > tearThreshold {
-            // Pull down → previous day
-            tear(to: offScreen, next: false)
+            // Default: pull down → previous. Inverted: pull down → next.
+            tear(to: offScreen, next: invertDaySwipe)
         } else {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                 dragY = 0
