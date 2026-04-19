@@ -46,18 +46,26 @@ extension Color {
         return Color(uiColor: UIColor { trait in
             var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
             base.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
+            // Near-grey sources have no meaningful hue — getHue() returns 0
+            // (red family) for pure grey, so we must not raise saturation on
+            // them or grey calendars would suddenly read as red.
+            let isGrey = s < 0.08
             if trait.userInterfaceStyle == .dark {
                 return UIColor(
                     hue: h,
-                    saturation: min(s, 0.55),
-                    brightness: max(0.70, min(b, 0.85)),
+                    saturation: isGrey ? s : min(s, 0.70),
+                    brightness: isGrey
+                        ? max(0.55, min(b, 0.75))
+                        : max(0.78, min(b, 0.90)),
                     alpha: 1
                 )
             } else {
                 return UIColor(
                     hue: h,
-                    saturation: min(s, 0.45),
-                    brightness: max(b, 0.78),
+                    saturation: isGrey ? s : max(min(s, 0.65), 0.45),
+                    brightness: isGrey
+                        ? min(max(b, 0.45), 0.62)
+                        : min(max(b, 0.58), 0.72),
                     alpha: 1
                 )
             }

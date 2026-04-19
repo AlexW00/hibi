@@ -35,10 +35,13 @@ struct EventCard: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(filledBackground(cornerRadius: 14))
+        .background(
+            event.tint.opacity(0.38)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(event.tint.opacity(0.30), lineWidth: 0.5)
+                .strokeBorder(event.tint.opacity(0.55), lineWidth: 0.5)
         )
     }
 
@@ -46,7 +49,7 @@ struct EventCard: View {
         HStack(alignment: .top, spacing: 10) {
             RoundedRectangle(cornerRadius: 2)
                 .fill(event.tint)
-                .frame(width: 3)
+                .frame(width: 4)
                 .padding(.vertical, 2)
             VStack(alignment: .leading, spacing: 2) {
                 Text(event.title)
@@ -77,7 +80,7 @@ struct EventCard: View {
         .background(filledBackground(cornerRadius: 14))
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(event.tint.opacity(0.22), lineWidth: 0.5)
+                .strokeBorder(event.tint.opacity(0.35), lineWidth: 0.5)
         )
     }
 
@@ -85,9 +88,9 @@ struct EventCard: View {
     /// to the card's rounded rectangle. Matches the DayEventRow styling.
     private func filledBackground(cornerRadius: CGFloat) -> some View {
         ZStack(alignment: .leading) {
-            event.tint.opacity(0.08)
+            event.tint.opacity(0.10)
             GeometryReader { geo in
-                event.tint.opacity(0.22)
+                event.tint.opacity(0.26)
                     .frame(width: geo.size.width * CGFloat(fillAmount))
             }
         }

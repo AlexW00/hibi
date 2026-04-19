@@ -27,15 +27,15 @@ struct DayEventRow: View {
         // left-to-right as the event elapses.
         .background(alignment: .leading) {
             GeometryReader { geo in
-                event.tint.opacity(0.22)
+                event.tint.opacity(event.allDay ? 0.28 : 0.26)
                     .frame(width: geo.size.width * CGFloat(fillAmount))
             }
         }
-        .background(event.tint.opacity(0.08))
+        .background(event.tint.opacity(event.allDay ? 0.38 : 0.10))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(event.tint.opacity(0.22), lineWidth: 0.5)
+                .strokeBorder(event.tint.opacity(0.35), lineWidth: 0.5)
         )
     }
 
