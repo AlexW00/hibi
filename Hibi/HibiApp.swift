@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreText
+import WhatsNewKit
 
 @main
 struct HibiApp: App {
@@ -10,6 +11,10 @@ struct HibiApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(
+                    \.whatsNew,
+                    WhatsNewEnvironment(whatsNewCollection: WhatsNewContent.collection)
+                )
         }
     }
 

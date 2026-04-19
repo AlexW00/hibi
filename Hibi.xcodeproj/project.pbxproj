@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4B0450C42F94C6EF009EA06E /* WhatsNewKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0450C32F94C6EF009EA06E /* WhatsNewKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		4B802FCD2F8F5453008F00F4 /* Hibi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hibi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B0450C42F94C6EF009EA06E /* WhatsNewKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = Hibi;
 			packageProductDependencies = (
+				4B0450C32F94C6EF009EA06E /* WhatsNewKit */,
 			);
 			productName = Hibi;
 			productReference = 4B802FCD2F8F5453008F00F4 /* Hibi.app */;
@@ -96,6 +102,9 @@
 			);
 			mainGroup = 4B802FC42F8F5453008F00F4;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "WhatsNewKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4B802FCE2F8F5453008F00F4 /* Products */;
 			projectDirPath = "";
@@ -358,6 +367,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "WhatsNewKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SvenTiigi/WhatsNewKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.2.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4B0450C32F94C6EF009EA06E /* WhatsNewKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "WhatsNewKit" */;
+			productName = WhatsNewKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4B802FC52F8F5453008F00F4 /* Project object */;
 }

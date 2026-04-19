@@ -1,5 +1,6 @@
 import EventKit
 import SwiftUI
+import WhatsNewKit
 
 enum CalendarTab: Hashable {
     case month, stream, day
@@ -111,6 +112,7 @@ struct ContentView: View {
         }
         .environment(eventStore)
         .environment(weatherStore)
+        .whatsNewSheet()
         .sheet(isPresented: $showSettings) {
             SettingsView()
                 .environment(eventStore)

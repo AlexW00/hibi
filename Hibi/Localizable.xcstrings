@@ -1008,6 +1008,294 @@
           }
         }
       }
+    },
+    "A new Settings toggle swaps the serif for the system sans, for a cleaner read." : {
+      "comment" : "What's New 1.1 — Simple-font feature subtitle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein neuer Schalter in den Einstellungen tauscht die Serifenschrift gegen die Systemschrift – für ein klareres Schriftbild."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new Settings toggle swaps the serif for the system sans, for a cleaner read."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定の新しいスイッチで、セリフ体をシステムのサンセリフ体に切り替えられます。読みやすさ重視のときに。"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "comment" : "What's New 1.1 — primary action that dismisses the sheet.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weiter"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "続ける"
+          }
+        }
+      }
+    },
+    "Deutsch & 日本語" : {
+      "comment" : "What's New 1.1 — localization feature title; kept identical across locales.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deutsch & 日本語"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deutsch & 日本語"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deutsch & 日本語"
+          }
+        }
+      }
+    },
+    "Drag to reschedule" : {
+      "comment" : "What's New 1.1 — drag-to-move feature title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziehen zum Verschieben"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag to reschedule"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ドラッグで予定を移動"
+          }
+        }
+      }
+    },
+    "Events spanning several days now appear on every day they cover, across Month, Week, and Day." : {
+      "comment" : "What's New 1.1 — multi-day events feature subtitle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Termine über mehrere Tage erscheinen jetzt an jedem betroffenen Tag – in Monat, Woche und Tag."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Events spanning several days now appear on every day they cover, across Month, Week, and Day."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "複数日にまたがるイベントが、月・週・日のすべてで該当する各日に表示されます。"
+          }
+        }
+      }
+    },
+    "Flip the swipe" : {
+      "comment" : "What's New 1.1 — invert-swipe-direction feature title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wischrichtung umkehren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flip the swipe"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スワイプ方向を反転"
+          }
+        }
+      }
+    },
+    "Hibi now speaks German and Japanese, with locale-appropriate week-start and time format." : {
+      "comment" : "What's New 1.1 — localization feature subtitle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi spricht jetzt Deutsch und Japanisch – mit passendem Wochenstart und Zeitformat."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi now speaks German and Japanese, with locale-appropriate week-start and time format."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi がドイツ語と日本語に対応しました。週の始まりと時刻表記もロケールに合わせて切り替わります。"
+          }
+        }
+      }
+    },
+    "Long-press an event in the Week view and drop it on another day to move it." : {
+      "comment" : "What's New 1.1 — drag-to-move feature subtitle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte einen Termin in der Wochenansicht gedrückt und ziehe ihn auf einen anderen Tag, um ihn zu verschieben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Long-press an event in the Week view and drop it on another day to move it."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "週ビューでイベントを長押しし、別の日にドロップすると移動できます。"
+          }
+        }
+      }
+    },
+    "Multi-day events" : {
+      "comment" : "What's New 1.1 — multi-day events feature title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehrtägige Termine"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Multi-day events"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "複数日のイベント"
+          }
+        }
+      }
+    },
+    "Prefer swipe-up to go back? Invert the Day-view tear direction in Settings." : {
+      "comment" : "What's New 1.1 — invert-swipe-direction feature subtitle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lieber nach oben wischen, um zurückzugehen? Kehre die Abreißrichtung der Tagesansicht in den Einstellungen um."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prefer swipe-up to go back? Invert the Day-view tear direction in Settings."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上方向へのスワイプで戻りたい場合は、設定で日ビューの切り取り方向を反転できます。"
+          }
+        }
+      }
+    },
+    "What's New" : {
+      "comment" : "Settings row + 1.1 sheet entry point. Opens the changelog.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neuigkeiten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's New"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新機能"
+          }
+        }
+      }
+    },
+    "What's New in Hibi" : {
+      "comment" : "Title at the top of the What's New sheet.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neu in Hibi"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's New in Hibi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi の新機能"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
