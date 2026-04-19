@@ -1,5 +1,20 @@
 import EventKit
 import SwiftUI
+import UniformTypeIdentifiers
+
+/// Transferable payload for long-press drag of an event instance in the week view.
+/// Carries the source day so `EventStore.moveEventInstance(...)` can decide whether
+/// the user grabbed the first, middle, or last day of a multi-day span.
+struct DraggedEvent: Codable, Transferable {
+    let eventIdentifier: String
+    let sourceYear: Int
+    let sourceMonth: Int
+    let sourceDay: Int
+
+    static var transferRepresentation: some TransferRepresentation {
+        CodableRepresentation(contentType: .data)
+    }
+}
 
 struct StreamView: View {
     @Binding var displayedYear: Int
@@ -213,6 +228,8 @@ private struct StreamDayRow: View {
 
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
+    @State private var isDropTargeted: Bool = false
+    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
 
     var body: some View {
         let events = eventStore.events(year: year, month: month, day: day)
@@ -247,21 +264,7 @@ private struct StreamDayRow: View {
                     // Tick once a minute so the fill advances with the day.
                     TimelineView(.periodic(from: .now, by: 60)) { ctx in
                         ForEach(events) { event in
-                            Button {
-                                onTapEvent(event)
-                            } label: {
-                                EventCard(
-                                    event: event,
-                                    progress: event.progress(
-                                        at: ctx.date,
-                                        useDemoTimeOfDay: eventStore.isDemoMode,
-                                        listYear: year,
-                                        listMonth: month,
-                                        listDay: day
-                                    )
-                                )
-                            }
-                            .buttonStyle(.plain)
+                            eventButton(event: event, now: ctx.date)
                         }
                     }
                 }
@@ -281,8 +284,69 @@ private struct StreamDayRow: View {
                     .frame(height: 0.5)
             }
         }
+        .background {
+            // Subtle highlight while a dragged event hovers this row.
+            if isDropTargeted {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.primary.opacity(0.06))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.12), value: isDropTargeted)
+        .contentShape(Rectangle())
+        .dropDestination(for: DraggedEvent.self) { items, _ in
+            guard let payload = items.first else { return false }
+            guard
+                payload.sourceYear != year ||
+                payload.sourceMonth != month ||
+                payload.sourceDay != day
+            else { return false }
+            return eventStore.moveEventInstance(
+                identifier: payload.eventIdentifier,
+                from: (payload.sourceYear, payload.sourceMonth, payload.sourceDay),
+                to: (year, month, day)
+            )
+        } isTargeted: { targeted in
+            isDropTargeted = targeted
+        }
         .task(id: MonthKey(year: year, month: month)) {
             eventStore.ensureLoaded(year: year, month: month)
+        }
+    }
+
+    @ViewBuilder
+    private func eventButton(event: CalendarEvent, now: Date) -> some View {
+        let card = EventCard(
+            event: event,
+            progress: event.progress(
+                at: now,
+                useDemoTimeOfDay: eventStore.isDemoMode,
+                listYear: year,
+                listMonth: month,
+                listDay: day
+            )
+        )
+        let button = Button {
+            onTapEvent(event)
+        } label: {
+            card
+        }
+        .buttonStyle(.plain)
+
+        if let id = event.eventIdentifier, !eventStore.isDemoMode {
+            button.draggable(DraggedEvent(
+                eventIdentifier: id,
+                sourceYear: year,
+                sourceMonth: month,
+                sourceDay: day
+            )) {
+                // Drag preview — render the card at its own intrinsic size.
+                card.frame(maxWidth: 320)
+            }
+        } else {
+            button
         }
     }
 
@@ -305,7 +369,7 @@ private struct StreamDayRow: View {
                 .padding(.top, 2)
             if day == 1 {
                 Text(MonthNames.short[month - 1])
-                    .font(.custom(AppFont.serifItalic, size: 11))
+                    .font(.appSerif(size: 11, italic: true, simple: useSimpleFont))
                     .foregroundStyle(.secondary)
                     .padding(.top, 6)
             }
@@ -316,7 +380,7 @@ private struct StreamDayRow: View {
 
     private func streamDayNumberText() -> some View {
         Text(verbatim: "\(day)")
-            .font(.custom(AppFont.serifRegular, size: 34))
+            .font(.appSerif(size: 34, simple: useSimpleFont))
             .tracking(-0.5)
             .foregroundStyle(.primary)
     }

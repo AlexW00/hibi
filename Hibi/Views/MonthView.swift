@@ -6,6 +6,7 @@ struct MonthView: View {
     var onPickDay: (Int) -> Void
 
     @Environment(EventStore.self) private var eventStore
+    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
 
     var body: some View {
         let totalDays = SampleData.daysInMonth(year: year, month: month)
@@ -29,12 +30,12 @@ struct MonthView: View {
     private func header(weekCount: Int) -> some View {
         VStack(alignment: .leading, spacing: -4) {
             Text(String(year))
-                .font(.custom(AppFont.serifItalic, size: 15))
+                .font(.appSerif(size: 15, italic: true, simple: useSimpleFont))
                 .tracking(0.4)
                 .foregroundStyle(.secondary)
             HStack(alignment: .lastTextBaseline) {
                 Text(MonthNames.full[month - 1])
-                    .font(.custom(AppFont.serifRegular, size: 72))
+                    .font(.appSerif(size: 72, simple: useSimpleFont))
                     .tracking(-1.5)
                     .foregroundStyle(.primary)
                 Spacer()
@@ -94,6 +95,7 @@ private struct DayCell: View {
     let day: Int
 
     @Environment(EventStore.self) private var eventStore
+    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
 
     var body: some View {
         let events = eventStore.events(year: year, month: month, day: day)
@@ -102,7 +104,7 @@ private struct DayCell: View {
         ZStack(alignment: .top) {
             VStack(spacing: 4) {
                 Text(verbatim: "\(day)")
-                    .font(.custom(AppFont.serifRegular, size: 22))
+                    .font(.appSerif(size: 22, simple: useSimpleFont))
                     .tracking(-0.2)
                     .foregroundStyle(.primary)
                     .frame(width: 32, height: 32)

@@ -5,6 +5,8 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(EventStore.self) private var eventStore
     @AppStorage("appearance") private var appearanceRaw: String = Appearance.system.rawValue
+    @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
+    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
 
     enum Appearance: String, CaseIterable, Identifiable {
         case system, light, dark
@@ -29,6 +31,12 @@ struct SettingsView: View {
                         }
                     }
                     .pickerStyle(.segmented)
+
+                    Toggle("Simple font", isOn: $useSimpleFont)
+                }
+
+                Section("Day View") {
+                    Toggle("Invert swipe direction", isOn: $invertDaySwipe)
                 }
 
                 Section("Calendars") {

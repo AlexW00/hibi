@@ -99,3 +99,15 @@ enum AppFont {
     static let serifRegular = "InstrumentSerif-Regular"
     static let serifItalic  = "InstrumentSerif-Italic"
 }
+
+extension Font {
+    /// App display font. `simple` swaps Instrument Serif for the system
+    /// sans-serif face (driven by the "useSimpleFont" AppStorage toggle).
+    static func appSerif(size: CGFloat, italic: Bool = false, simple: Bool) -> Font {
+        if simple {
+            let base = Font.system(size: size)
+            return italic ? base.italic() : base
+        }
+        return .custom(italic ? AppFont.serifItalic : AppFont.serifRegular, size: size)
+    }
+}

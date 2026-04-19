@@ -193,6 +193,102 @@
         }
       }
     },
+    "Day View" : {
+      "comment" : "Settings section header for Day-tab-specific options.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tagesansicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day View"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日表示"
+          }
+        }
+      }
+    },
+    "Invert swipe direction" : {
+      "comment" : "Toggle label in Settings → Day View: flips tear-up-for-next gesture.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wischrichtung umkehren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invert swipe direction"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スワイプ方向を反転"
+          }
+        }
+      }
+    },
+    "PULL TO TEAR · ↑ PREV · ↓ NEXT" : {
+      "comment" : "Day tab hint text when the invert-swipe setting is on. Uppercase tracked caps.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ZIEHEN ZUM ABREISSEN · ↑ ZURÜCK · ↓ WEITER"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PULL TO TEAR · ↑ PREV · ↓ NEXT"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "めくる · ↑ 前の日 · ↓ 次の日"
+          }
+        }
+      }
+    },
+    "Simple font" : {
+      "comment" : "Toggle label in Settings → Appearance: swap Instrument Serif for system sans.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einfache Schrift"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Simple font"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シンプルなフォント"
+          }
+        }
+      }
+    },
     "Calendars" : {
       "comment" : "Settings section header and row label for the Calendars picker screen.",
       "extractionState" : "manual",

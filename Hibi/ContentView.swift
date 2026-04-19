@@ -17,6 +17,7 @@ struct ContentView: View {
     @State private var editorMode: EventEditorSheet.Mode?
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearanceRaw: String = SettingsView.Appearance.system.rawValue
+    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
 
     private var selectionBinding: Binding<CalendarTab> {
         Binding(
@@ -91,9 +92,10 @@ struct ContentView: View {
                     }
                 }
                 ToolbarItem(placement: .principal) {
-                    // Month name is already locale-aware via the accessor.
+                    // Month name is already locale-aware via the accessor;
+                    // verbatim skips the pointless "%@ · %@" catalog entry.
                     Text(verbatim: "\(MonthNames.full[displayedMonth - 1]) · \(String(displayedYear))")
-                        .font(.custom(AppFont.serifItalic, size: 15))
+                        .font(.appSerif(size: 15, italic: true, simple: useSimpleFont))
                         .foregroundStyle(.secondary)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
