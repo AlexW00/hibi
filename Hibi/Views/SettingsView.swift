@@ -9,7 +9,8 @@ struct SettingsView: View {
     enum Appearance: String, CaseIterable, Identifiable {
         case system, light, dark
         var id: String { rawValue }
-        var label: String {
+        /// Deferred-lookup resource so SwiftUI re-resolves when the locale changes.
+        var labelResource: LocalizedStringResource {
             switch self {
             case .system: "System"
             case .light:  "Light"
@@ -24,7 +25,7 @@ struct SettingsView: View {
                 Section("Appearance") {
                     Picker("Theme", selection: $appearanceRaw) {
                         ForEach(Appearance.allCases) { a in
-                            Text(a.label).tag(a.rawValue)
+                            Text(a.labelResource).tag(a.rawValue)
                         }
                     }
                     .pickerStyle(.segmented)
@@ -34,7 +35,9 @@ struct SettingsView: View {
                     NavigationLink {
                         CalendarSelectionView()
                     } label: {
-                        LabeledContent("Calendars", value: calendarSummary)
+                        LabeledContent("Calendars") {
+                            Text(calendarSummary)
+                        }
                     }
                 }
 
@@ -61,11 +64,11 @@ struct SettingsView: View {
         }
     }
 
-    private var calendarSummary: String {
+    private var calendarSummary: LocalizedStringResource {
         if eventStore.isDemoMode { return "Demo" }
         guard eventStore.authorization == .fullAccess else { return "Not connected" }
         let all = eventStore.allCalendars()
         let visible = all.filter { !eventStore.isHidden($0) }.count
-        return "\(visible) of \(all.count)"
+        return "\(visible) / \(all.count)"
     }
 }

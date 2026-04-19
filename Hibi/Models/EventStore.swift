@@ -25,14 +25,15 @@ final class EventStore {
 
     private let calendar: Calendar = {
         var c = Calendar(identifier: .gregorian)
-        c.locale = Locale(identifier: "de_DE")
+        c.locale = .autoupdatingCurrent
         return c
     }()
 
     private let timeFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "de_DE")
-        f.dateFormat = "HH:mm"
+        f.locale = .autoupdatingCurrent
+        f.dateStyle = .none
+        f.timeStyle = .short
         return f
     }()
 

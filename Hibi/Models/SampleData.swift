@@ -23,14 +23,18 @@ enum SampleData {
         return (c.year ?? demoAnchorYear, c.month ?? demoAnchorMonth, c.day ?? demoAnchorDay)
     }
 
+    /// Column offset (0..6) for the first day of the given month in the user's
+    /// current calendar. Respects `Calendar.firstWeekday` so German users get a
+    /// Monday-first grid and Japanese/English users get a Sunday-first grid.
     static func firstWeekday(year: Int, month: Int) -> Int {
         var comps = DateComponents()
         comps.year = year
         comps.month = month
         comps.day = 1
-        let cal = Calendar(identifier: .gregorian)
+        let cal = Calendar.autoupdatingCurrent
         guard let date = cal.date(from: comps) else { return 0 }
-        return cal.component(.weekday, from: date) - 1
+        let weekday = cal.component(.weekday, from: date)  // 1=Sun..7=Sat
+        return (weekday - cal.firstWeekday + 7) % 7
     }
 
     static func daysInMonth(year: Int, month: Int) -> Int {
@@ -65,17 +69,24 @@ enum SampleData {
     }
 }
 
+/// Locale-aware month name accessors. Backed by `Calendar.autoupdatingCurrent`
+/// so German shows "Januar", Japanese "1月", English "January" — no catalog
+/// entries needed for these since the system already provides them.
 enum MonthNames {
-    static let full = ["January","February","March","April","May","June",
-                       "July","August","September","October","November","December"]
-    static let short = ["Jan","Feb","Mar","Apr","May","Jun",
-                        "Jul","Aug","Sep","Oct","Nov","Dec"]
+    static var full: [String]  { Calendar.autoupdatingCurrent.standaloneMonthSymbols }
+    static var short: [String] { Calendar.autoupdatingCurrent.shortStandaloneMonthSymbols }
 }
 
+/// Locale-aware weekday name accessors, always Sunday-indexed (0=Sun..6=Sat)
+/// regardless of locale week-start — callers that need to account for
+/// `firstWeekday` do so at the view layer (see `MonthView.weekdayHeader`).
 enum DayNames {
-    static let upper = ["SUN","MON","TUE","WED","THU","FRI","SAT"]
-    static let full  = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
-    static let short = ["S","M","T","W","T","F","S"]
+    static var full: [String]  { Calendar.autoupdatingCurrent.standaloneWeekdaySymbols }
+    static var upper: [String] {
+        Calendar.autoupdatingCurrent.shortStandaloneWeekdaySymbols
+            .map { $0.uppercased(with: .autoupdatingCurrent) }
+    }
+    static var short: [String] { Calendar.autoupdatingCurrent.veryShortStandaloneWeekdaySymbols }
 }
 
 enum AppColor {
