@@ -213,6 +213,7 @@ private struct StreamDayRow: View {
 
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
+    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
 
     var body: some View {
         let events = eventStore.events(year: year, month: month, day: day)
@@ -302,7 +303,7 @@ private struct StreamDayRow: View {
                 .padding(.top, 2)
             if day == 1 {
                 Text(MonthNames.short[month - 1])
-                    .font(.custom(AppFont.serifItalic, size: 11))
+                    .font(.appSerif(size: 11, italic: true, simple: useSimpleFont))
                     .foregroundStyle(.secondary)
                     .padding(.top, 6)
             }
@@ -313,7 +314,7 @@ private struct StreamDayRow: View {
 
     private func streamDayNumberText() -> some View {
         Text("\(day)")
-            .font(.custom(AppFont.serifRegular, size: 34))
+            .font(.appSerif(size: 34, simple: useSimpleFont))
             .tracking(-0.5)
             .foregroundStyle(.primary)
     }

@@ -12,6 +12,7 @@ struct DayView: View {
     @Environment(WeatherStore.self) private var weatherStore
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
+    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @State private var dragY: CGFloat = 0
     @State private var isTearing: Bool = false
     @State private var cardShiftAmount: CGFloat = 0
@@ -116,7 +117,7 @@ struct DayView: View {
                 .contentTransition(.numericText(value: Double(day)))
             Spacer()
             Text("est. MMXXVI")
-                .font(.custom(AppFont.serifItalic, size: 13))
+                .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
                 .foregroundStyle(.secondary)
         }
         .padding(.horizontal, 20)
@@ -301,7 +302,7 @@ struct DayView: View {
                 }
             } else if events.isEmpty {
                 Text("An open day.")
-                    .font(.custom(AppFont.serifItalic, size: 20))
+                    .font(.appSerif(size: 20, italic: true, simple: useSimpleFont))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 40)
@@ -468,6 +469,8 @@ private struct PageContent: View {
     let locationName: String?
     let preview: Bool
 
+    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
+
     private static let sunFormatter: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "de_DE")
@@ -502,7 +505,7 @@ private struct PageContent: View {
             .opacity(weather?.sunrise == nil ? 0 : 1)
             Spacer()
             Text(DayNames.full[SampleData.weekday(year: year, month: month, day: day)])
-                .font(.custom(AppFont.serifItalic, size: 19))
+                .font(.appSerif(size: 19, italic: true, simple: useSimpleFont))
                 .foregroundStyle(.primary)
                 .padding(.top, 2)
             Spacer()
@@ -523,7 +526,7 @@ private struct PageContent: View {
     private var numeralBlock: some View {
         VStack(spacing: 2) {
             Text("\(day)")
-                .font(.custom(AppFont.serifRegular, size: 180))
+                .font(.appSerif(size: 180, simple: useSimpleFont))
                 .foregroundStyle(.primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
