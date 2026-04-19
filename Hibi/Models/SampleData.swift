@@ -98,14 +98,36 @@ enum AppColor {
 enum AppFont {
     static let serifRegular = "InstrumentSerif-Regular"
     static let serifItalic  = "InstrumentSerif-Italic"
+    /// Noto Serif JP Regular. Used for the entire display face when the user's
+    /// preferred language is Japanese — Instrument Serif is Latin-only and
+    /// would otherwise fall back to the system default for kana/kanji. Noto
+    /// CJK ships no italic; callers that want italic in a Japanese locale get
+    /// synthesized skew via `Font.italic()`.
+    static let serifJP = "NotoSerifJP-Regular"
+
+    /// True when the user's preferred UI language resolves to Japanese.
+    /// Read from `Locale.preferredLanguages` (what the app actually renders
+    /// in) rather than `Locale.current`, which on this project is pinned to
+    /// `de_DE` for calendar math.
+    static var isJapaneseLocale: Bool {
+        guard let first = Locale.preferredLanguages.first else { return false }
+        return Locale(identifier: first).language.languageCode?.identifier == "ja"
+    }
 }
 
 extension Font {
     /// App display font. `simple` swaps Instrument Serif for the system
     /// sans-serif face (driven by the "useSimpleFont" AppStorage toggle).
+    /// In a Japanese locale the serif face is Noto Serif JP (Latin-only
+    /// Instrument Serif can't render kana/kanji); italic is synthesized since
+    /// Noto CJK has no italic cut.
     static func appSerif(size: CGFloat, italic: Bool = false, simple: Bool) -> Font {
         if simple {
             let base = Font.system(size: size)
+            return italic ? base.italic() : base
+        }
+        if AppFont.isJapaneseLocale {
+            let base = Font.custom(AppFont.serifJP, size: size)
             return italic ? base.italic() : base
         }
         return .custom(italic ? AppFont.serifItalic : AppFont.serifRegular, size: size)
