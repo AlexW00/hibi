@@ -55,12 +55,12 @@ struct EventCard: View {
                     .foregroundStyle(.primary)
                     .lineLimit(1)
                 HStack(spacing: 8) {
-                    Text("\(event.start ?? "")–\(event.end ?? "")")
+                    Text(verbatim: "\(event.start ?? "")–\(event.end ?? "")")
                         .font(.system(size: 10.5, design: .monospaced))
                         .tracking(0.2)
                         .foregroundStyle(.secondary)
                     if let loc = event.location {
-                        Text("·")
+                        Text(verbatim: "·")
                             .foregroundStyle(.secondary)
                             .opacity(0.4)
                         Text(loc)

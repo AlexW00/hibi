@@ -11,6 +11,7 @@ struct DayView: View {
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
     @Environment(\.colorScheme) private var colorScheme
+    @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @State private var dragY: CGFloat = 0
     @State private var isTearing: Bool = false
@@ -92,7 +93,9 @@ struct DayView: View {
     }
 
     private var pullToTearHint: some View {
-        Text("PULL TO TEAR · ↑ NEXT · ↓ PREV")
+        Text(invertDaySwipe
+             ? "PULL TO TEAR · ↑ PREV · ↓ NEXT"
+             : "PULL TO TEAR · ↑ NEXT · ↓ PREV")
             .font(.system(size: 10))
             .tracking(1.2)
             .foregroundStyle(.secondary.opacity(0.6))
@@ -106,14 +109,16 @@ struct DayView: View {
 
     private var masthead: some View {
         HStack {
-            Text("Hibi · No. \(String(format: "%03d", day))")
+            // Typographic constant — identical across all locales per design.
+            Text(verbatim: "Hibi · No. \(String(format: "%03d", day))")
                 .font(.system(size: 11, weight: .medium))
                 .tracking(1.8)
                 .textCase(.uppercase)
                 .foregroundStyle(.secondary)
                 .contentTransition(.numericText(value: Double(day)))
             Spacer()
-            Text("est. MMXXVI")
+            // Typographic constant — identical across all locales per design.
+            Text(verbatim: "est. MMXXVI")
                 .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
                 .foregroundStyle(.secondary)
         }
@@ -193,8 +198,10 @@ struct DayView: View {
                             guard !isTearing else { return }
                             dragY = g.translation.height
                             if abs(g.translation.height) > 2 {
-                                // Drag up → next (+1); drag down → prev (-1).
-                                tearDirection = g.translation.height < 0 ? 1 : -1
+                                // Default: drag up → next (+1), drag down → prev (-1).
+                                // Inverted: drag up → prev (-1), drag down → next (+1).
+                                let dragUp = g.translation.height < 0
+                                tearDirection = (dragUp != invertDaySwipe) ? 1 : -1
                             }
                         }
                         .onEnded { _ in handleRelease() }
@@ -363,11 +370,11 @@ struct DayView: View {
 
     private func handleRelease() {
         if dragY < -tearThreshold {
-            // Pull up → next day
-            tear(to: -offScreen, next: true)
+            // Default: pull up → next. Inverted: pull up → previous.
+            tear(to: -offScreen, next: !invertDaySwipe)
         } else if dragY > tearThreshold {
-            // Pull down → previous day
-            tear(to: offScreen, next: false)
+            // Default: pull down → previous. Inverted: pull down → next.
+            tear(to: offScreen, next: invertDaySwipe)
         } else {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                 dragY = 0
@@ -468,8 +475,9 @@ private struct PageContent: View {
 
     private static let sunFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "de_DE")
-        f.dateFormat = "HH:mm"
+        f.locale = .autoupdatingCurrent
+        f.dateStyle = .none
+        f.timeStyle = .short
         return f
     }()
 
@@ -520,7 +528,7 @@ private struct PageContent: View {
 
     private var numeralBlock: some View {
         VStack(spacing: 2) {
-            Text("\(day)")
+            Text(verbatim: "\(day)")
                 .font(.appSerif(size: 180, simple: useSimpleFont))
                 .foregroundStyle(.primary)
                 .lineLimit(1)
@@ -535,7 +543,11 @@ private struct PageContent: View {
                             .offset(y: -8)
                     }
                 }
-            Text("\(MonthNames.full[month - 1].uppercased()) · \(String(year))")
+            // Month name is already localized via the MonthNames accessor;
+            // separator + year are locale-invariant. `verbatim:` skips the
+            // LocalizedStringKey lookup so we don't pollute the catalog with a
+            // generic "%@ · %@" key.
+            Text(verbatim: "\(MonthNames.full[month - 1].uppercased(with: .autoupdatingCurrent)) · \(String(year))")
                 .font(.system(size: 11, weight: .semibold))
                 .tracking(3.2)
                 .foregroundStyle(.secondary)
@@ -555,10 +567,10 @@ private struct PageContent: View {
                     .foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(spacing: 0) {
-                        Text("\(weather?.high ?? 0)°")
+                        Text(verbatim: "\(weather?.high ?? 0)°")
                             .font(.system(size: 15, weight: .medium))
                             .tracking(-0.3)
-                        Text(" / \(weather?.low ?? 0)°")
+                        Text(verbatim: " / \(weather?.low ?? 0)°")
                             .font(.system(size: 15))
                             .foregroundStyle(.secondary)
                     }

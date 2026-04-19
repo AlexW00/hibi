@@ -1,5 +1,20 @@
 import EventKit
 import SwiftUI
+import UniformTypeIdentifiers
+
+/// Transferable payload for long-press drag of an event instance in the week view.
+/// Carries the source day so `EventStore.moveEventInstance(...)` can decide whether
+/// the user grabbed the first, middle, or last day of a multi-day span.
+struct DraggedEvent: Codable, Transferable {
+    let eventIdentifier: String
+    let sourceYear: Int
+    let sourceMonth: Int
+    let sourceDay: Int
+
+    static var transferRepresentation: some TransferRepresentation {
+        CodableRepresentation(contentType: .data)
+    }
+}
 
 struct StreamView: View {
     @Binding var displayedYear: Int
@@ -213,6 +228,7 @@ private struct StreamDayRow: View {
 
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
+    @State private var isDropTargeted: Bool = false
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
 
     var body: some View {
@@ -220,7 +236,10 @@ private struct StreamDayRow: View {
         let wx = weatherStore.weather(year: year, month: month, day: day)
         let weekday = SampleData.weekday(year: year, month: month, day: day)
         let isToday = SampleData.isToday(year: year, month: month, day: day)
-        let isMondayOrFirst = (weekday == 1) || (day == 1)
+        // Row divider appears at the start of each week so the stream reads as
+        // week-sized groups. Uses locale's first weekday (German=Mon, Sun else).
+        let firstDayOfWeek = Calendar.autoupdatingCurrent.firstWeekday - 1
+        let isWeekStartOrMonthStart = (weekday == firstDayOfWeek) || (day == 1)
 
         HStack(alignment: .top, spacing: 0) {
             Button {
@@ -245,21 +264,7 @@ private struct StreamDayRow: View {
                     // Tick once a minute so the fill advances with the day.
                     TimelineView(.periodic(from: .now, by: 60)) { ctx in
                         ForEach(events) { event in
-                            Button {
-                                onTapEvent(event)
-                            } label: {
-                                EventCard(
-                                    event: event,
-                                    progress: event.progress(
-                                        at: ctx.date,
-                                        useDemoTimeOfDay: eventStore.isDemoMode,
-                                        listYear: year,
-                                        listMonth: month,
-                                        listDay: day
-                                    )
-                                )
-                            }
-                            .buttonStyle(.plain)
+                            eventButton(event: event, now: ctx.date)
                         }
                     }
                 }
@@ -273,14 +278,75 @@ private struct StreamDayRow: View {
         }
         .frame(minHeight: events.isEmpty ? 92 : nil)
         .overlay(alignment: .top) {
-            if isMondayOrFirst {
+            if isWeekStartOrMonthStart {
                 Rectangle()
                     .fill(.quaternary)
                     .frame(height: 0.5)
             }
         }
+        .background {
+            // Subtle highlight while a dragged event hovers this row.
+            if isDropTargeted {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.primary.opacity(0.06))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.12), value: isDropTargeted)
+        .contentShape(Rectangle())
+        .dropDestination(for: DraggedEvent.self) { items, _ in
+            guard let payload = items.first else { return false }
+            guard
+                payload.sourceYear != year ||
+                payload.sourceMonth != month ||
+                payload.sourceDay != day
+            else { return false }
+            return eventStore.moveEventInstance(
+                identifier: payload.eventIdentifier,
+                from: (payload.sourceYear, payload.sourceMonth, payload.sourceDay),
+                to: (year, month, day)
+            )
+        } isTargeted: { targeted in
+            isDropTargeted = targeted
+        }
         .task(id: MonthKey(year: year, month: month)) {
             eventStore.ensureLoaded(year: year, month: month)
+        }
+    }
+
+    @ViewBuilder
+    private func eventButton(event: CalendarEvent, now: Date) -> some View {
+        let card = EventCard(
+            event: event,
+            progress: event.progress(
+                at: now,
+                useDemoTimeOfDay: eventStore.isDemoMode,
+                listYear: year,
+                listMonth: month,
+                listDay: day
+            )
+        )
+        let button = Button {
+            onTapEvent(event)
+        } label: {
+            card
+        }
+        .buttonStyle(.plain)
+
+        if let id = event.eventIdentifier, !eventStore.isDemoMode {
+            button.draggable(DraggedEvent(
+                eventIdentifier: id,
+                sourceYear: year,
+                sourceMonth: month,
+                sourceDay: day
+            )) {
+                // Drag preview — render the card at its own intrinsic size.
+                card.frame(maxWidth: 320)
+            }
+        } else {
+            button
         }
     }
 
@@ -313,7 +379,7 @@ private struct StreamDayRow: View {
     }
 
     private func streamDayNumberText() -> some View {
-        Text("\(day)")
+        Text(verbatim: "\(day)")
             .font(.appSerif(size: 34, simple: useSimpleFont))
             .tracking(-0.5)
             .foregroundStyle(.primary)
@@ -325,10 +391,10 @@ private struct StreamDayRow: View {
             VStack(spacing: 2) {
                 WeatherIcon(code: wx.code, size: 18)
                     .foregroundStyle(.secondary)
-                Text("\(wx.high)°")
+                Text(verbatim: "\(wx.high)°")
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(.secondary)
-                Text("\(wx.low)°")
+                Text(verbatim: "\(wx.low)°")
                     .font(.system(size: 9))
                     .foregroundStyle(.tertiary)
             }

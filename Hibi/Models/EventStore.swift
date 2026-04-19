@@ -25,14 +25,15 @@ final class EventStore {
 
     private let calendar: Calendar = {
         var c = Calendar(identifier: .gregorian)
-        c.locale = Locale(identifier: "de_DE")
+        c.locale = .autoupdatingCurrent
         return c
     }()
 
     private let timeFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "de_DE")
-        f.dateFormat = "HH:mm"
+        f.locale = .autoupdatingCurrent
+        f.dateStyle = .none
+        f.timeStyle = .short
         return f
     }()
 
@@ -164,9 +165,21 @@ final class EventStore {
 
         var grouped: [Int: [CalendarEvent]] = [:]
         for ek in raw {
-            let day = calendar.component(.day, from: ek.startDate)
-            let event = makeCalendarEvent(from: ek, day: day)
-            grouped[day, default: []].append(event)
+            // Multi-day events get placed in every day-of-month bucket they overlap
+            // within this month's window. Clamp the event's [startDate, endDate) to
+            // [start, end) so cross-month events only populate the days that belong
+            // to the month we're currently loading.
+            let clampedStart = max(ek.startDate, start)
+            let clampedEnd = min(ek.endDate, end)
+            guard clampedEnd > clampedStart else { continue }
+
+            var cursor = calendar.startOfDay(for: clampedStart)
+            while cursor < clampedEnd {
+                let day = calendar.component(.day, from: cursor)
+                grouped[day, default: []].append(makeCalendarEvent(from: ek, day: day))
+                guard let next = calendar.date(byAdding: .day, value: 1, to: cursor) else { break }
+                cursor = next
+            }
         }
         for d in grouped.keys {
             grouped[d]?.sort { lhs, rhs in
@@ -202,16 +215,110 @@ final class EventStore {
         return ekStore.event(withIdentifier: identifier)
     }
 
+    // MARK: - Mutations (drag & drop)
+
+    /// Move the instance of an event displayed on `from` to land on `to`.
+    ///
+    /// - Single-day events shift entirely by the day delta (duration preserved).
+    /// - Multi-day events adjust a boundary:
+    ///   - Dragging the first-day instance moves `startDate` by the delta.
+    ///   - Dragging the last-day instance moves `endDate` by the delta.
+    ///   - Dragging a middle day moves whichever boundary lies in the drag's direction.
+    ///
+    /// No-ops in demo mode, without full access, for events without identifiers,
+    /// or when source and destination are the same day.
+    @discardableResult
+    func moveEventInstance(
+        identifier: String,
+        from: (year: Int, month: Int, day: Int),
+        to: (year: Int, month: Int, day: Int)
+    ) -> Bool {
+        guard !isDemoMode else { return false }
+        guard authorization == .fullAccess else { return false }
+        guard let ek = ekStore.event(withIdentifier: identifier) else { return false }
+
+        guard
+            let fromMidnight = calendar.date(from: DateComponents(year: from.year, month: from.month, day: from.day)),
+            let toMidnight = calendar.date(from: DateComponents(year: to.year, month: to.month, day: to.day)),
+            let dayDelta = calendar.dateComponents([.day], from: fromMidnight, to: toMidnight).day,
+            dayDelta != 0
+        else { return false }
+
+        // Effective last-day midnight: treat an exact-midnight endDate (EK's
+        // exclusive-end convention for all-day and on-the-minute events) as
+        // belonging to the previous day.
+        let startMidnight = calendar.startOfDay(for: ek.startDate)
+        let endMidnightRaw = calendar.startOfDay(for: ek.endDate)
+        let lastDayMidnight: Date = (ek.endDate == endMidnightRaw)
+            ? (calendar.date(byAdding: .day, value: -1, to: endMidnightRaw) ?? startMidnight)
+            : endMidnightRaw
+        let isSingleDay = startMidnight == lastDayMidnight
+
+        let newStart: Date
+        let newEnd: Date
+        if isSingleDay {
+            guard
+                let s = calendar.date(byAdding: .day, value: dayDelta, to: ek.startDate),
+                let e = calendar.date(byAdding: .day, value: dayDelta, to: ek.endDate)
+            else { return false }
+            newStart = s
+            newEnd = e
+        } else if fromMidnight == startMidnight {
+            // First-day instance dragged: move the start.
+            guard let s = calendar.date(byAdding: .day, value: dayDelta, to: ek.startDate) else { return false }
+            newStart = s
+            newEnd = ek.endDate
+        } else if fromMidnight == lastDayMidnight {
+            // Last-day instance dragged: move the end.
+            guard let e = calendar.date(byAdding: .day, value: dayDelta, to: ek.endDate) else { return false }
+            newStart = ek.startDate
+            newEnd = e
+        } else if dayDelta > 0 {
+            // Middle-day dragged forward: extend end.
+            guard let e = calendar.date(byAdding: .day, value: dayDelta, to: ek.endDate) else { return false }
+            newStart = ek.startDate
+            newEnd = e
+        } else {
+            // Middle-day dragged backward: extend start.
+            guard let s = calendar.date(byAdding: .day, value: dayDelta, to: ek.startDate) else { return false }
+            newStart = s
+            newEnd = ek.endDate
+        }
+
+        guard newEnd > newStart else { return false }
+
+        ek.startDate = newStart
+        ek.endDate = newEnd
+        do {
+            try ekStore.save(ek, span: .thisEvent)
+            // .EKEventStoreChanged fires → reloadAll() refreshes cached months.
+            return true
+        } catch {
+            return false
+        }
+    }
+
     func allLoadedEvents() -> [(year: Int, month: Int, event: CalendarEvent)] {
-        var out: [(Int, Int, CalendarEvent)] = []
+        // Multi-day events appear in every day bucket they span; dedupe by id so
+        // search shows one hit per event. Keep the earliest (year, month, day)
+        // instance so the result's subtitle points to where the event starts.
+        var bestByID: [String: (year: Int, month: Int, event: CalendarEvent)] = [:]
         for (key, days) in eventsByMonth {
             for (_, events) in days {
                 for e in events {
-                    out.append((key.year, key.month, e))
+                    if let existing = bestByID[e.id] {
+                        let isEarlier = (key.year, key.month, e.day) <
+                            (existing.year, existing.month, existing.event.day)
+                        if isEarlier {
+                            bestByID[e.id] = (key.year, key.month, e)
+                        }
+                    } else {
+                        bestByID[e.id] = (key.year, key.month, e)
+                    }
                 }
             }
         }
-        return out
+        return Array(bestByID.values)
     }
 
     // MARK: - Adapters

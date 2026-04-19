@@ -92,7 +92,9 @@ struct ContentView: View {
                     }
                 }
                 ToolbarItem(placement: .principal) {
-                    Text("\(MonthNames.full[displayedMonth - 1]) · \(String(displayedYear))")
+                    // Month name is already locale-aware via the accessor;
+                    // verbatim skips the pointless "%@ · %@" catalog entry.
+                    Text(verbatim: "\(MonthNames.full[displayedMonth - 1]) · \(String(displayedYear))")
                         .font(.appSerif(size: 15, italic: true, simple: useSimpleFont))
                         .foregroundStyle(.secondary)
                 }
@@ -241,7 +243,7 @@ private struct SearchResultsView: View {
         let monthShort = MonthNames.short[item.month - 1]
         let date = "\(monthShort) \(item.event.day)"
         if item.event.allDay {
-            return "\(date) · All day"
+            return "\(date) · \(String(localized: "All day"))"
         }
         let time = "\(item.event.start ?? "")–\(item.event.end ?? "")"
         if let loc = item.event.location {
