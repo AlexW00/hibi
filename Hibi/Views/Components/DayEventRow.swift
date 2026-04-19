@@ -12,7 +12,9 @@ struct DayEventRow: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            timeLabel(event.allDay ? "ALL DAY" : (event.start ?? ""))
+            // "ALL DAY" goes through LocalizedStringKey (auto-localized);
+            // formatted times are already locale-formatted by EventStore.
+            timeLabel(event.allDay ? Text("ALL DAY") : Text(verbatim: event.start ?? ""))
             Rectangle()
                 .fill(event.tint.opacity(0.4))
                 .frame(width: 1)
@@ -37,8 +39,8 @@ struct DayEventRow: View {
         )
     }
 
-    private func timeLabel(_ text: String) -> some View {
-        Text(text)
+    private func timeLabel(_ text: Text) -> some View {
+        text
             .font(.system(size: 11, weight: .semibold, design: .monospaced))
             .tracking(0.3)
             .foregroundStyle(event.tint.mix(with: .black, by: 0.15))

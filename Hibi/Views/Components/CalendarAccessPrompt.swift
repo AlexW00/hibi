@@ -18,7 +18,7 @@ struct CalendarAccessPrompt: View {
                 .font(.system(size: 13))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-            Button(buttonLabel) {
+            Button {
                 switch status {
                 case .notDetermined:
                     onRequestAccess()
@@ -27,6 +27,8 @@ struct CalendarAccessPrompt: View {
                         UIApplication.shared.open(url)
                     }
                 }
+            } label: {
+                Text(buttonLabel)
             }
             .buttonStyle(.bordered)
             .padding(.top, 4)
@@ -35,7 +37,7 @@ struct CalendarAccessPrompt: View {
         .padding(.vertical, 24)
     }
 
-    private var title: String {
+    private var title: LocalizedStringResource {
         switch status {
         case .notDetermined: "Calendar access needed"
         case .denied, .restricted: "Calendar access denied"
@@ -44,7 +46,7 @@ struct CalendarAccessPrompt: View {
         }
     }
 
-    private var message: String {
+    private var message: LocalizedStringResource {
         switch status {
         case .notDetermined: "Grant access to see and edit your events."
         case .denied, .restricted: "Enable calendar access in Settings to see your events."
@@ -53,7 +55,7 @@ struct CalendarAccessPrompt: View {
         }
     }
 
-    private var buttonLabel: String {
+    private var buttonLabel: LocalizedStringResource {
         status == .notDetermined ? "Grant access" : "Open Settings"
     }
 }

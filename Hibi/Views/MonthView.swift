@@ -51,12 +51,17 @@ struct MonthView: View {
     }
 
     private var weekdayHeader: some View {
-        HStack(spacing: 0) {
-            ForEach(0..<7, id: \.self) { i in
-                Text(DayNames.short[i])
+        let cal = Calendar.autoupdatingCurrent
+        let start = cal.firstWeekday - 1  // 0=Sun..6=Sat
+        let symbols = DayNames.short      // Sunday-indexed
+        return HStack(spacing: 0) {
+            ForEach(0..<7, id: \.self) { col in
+                let weekdayIndex = (start + col) % 7
+                let isWeekend = (weekdayIndex == 0 || weekdayIndex == 6)
+                Text(symbols[weekdayIndex])
                     .font(.system(size: 11))
                     .tracking(1.2)
-                    .foregroundStyle((i == 0 || i == 6) ? .tertiary : .secondary)
+                    .foregroundStyle(isWeekend ? .tertiary : .secondary)
                     .frame(maxWidth: .infinity)
             }
         }
@@ -98,7 +103,7 @@ private struct DayCell: View {
 
         ZStack(alignment: .top) {
             VStack(spacing: 4) {
-                Text("\(day)")
+                Text(verbatim: "\(day)")
                     .font(.appSerif(size: 22, simple: useSimpleFont))
                     .tracking(-0.2)
                     .foregroundStyle(.primary)
@@ -119,7 +124,7 @@ private struct DayCell: View {
                             .opacity(0.9)
                     }
                     if events.count > 4 {
-                        Text("+\(events.count - 4)")
+                        Text(verbatim: "+\(events.count - 4)")
                             .font(.system(size: 8.5))
                             .foregroundStyle(.secondary)
                     }

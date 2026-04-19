@@ -236,7 +236,10 @@ private struct StreamDayRow: View {
         let wx = weatherStore.weather(year: year, month: month, day: day)
         let weekday = SampleData.weekday(year: year, month: month, day: day)
         let isToday = SampleData.isToday(year: year, month: month, day: day)
-        let isMondayOrFirst = (weekday == 1) || (day == 1)
+        // Row divider appears at the start of each week so the stream reads as
+        // week-sized groups. Uses locale's first weekday (German=Mon, Sun else).
+        let firstDayOfWeek = Calendar.autoupdatingCurrent.firstWeekday - 1
+        let isWeekStartOrMonthStart = (weekday == firstDayOfWeek) || (day == 1)
 
         HStack(alignment: .top, spacing: 0) {
             Button {
@@ -275,7 +278,7 @@ private struct StreamDayRow: View {
         }
         .frame(minHeight: events.isEmpty ? 92 : nil)
         .overlay(alignment: .top) {
-            if isMondayOrFirst {
+            if isWeekStartOrMonthStart {
                 Rectangle()
                     .fill(.quaternary)
                     .frame(height: 0.5)
@@ -376,7 +379,7 @@ private struct StreamDayRow: View {
     }
 
     private func streamDayNumberText() -> some View {
-        Text("\(day)")
+        Text(verbatim: "\(day)")
             .font(.appSerif(size: 34, simple: useSimpleFont))
             .tracking(-0.5)
             .foregroundStyle(.primary)
@@ -388,10 +391,10 @@ private struct StreamDayRow: View {
             VStack(spacing: 2) {
                 WeatherIcon(code: wx.code, size: 18)
                     .foregroundStyle(.secondary)
-                Text("\(wx.high)°")
+                Text(verbatim: "\(wx.high)°")
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(.secondary)
-                Text("\(wx.low)°")
+                Text(verbatim: "\(wx.low)°")
                     .font(.system(size: 9))
                     .foregroundStyle(.tertiary)
             }

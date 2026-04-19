@@ -22,7 +22,7 @@ final class WeatherStore: NSObject {
 
     private let calendar: Calendar = {
         var c = Calendar(identifier: .gregorian)
-        c.locale = Locale(identifier: "de_DE")
+        c.locale = .autoupdatingCurrent
         return c
     }()
 

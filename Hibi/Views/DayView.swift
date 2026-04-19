@@ -109,14 +109,16 @@ struct DayView: View {
 
     private var masthead: some View {
         HStack {
-            Text("Hibi · No. \(String(format: "%03d", day))")
+            // Typographic constant — identical across all locales per design.
+            Text(verbatim: "Hibi · No. \(String(format: "%03d", day))")
                 .font(.system(size: 11, weight: .medium))
                 .tracking(1.8)
                 .textCase(.uppercase)
                 .foregroundStyle(.secondary)
                 .contentTransition(.numericText(value: Double(day)))
             Spacer()
-            Text("est. MMXXVI")
+            // Typographic constant — identical across all locales per design.
+            Text(verbatim: "est. MMXXVI")
                 .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
                 .foregroundStyle(.secondary)
         }
@@ -473,8 +475,9 @@ private struct PageContent: View {
 
     private static let sunFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "de_DE")
-        f.dateFormat = "HH:mm"
+        f.locale = .autoupdatingCurrent
+        f.dateStyle = .none
+        f.timeStyle = .short
         return f
     }()
 
@@ -525,7 +528,7 @@ private struct PageContent: View {
 
     private var numeralBlock: some View {
         VStack(spacing: 2) {
-            Text("\(day)")
+            Text(verbatim: "\(day)")
                 .font(.appSerif(size: 180, simple: useSimpleFont))
                 .foregroundStyle(.primary)
                 .lineLimit(1)
@@ -540,7 +543,11 @@ private struct PageContent: View {
                             .offset(y: -8)
                     }
                 }
-            Text("\(MonthNames.full[month - 1].uppercased()) · \(String(year))")
+            // Month name is already localized via the MonthNames accessor;
+            // separator + year are locale-invariant. `verbatim:` skips the
+            // LocalizedStringKey lookup so we don't pollute the catalog with a
+            // generic "%@ · %@" key.
+            Text(verbatim: "\(MonthNames.full[month - 1].uppercased(with: .autoupdatingCurrent)) · \(String(year))")
                 .font(.system(size: 11, weight: .semibold))
                 .tracking(3.2)
                 .foregroundStyle(.secondary)
@@ -560,10 +567,10 @@ private struct PageContent: View {
                     .foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(spacing: 0) {
-                        Text("\(weather?.high ?? 0)°")
+                        Text(verbatim: "\(weather?.high ?? 0)°")
                             .font(.system(size: 15, weight: .medium))
                             .tracking(-0.3)
-                        Text(" / \(weather?.low ?? 0)°")
+                        Text(verbatim: " / \(weather?.low ?? 0)°")
                             .font(.system(size: 15))
                             .foregroundStyle(.secondary)
                     }
