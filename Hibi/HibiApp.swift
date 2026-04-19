@@ -14,9 +14,13 @@ struct HibiApp: App {
     }
 
     private static func registerFonts() {
-        let names = ["InstrumentSerif-Regular", "InstrumentSerif-Italic"]
-        for name in names {
-            guard let url = Bundle.main.url(forResource: name, withExtension: "ttf") else {
+        let fonts: [(name: String, ext: String)] = [
+            ("InstrumentSerif-Regular", "ttf"),
+            ("InstrumentSerif-Italic", "ttf"),
+            ("NotoSerifJP-Regular", "otf"),
+        ]
+        for font in fonts {
+            guard let url = Bundle.main.url(forResource: font.name, withExtension: font.ext) else {
                 continue
             }
             var error: Unmanaged<CFError>?
