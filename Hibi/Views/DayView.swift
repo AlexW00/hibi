@@ -110,7 +110,7 @@ struct DayView: View {
     private var masthead: some View {
         HStack {
             // Typographic constant — identical across all locales per design.
-            Text(verbatim: "Hibi · No. \(String(format: "%03d", day))")
+            Text(verbatim: "日々 · No. \(String(format: "%03d", day))")
                 .font(.system(size: 11, weight: .medium))
                 .tracking(1.8)
                 .textCase(.uppercase)

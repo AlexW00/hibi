@@ -33,10 +33,12 @@ struct SettingsView: View {
                     .pickerStyle(.segmented)
 
                     Toggle("Simple font", isOn: $useSimpleFont)
+                        .tint(.black)
                 }
 
                 Section("Day View") {
                     Toggle("Invert swipe direction", isOn: $invertDaySwipe)
+                        .tint(.black)
                 }
 
                 Section("Calendars") {
@@ -55,6 +57,7 @@ struct SettingsView: View {
                         get: { eventStore.isDemoMode },
                         set: { eventStore.setDemoMode($0) }
                     ))
+                    .tint(.black)
                 }
                 #endif
 
