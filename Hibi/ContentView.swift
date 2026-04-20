@@ -1,4 +1,3 @@
-import EventKit
 import SwiftUI
 import WhatsNewKit
 
@@ -105,7 +104,7 @@ struct ContentView: View {
                     } label: {
                         Image(systemName: "plus")
                     }
-                    .disabled(eventStore.isDemoMode || eventStore.authorization != .fullAccess)
+                    .disabled(eventStore.isDemoMode || !eventStore.hasCalendarAccess)
                 }
             }
             .background(backgroundGradient.ignoresSafeArea())
@@ -124,7 +123,7 @@ struct ContentView: View {
             .ignoresSafeArea()
         }
         .task {
-            if eventStore.authorization != .fullAccess, !eventStore.isDemoMode {
+            if !eventStore.hasCalendarAccess, !eventStore.isDemoMode {
                 await eventStore.requestAccess()
             }
             eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
@@ -138,7 +137,10 @@ struct ContentView: View {
             eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { weatherStore.refresh() }
+            if phase == .active {
+                eventStore.refreshAccessFromScenePhase()
+                weatherStore.refresh()
+            }
         }
         .preferredColorScheme(colorScheme)
         .tint(.primary)

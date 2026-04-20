@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		4B0450C42F94C6EF009EA06E /* WhatsNewKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0450C32F94C6EF009EA06E /* WhatsNewKit */; };
+		4B0451032F94C6EF009EA06E /* CalendarPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0451012F94C6EF009EA06E /* CalendarPermission */; };
+		4B0451042F94C6EF009EA06E /* LocationPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0451022F94C6EF009EA06E /* LocationPermission */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +30,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B0450C42F94C6EF009EA06E /* WhatsNewKit in Frameworks */,
+				4B0451032F94C6EF009EA06E /* CalendarPermission in Frameworks */,
+				4B0451042F94C6EF009EA06E /* LocationPermission in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,6 +75,8 @@
 			name = Hibi;
 			packageProductDependencies = (
 				4B0450C32F94C6EF009EA06E /* WhatsNewKit */,
+				4B0451012F94C6EF009EA06E /* CalendarPermission */,
+				4B0451022F94C6EF009EA06E /* LocationPermission */,
 			);
 			productName = Hibi;
 			productReference = 4B802FCD2F8F5453008F00F4 /* Hibi.app */;
@@ -104,6 +110,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "WhatsNewKit" */,
+				4B0451002F94C6EF009EA06E /* XCRemoteSwiftPackageReference "PermissionsKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4B802FCE2F8F5453008F00F4 /* Products */;
@@ -377,6 +384,14 @@
 				minimumVersion = 2.2.1;
 			};
 		};
+		4B0451002F94C6EF009EA06E /* XCRemoteSwiftPackageReference "PermissionsKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparrowcode/PermissionsKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -384,6 +399,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "WhatsNewKit" */;
 			productName = WhatsNewKit;
+		};
+		4B0451012F94C6EF009EA06E /* CalendarPermission */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B0451002F94C6EF009EA06E /* XCRemoteSwiftPackageReference "PermissionsKit" */;
+			productName = CalendarPermission;
+		};
+		4B0451022F94C6EF009EA06E /* LocationPermission */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B0451002F94C6EF009EA06E /* XCRemoteSwiftPackageReference "PermissionsKit" */;
+			productName = LocationPermission;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

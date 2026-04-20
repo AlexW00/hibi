@@ -91,7 +91,7 @@ struct SettingsView: View {
 
     private var calendarSummary: LocalizedStringResource {
         if eventStore.isDemoMode { return "Demo" }
-        guard eventStore.authorization == .fullAccess else { return "Not connected" }
+        guard eventStore.hasCalendarAccess else { return "Not connected" }
         let all = eventStore.allCalendars()
         let visible = all.filter { !eventStore.isHidden($0) }.count
         return "\(visible) / \(all.count)"

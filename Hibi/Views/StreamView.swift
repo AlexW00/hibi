@@ -54,7 +54,7 @@ struct StreamView: View {
     var body: some View {
         ScrollView {
             if !eventStore.showsCalendarContent {
-                CalendarAccessPrompt(status: eventStore.authorization) {
+                CalendarAccessPrompt(isDenied: eventStore.calendarAccessDenied) {
                     Task { await eventStore.requestAccess() }
                 }
                 .padding(.horizontal, 20)

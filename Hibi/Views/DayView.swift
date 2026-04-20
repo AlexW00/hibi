@@ -299,7 +299,7 @@ struct DayView: View {
         let events = eventStore.events(year: year, month: month, day: scheduleDay)
         return Group {
             if !eventStore.showsCalendarContent {
-                CalendarAccessPrompt(status: eventStore.authorization) {
+                CalendarAccessPrompt(isDenied: eventStore.calendarAccessDenied) {
                     Task { await eventStore.requestAccess() }
                 }
             } else if events.isEmpty {

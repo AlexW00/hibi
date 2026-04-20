@@ -1,13 +1,16 @@
+import CalendarPermission
 import EventKit
 import Foundation
 import Observation
+import PermissionsKit
 import SwiftUI
 
 @MainActor
 @Observable
 final class EventStore {
     let ekStore = EKEventStore()
-    private(set) var authorization: EKAuthorizationStatus
+    private(set) var hasCalendarAccess: Bool
+    private(set) var calendarAccessDenied: Bool
     /// Debug demo mode: fixture data only, persisted. Release UI toggle is `#if DEBUG` only.
     private(set) var isDemoMode: Bool
     private(set) var eventsByMonth: [MonthKey: [Int: [CalendarEvent]]] = [:]
@@ -18,9 +21,9 @@ final class EventStore {
     private static let hiddenIDsDefaultsKey = "hiddenCalendarIDs"
     private static let demoModeDefaultsKey = "demoMode"
 
-    /// Month/stream/day views use this instead of checking `authorization` alone so demo works without EventKit.
+    /// Month/stream/day views use this instead of checking access alone so demo works without EventKit.
     var showsCalendarContent: Bool {
-        isDemoMode || authorization == .fullAccess
+        isDemoMode || hasCalendarAccess
     }
 
     private let calendar: Calendar = {
@@ -38,7 +41,9 @@ final class EventStore {
     }()
 
     init() {
-        self.authorization = EKEventStore.authorizationStatus(for: .event)
+        let permission = Permission.calendar(access: .full)
+        self.hasCalendarAccess = permission.authorized
+        self.calendarAccessDenied = permission.denied
         #if DEBUG
         self.isDemoMode = UserDefaults.standard.bool(forKey: Self.demoModeDefaultsKey)
         #else
@@ -56,9 +61,16 @@ final class EventStore {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor [weak self] in
+                self?.refreshAccessStatus()
                 self?.reloadAll()
             }
         }
+    }
+
+    private func refreshAccessStatus() {
+        let permission = Permission.calendar(access: .full)
+        hasCalendarAccess = permission.authorized
+        calendarAccessDenied = permission.denied
     }
 
     func setDemoMode(_ enabled: Bool) {
@@ -92,14 +104,23 @@ final class EventStore {
     // MARK: - Access
 
     func requestAccess() async {
-        do {
-            let granted = try await ekStore.requestFullAccessToEvents()
-            authorization = EKEventStore.authorizationStatus(for: .event)
-            if granted {
-                reloadAll()
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            Permission.calendar(access: .full).request {
+                continuation.resume()
             }
-        } catch {
-            authorization = EKEventStore.authorizationStatus(for: .event)
+        }
+        refreshAccessStatus()
+        if hasCalendarAccess {
+            reloadAll()
+        }
+    }
+
+    /// Re-check the system permission on the next run loop tick. Call after the app
+    /// returns to the foreground — users may have flipped the toggle in Settings.
+    func refreshAccessFromScenePhase() {
+        refreshAccessStatus()
+        if hasCalendarAccess {
+            reloadAll()
         }
     }
 
@@ -108,7 +129,7 @@ final class EventStore {
     /// All event calendars known to EventKit, across every account source.
     func allCalendars() -> [EKCalendar] {
         guard !isDemoMode else { return [] }
-        guard authorization == .fullAccess else { return [] }
+        guard hasCalendarAccess else { return [] }
         return ekStore.calendars(for: .event)
     }
 
@@ -142,7 +163,7 @@ final class EventStore {
 
     func reload(year: Int, month: Int) {
         guard !isDemoMode else { return }
-        guard authorization == .fullAccess else { return }
+        guard hasCalendarAccess else { return }
         let key = MonthKey(year: year, month: month)
 
         var comps = DateComponents(year: year, month: month, day: 1)
@@ -234,7 +255,7 @@ final class EventStore {
         to: (year: Int, month: Int, day: Int)
     ) -> Bool {
         guard !isDemoMode else { return false }
-        guard authorization == .fullAccess else { return false }
+        guard hasCalendarAccess else { return false }
         guard let ek = ekStore.event(withIdentifier: identifier) else { return false }
 
         guard
