@@ -16,6 +16,10 @@ struct ContentView: View {
     @State private var weatherStore = WeatherStore()
     @State private var editorMode: EventEditorSheet.Mode?
     @State private var showOnboarding = false
+    /// Latched by SettingsView — when Settings dismisses with this set we
+    /// present the onboarding sheet. Can't show two sheets at once, so we
+    /// chain via `onDismiss`.
+    @State private var reopenOnboardingAfterSettings = false
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearanceRaw: String = SettingsView.Appearance.system.rawValue
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
@@ -113,9 +117,19 @@ struct ContentView: View {
         .environment(eventStore)
         .environment(weatherStore)
         .whatsNewSheet()
-        .sheet(isPresented: $showSettings) {
-            SettingsView()
-                .environment(eventStore)
+        .sheet(isPresented: $showSettings, onDismiss: {
+            if reopenOnboardingAfterSettings {
+                reopenOnboardingAfterSettings = false
+                showOnboarding = true
+            }
+        }) {
+            SettingsView(
+                onReopenPermissions: {
+                    reopenOnboardingAfterSettings = true
+                }
+            )
+            .environment(eventStore)
+            .environment(weatherStore)
         }
         .sheet(item: $editorMode) { mode in
             EventEditorSheet(store: eventStore.ekStore, mode: mode) {
@@ -135,8 +149,9 @@ struct ContentView: View {
         .task {
             eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
             weatherStore.refresh()
-            if !eventStore.isDemoMode,
-               (!eventStore.hasCalendarAccess || !weatherStore.hasLocationAccess) {
+            // Auto-present only when a REQUIRED permission is missing.
+            // Location is optional — users enable it later from Settings.
+            if !eventStore.isDemoMode, !eventStore.hasCalendarAccess {
                 showOnboarding = true
             }
         }
@@ -145,6 +160,14 @@ struct ContentView: View {
         }
         .onChange(of: displayedMonth) { _, _ in
             eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
+        }
+        .onChange(of: eventStore.hasCalendarAccess) { _, newValue in
+            // Cover any path that flips access on — inline CalendarAccessPrompt,
+            // Settings toggle, or onboarding sheet. ensureLoaded only fetches
+            // months not yet in the cache, so this is cheap and idempotent.
+            if newValue {
+                eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
@@ -184,6 +207,7 @@ struct ContentView: View {
                 tint: Color(.displayP3, red: 0.78, green: 0.49, blue: 0.42, opacity: 1),
                 title: "Calendar",
                 description: "Show and edit the events from your system calendars.",
+                isRequired: true,
                 isGranted: { eventStore.hasCalendarAccess },
                 isDenied: { eventStore.calendarAccessDenied },
                 request: { await eventStore.requestAccess() },
@@ -195,6 +219,7 @@ struct ContentView: View {
                 tint: Color(.displayP3, red: 0.38, green: 0.55, blue: 0.76, opacity: 1),
                 title: "Location",
                 description: "Local weather and sunrise / sunset on each day.",
+                isRequired: false,
                 isGranted: { weatherStore.hasLocationAccess },
                 isDenied: { weatherStore.locationAccessDenied },
                 request: { await weatherStore.requestAccess() },

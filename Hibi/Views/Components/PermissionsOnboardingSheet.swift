@@ -11,6 +11,9 @@ struct PermissionOnboardingItem: Identifiable {
     let tint: Color
     let title: LocalizedStringResource
     let description: LocalizedStringResource
+    /// Required permissions gate the "Continue" button — the user can't finish
+    /// onboarding without granting them. Optional permissions can be skipped.
+    let isRequired: Bool
     let isGranted: @MainActor () -> Bool
     let isDenied: @MainActor () -> Bool
     let request: @MainActor () async -> Void
@@ -63,6 +66,7 @@ struct PermissionsOnboardingSheet: View {
             .buttonStyle(.borderedProminent)
             .tint(.primary)
             .foregroundStyle(Color(.systemBackground))
+            .disabled(!canContinue)
             .padding(.horizontal, 28)
             .padding(.bottom, 20)
             .frame(maxWidth: 460)
@@ -78,6 +82,13 @@ struct PermissionsOnboardingSheet: View {
             AppBackgroundGradient().ignoresSafeArea()
         }
         .onAppear { appeared = true }
+    }
+
+    /// Continue is disabled until every required permission is granted.
+    /// Computed each render — `isGranted()` is a light wrapper over PermissionsKit's
+    /// system status query, which re-evaluates against the live authorization state.
+    private var canContinue: Bool {
+        items.filter(\.isRequired).allSatisfy { $0.isGranted() }
     }
 
     private var header: some View {
@@ -97,6 +108,7 @@ struct PermissionsOnboardingSheet: View {
 
 private struct PermissionRow: View {
     let item: PermissionOnboardingItem
+    @State private var isRequesting = false
 
     var body: some View {
         HStack(spacing: 14) {
@@ -150,6 +162,10 @@ private struct PermissionRow: View {
                     .font(.system(size: 26, weight: .regular))
                     .foregroundStyle(Color.green.gradient)
                     .transition(.scale(scale: 0.6).combined(with: .opacity))
+            } else if isRequesting {
+                ProgressView()
+                    .controlSize(.small)
+                    .transition(.opacity)
             } else if denied {
                 Button {
                     item.openSettings()
@@ -164,10 +180,13 @@ private struct PermissionRow: View {
             } else {
                 Button {
                     Task { @MainActor in
+                        isRequesting = true
                         await item.request()
-                        // The store mutation that flips isGranted happens inside
-                        // request(); SwiftUI re-evaluates trailing and fires the
-                        // checkmark transition.
+                        // isGranted flips inside request(); SwiftUI re-evaluates
+                        // and the checkmark transitions in. Clear the requesting
+                        // flag last so the row never shows both the spinner and
+                        // the stale Allow button at the same time.
+                        isRequesting = false
                     }
                 } label: {
                     Text("Allow")
@@ -182,6 +201,7 @@ private struct PermissionRow: View {
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: granted)
         .animation(.easeInOut(duration: 0.2), value: denied)
+        .animation(.easeInOut(duration: 0.15), value: isRequesting)
     }
 }
 
@@ -196,6 +216,7 @@ private struct PermissionRow: View {
                 tint: Color(.displayP3, red: 0.78, green: 0.49, blue: 0.42, opacity: 1),
                 title: "Calendar",
                 description: "Show and edit the events from your system calendars.",
+                isRequired: true,
                 isGranted: { false },
                 isDenied: { false },
                 request: { },
@@ -207,6 +228,7 @@ private struct PermissionRow: View {
                 tint: Color(.displayP3, red: 0.38, green: 0.55, blue: 0.76, opacity: 1),
                 title: "Location",
                 description: "Local weather and sunrise / sunset on each day.",
+                isRequired: false,
                 isGranted: { false },
                 isDenied: { false },
                 request: { },

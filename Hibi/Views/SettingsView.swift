@@ -3,8 +3,13 @@ import SwiftUI
 import WhatsNewKit
 
 struct SettingsView: View {
+    /// Called by the "Review permissions" button. ContentView latches this and
+    /// presents the onboarding sheet once Settings dismisses (can't stack sheets).
+    let onReopenPermissions: () -> Void
+
     @Environment(\.dismiss) private var dismiss
     @Environment(EventStore.self) private var eventStore
+    @Environment(WeatherStore.self) private var weatherStore
     @AppStorage("appearance") private var appearanceRaw: String = Appearance.system.rawValue
     @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
@@ -53,6 +58,22 @@ struct SettingsView: View {
                     }
                 }
 
+                if hasMissingPermission {
+                    Section("Permissions") {
+                        Button {
+                            onReopenPermissions()
+                            dismiss()
+                        } label: {
+                            LabeledContent("Review permissions") {
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                        .tint(.primary)
+                    }
+                }
+
                 #if DEBUG
                 Section("Debug") {
                     Toggle("Demo Mode", isOn: Binding(
@@ -95,5 +116,9 @@ struct SettingsView: View {
         let all = eventStore.allCalendars()
         let visible = all.filter { !eventStore.isHidden($0) }.count
         return "\(visible) / \(all.count)"
+    }
+
+    private var hasMissingPermission: Bool {
+        !eventStore.hasCalendarAccess || !weatherStore.hasLocationAccess
     }
 }
