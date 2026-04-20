@@ -111,6 +111,9 @@ final class EventStore {
         }
         refreshAccessStatus()
         if hasCalendarAccess {
+            // Flush any cached unauthorized state so calendars(for:) / events(matching:)
+            // see the newly granted data without an app restart.
+            ekStore.reset()
             reloadAll()
         }
     }
@@ -118,8 +121,10 @@ final class EventStore {
     /// Re-check the system permission on the next run loop tick. Call after the app
     /// returns to the foreground — users may have flipped the toggle in Settings.
     func refreshAccessFromScenePhase() {
+        let wasAuthorized = hasCalendarAccess
         refreshAccessStatus()
         if hasCalendarAccess {
+            if !wasAuthorized { ekStore.reset() }
             reloadAll()
         }
     }
