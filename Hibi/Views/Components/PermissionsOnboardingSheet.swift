@@ -27,6 +27,13 @@ struct PermissionsOnboardingSheet: View {
     let onContinue: () -> Void
 
     @State private var appeared = false
+    /// Snapshotted once on first appearance. Prevents auto-dismiss from firing
+    /// when the sheet is re-opened from Settings while everything is already
+    /// granted — auto-dismiss should only celebrate a fresh completion.
+    @State private var startedWithAllGranted = true
+    /// Brief success state shown between the last grant and the actual dismiss,
+    /// so the user sees confirmation instead of the sheet just yanking away.
+    @State private var isCelebrating = false
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @Environment(\.dismiss) private var dismiss
 
@@ -58,14 +65,18 @@ struct PermissionsOnboardingSheet: View {
                 onContinue()
                 dismiss()
             } label: {
-                Text("Continue")
+                continueLabel
                     .font(.system(size: 16, weight: .semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.primary)
-            .foregroundStyle(Color(.systemBackground))
+            .tint(isCelebrating ? Color.green : .primary)
+            // In the normal state the tint is `.primary` (black/white depending
+            // on appearance) so the label needs the inverse for contrast.
+            // During celebration the tint is green, and white reads on green
+            // in both light and dark.
+            .foregroundStyle(isCelebrating ? Color.white : Color(.systemBackground))
             .disabled(!canContinue)
             .padding(.horizontal, 28)
             .padding(.bottom, 20)
@@ -76,12 +87,43 @@ struct PermissionsOnboardingSheet: View {
                     .delay(0.18 + Double(items.count) * 0.08 + 0.05),
                 value: appeared
             )
+            .animation(.spring(response: 0.4, dampingFraction: 0.75), value: isCelebrating)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .presentationBackground {
             AppBackgroundGradient().ignoresSafeArea()
         }
-        .onAppear { appeared = true }
+        .onAppear {
+            appeared = true
+            startedWithAllGranted = allGranted
+        }
+        .onChange(of: allGranted) { _, newValue in
+            // Auto-dismiss only when the user just completed the final grant
+            // in THIS session. If the sheet was opened (e.g. from Settings)
+            // with everything already granted, don't yank it away — the user
+            // came here on purpose.
+            guard newValue, !startedWithAllGranted, !isCelebrating else { return }
+            isCelebrating = true
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(900))
+                onContinue()
+                dismiss()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var continueLabel: some View {
+        if isCelebrating {
+            HStack(spacing: 8) {
+                Image(systemName: "checkmark")
+                Text("All set")
+            }
+            .transition(.scale(scale: 0.85).combined(with: .opacity))
+        } else {
+            Text("Continue")
+                .transition(.opacity)
+        }
     }
 
     /// Continue is disabled until every required permission is granted.
@@ -89,6 +131,12 @@ struct PermissionsOnboardingSheet: View {
     /// system status query, which re-evaluates against the live authorization state.
     private var canContinue: Bool {
         items.filter(\.isRequired).allSatisfy { $0.isGranted() }
+    }
+
+    /// True when every row (required + optional) is granted — the cue for
+    /// auto-dismiss.
+    private var allGranted: Bool {
+        items.allSatisfy { $0.isGranted() }
     }
 
     private var header: some View {
