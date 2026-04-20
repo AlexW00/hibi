@@ -5,8 +5,20 @@ struct EventCard: View {
     /// 0 before the event starts, 1 after it ends. Ignored for all-day events.
     var progress: Double = 0
 
+    @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
+
+    private var timeFormat: TimeFormat {
+        TimeFormat(rawValue: timeFormatRaw) ?? .system
+    }
+
     private var fillAmount: Double {
         event.allDay ? 1 : max(0, min(1, progress))
+    }
+
+    private var timeRange: String {
+        let start = event.startDate.map { timeFormat.string(from: $0) } ?? ""
+        let end = event.endDate.map { timeFormat.string(from: $0) } ?? ""
+        return "\(start)–\(end)"
     }
 
     var body: some View {
@@ -58,7 +70,7 @@ struct EventCard: View {
                     .foregroundStyle(.primary)
                     .lineLimit(1)
                 HStack(spacing: 8) {
-                    Text(verbatim: "\(event.start ?? "")–\(event.end ?? "")")
+                    Text(verbatim: timeRange)
                         .font(.system(size: 10.5, design: .monospaced))
                         .tracking(0.2)
                         .foregroundStyle(.secondary)

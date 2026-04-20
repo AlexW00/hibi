@@ -7,21 +7,10 @@ import SwiftUI
 /// except **April 18** (SampleData “today”) stays full for screenshots. **Smart Cities Expo**
 /// runs Apr 10–11 only so Apr 12 is a quiet gap after the conference.
 enum DemoFixtures {
-    private static let timeFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "HH:mm"
-        return f
-    }()
-
     private static func d(_ y: Int, _ m: Int, _ day: Int, h: Int = 0, min: Int = 0) -> Date {
         var comps = DateComponents(year: y, month: m, day: day, hour: h, minute: min)
         comps.calendar = Calendar(identifier: .gregorian)
         return comps.date!
-    }
-
-    private static func t(_ start: Date, _ end: Date) -> (String, String) {
-        (timeFormatter.string(from: start), timeFormatter.string(from: end))
     }
 
     static let events: [MonthKey: [Int: [CalendarEvent]]] = makeEvents()
@@ -44,13 +33,10 @@ enum DemoFixtures {
         ) {
             let s = d(y, m, day, h: h1, min: m1)
             let e = d(y, m, day, h: h2, min: m2)
-            let pair = t(s, e)
             add(y, m, day, CalendarEvent(
                 id: id,
                 eventIdentifier: nil,
                 day: day,
-                start: pair.0,
-                end: pair.1,
                 startDate: s,
                 endDate: e,
                 title: title,
@@ -66,7 +52,7 @@ enum DemoFixtures {
                 for dayKey in sortedDays.keys {
                     sortedDays[dayKey]?.sort { lhs, rhs in
                         if lhs.allDay != rhs.allDay { return lhs.allDay && !rhs.allDay }
-                        return (lhs.start ?? "") < (rhs.start ?? "")
+                        return (lhs.startDate ?? .distantPast) < (rhs.startDate ?? .distantPast)
                     }
                 }
                 out[key] = sortedDays
@@ -102,13 +88,10 @@ enum DemoFixtures {
         addTimed("demo-feb-112", 2026, 2, 13, 17, 30, 18, 30, title: "Therapy session", tint: sky)
         let feb14s = d(2026, 2, 14, h: 10, min: 0)
         let feb14e = d(2026, 2, 14, h: 12, min: 30)
-        let feb14t = t(feb14s, feb14e)
         add(2026, 2, 14, CalendarEvent(
             id: "demo-feb-002",
             eventIdentifier: nil,
             day: 14,
-            start: feb14t.0,
-            end: feb14t.1,
             startDate: feb14s,
             endDate: feb14e,
             title: "Valentine’s brunch",
@@ -154,13 +137,10 @@ enum DemoFixtures {
         addTimed("demo-mar-107", 2026, 3, 7, 11, 0, 12, 30, title: "Brunch with parents", tint: rose, location: "The Orchard")
         let mar8s = d(2026, 3, 8, h: 11, min: 0)
         let mar8e = d(2026, 3, 8, h: 13, min: 0)
-        let mar8t = t(mar8s, mar8e)
         add(2026, 3, 8, CalendarEvent(
             id: "demo-mar-001",
             eventIdentifier: nil,
             day: 8,
-            start: mar8t.0,
-            end: mar8t.1,
             startDate: mar8s,
             endDate: mar8e,
             title: "Women’s Day — family coffee",
@@ -177,13 +157,10 @@ enum DemoFixtures {
         addTimed("demo-mar-114b", 2026, 3, 14, 15, 0, 16, 30, title: "Nap + laundry", tint: butter)
         let mar15s = d(2026, 3, 15, h: 15, min: 30)
         let mar15e = d(2026, 3, 15, h: 16, min: 30)
-        let mar15t = t(mar15s, mar15e)
         add(2026, 3, 15, CalendarEvent(
             id: "demo-mar-002",
             eventIdentifier: nil,
             day: 15,
-            start: mar15t.0,
-            end: mar15t.1,
             startDate: mar15s,
             endDate: mar15e,
             title: "Dentist checkup",
@@ -217,13 +194,10 @@ enum DemoFixtures {
         addTimed("demo-apr-103", 2026, 4, 2, 15, 30, 16, 30, title: "Tea with neighbor", tint: peach, location: "Patio")
         let apr3s = d(2026, 4, 3, h: 10, min: 0)
         let apr3e = d(2026, 4, 3, h: 11, min: 30)
-        let apr3t = t(apr3s, apr3e)
         add(2026, 4, 3, CalendarEvent(
             id: "demo-apr-001",
             eventIdentifier: nil,
             day: 3,
-            start: apr3t.0,
-            end: apr3t.1,
             startDate: apr3s,
             endDate: apr3e,
             title: "Team stand-up & roadmap",
@@ -236,13 +210,10 @@ enum DemoFixtures {
         addTimed("demo-apr-104b", 2026, 4, 4, 16, 0, 17, 30, title: "Egg hunt — neighborhood", tint: mint, location: "Park")
         let apr5s = d(2026, 4, 5, h: 19, min: 30)
         let apr5e = d(2026, 4, 5, h: 22, min: 0)
-        let apr5t = t(apr5s, apr5e)
         add(2026, 4, 5, CalendarEvent(
             id: "demo-apr-002",
             eventIdentifier: nil,
             day: 5,
-            start: apr5t.0,
-            end: apr5t.1,
             startDate: apr5s,
             endDate: apr5e,
             title: "Chamber orchestra concert",
@@ -280,13 +251,10 @@ enum DemoFixtures {
         // 2026-04-18 (SampleData “today”)
         let apr18a = d(2026, 4, 18, h: 8, min: 0)
         let apr18b = d(2026, 4, 18, h: 9, min: 30)
-        let apr18at = t(apr18a, apr18b)
         add(2026, 4, 18, CalendarEvent(
             id: "demo-apr-today-001",
             eventIdentifier: nil,
             day: 18,
-            start: apr18at.0,
-            end: apr18at.1,
             startDate: apr18a,
             endDate: apr18b,
             title: "Breakfast with Maria",
@@ -305,13 +273,10 @@ enum DemoFixtures {
         )
         let apr18c = d(2026, 4, 18, h: 12, min: 30)
         let apr18d = d(2026, 4, 18, h: 13, min: 45)
-        let apr18ct = t(apr18c, apr18d)
         add(2026, 4, 18, CalendarEvent(
             id: "demo-apr-today-002",
             eventIdentifier: nil,
             day: 18,
-            start: apr18ct.0,
-            end: apr18ct.1,
             startDate: apr18c,
             endDate: apr18d,
             title: "Team lunch",
@@ -330,13 +295,10 @@ enum DemoFixtures {
         ))
         let apr18e = d(2026, 4, 18, h: 20, min: 15)
         let apr18f = d(2026, 4, 18, h: 23, min: 15)
-        let apr18et = t(apr18e, apr18f)
         add(2026, 4, 18, CalendarEvent(
             id: "demo-apr-today-004",
             eventIdentifier: nil,
             day: 18,
-            start: apr18et.0,
-            end: apr18et.1,
             startDate: apr18e,
             endDate: apr18f,
             title: "Movie: Dune Part Two",
@@ -384,13 +346,10 @@ enum DemoFixtures {
         addTimed("demo-may-107", 2026, 5, 8, 14, 0, 15, 30, title: "1:1 — career chat", tint: butter, location: "Coffee Lab")
         let may9s = d(2026, 5, 9, h: 10, min: 0)
         let may9e = d(2026, 5, 9, h: 14, min: 0)
-        let may9t = t(may9s, may9e)
         add(2026, 5, 9, CalendarEvent(
             id: "demo-may-002",
             eventIdentifier: nil,
             day: 9,
-            start: may9t.0,
-            end: may9t.1,
             startDate: may9s,
             endDate: may9e,
             title: "Mother’s Day brunch",
@@ -467,13 +426,10 @@ enum DemoFixtures {
         addTimed("demo-jun-120", 2026, 6, 20, 8, 45, 10, 15, title: "Yard work party", tint: peach, location: "Front + side yard")
         let jun21s = d(2026, 6, 21, h: 18, min: 0)
         let jun21e = d(2026, 6, 21, h: 22, min: 30)
-        let jun21t = t(jun21s, jun21e)
         add(2026, 6, 21, CalendarEvent(
             id: "demo-jun-001",
             eventIdentifier: nil,
             day: 21,
-            start: jun21t.0,
-            end: jun21t.1,
             startDate: jun21s,
             endDate: jun21e,
             title: "Summer solstice grill-out",

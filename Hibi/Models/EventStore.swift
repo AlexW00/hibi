@@ -32,14 +32,6 @@ final class EventStore {
         return c
     }()
 
-    private let timeFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.locale = .autoupdatingCurrent
-        f.dateStyle = .none
-        f.timeStyle = .short
-        return f
-    }()
-
     init() {
         let permission = Permission.calendar(access: .full)
         self.hasCalendarAccess = permission.authorized
@@ -226,7 +218,7 @@ final class EventStore {
         for d in grouped.keys {
             grouped[d]?.sort { lhs, rhs in
                 if lhs.allDay != rhs.allDay { return lhs.allDay && !rhs.allDay }
-                return (lhs.start ?? "") < (rhs.start ?? "")
+                return (lhs.startDate ?? .distantPast) < (rhs.startDate ?? .distantPast)
             }
         }
 
@@ -366,15 +358,11 @@ final class EventStore {
     // MARK: - Adapters
 
     private func makeCalendarEvent(from ek: EKEvent, day: Int) -> CalendarEvent {
-        let start: String? = ek.isAllDay ? nil : timeFormatter.string(from: ek.startDate)
-        let end: String? = ek.isAllDay ? nil : timeFormatter.string(from: ek.endDate)
         let tint = Color.pastelized(cgColor: ek.calendar?.cgColor)
         return CalendarEvent(
             id: ek.eventIdentifier ?? UUID().uuidString,
             eventIdentifier: ek.eventIdentifier,
             day: day,
-            start: start,
-            end: end,
             startDate: ek.startDate,
             endDate: ek.endDate,
             title: ek.title ?? "",

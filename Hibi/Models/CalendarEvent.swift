@@ -20,10 +20,8 @@ struct CalendarEvent: Identifiable, Hashable {
     let id: String
     let eventIdentifier: String?
     let day: Int
-    let start: String?
-    let end: String?
-    /// Absolute start/end — kept separate from the HH:mm strings so progress
-    /// computation works for events that span into another day.
+    /// Absolute start/end — views format against the user's time-format
+    /// preference at render time (see `TimeFormat`).
     let startDate: Date?
     let endDate: Date?
     let title: String
@@ -36,8 +34,6 @@ struct CalendarEvent: Identifiable, Hashable {
     init(id: String = UUID().uuidString,
          eventIdentifier: String? = nil,
          day: Int,
-         start: String? = nil,
-         end: String? = nil,
          startDate: Date? = nil,
          endDate: Date? = nil,
          title: String,
@@ -47,8 +43,6 @@ struct CalendarEvent: Identifiable, Hashable {
         self.id = id
         self.eventIdentifier = eventIdentifier
         self.day = day
-        self.start = start
-        self.end = end
         self.startDate = startDate
         self.endDate = endDate
         self.title = title
@@ -98,8 +92,11 @@ extension CalendarEvent {
 }
 
 struct DayWeather: Hashable {
-    let high: Int
-    let low: Int
+    /// Stored in Celsius with full decimal precision. Views convert + round
+    /// at display time so switching the temperature unit doesn't accumulate
+    /// rounding error (e.g. 23.4°C → 23 → 73°F instead of the correct 74°F).
+    let high: Double
+    let low: Double
     let code: WeatherCode
     let sunrise: Date?
     let sunset: Date?
