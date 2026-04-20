@@ -158,9 +158,12 @@ struct MonthsScrollView: View {
         self._displayedMonth = displayedMonth
         self.scrollToNowToken = scrollToNowToken
         self.onPickDay = onPickDay
+        // Seed on today, not the binding: the binding can drift when the Week
+        // view has been scrolled before the Month tab is first opened, which
+        // otherwise lands Month on whatever month Week was showing.
         let seed = MonthKey(
-            year: displayedYear.wrappedValue,
-            month: displayedMonth.wrappedValue
+            year: SampleData.todayYear,
+            month: SampleData.todayMonth
         )
         _window = State(initialValue: CalendarWindow(center: seed))
         var initial = ScrollPosition(idType: Int.self)
