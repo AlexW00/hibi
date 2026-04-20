@@ -104,15 +104,26 @@ final class EventStore {
     // MARK: - Access
 
     func requestAccess() async {
-        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            Permission.calendar(access: .full).request {
-                continuation.resume()
-            }
+        // Use EventKit directly rather than routing through PermissionsKit:
+        // the native API returns `granted: Bool` so we update our @Observable
+        // state deterministically, without a post-request status re-query.
+        // PermissionsKit's status getter is eventually consistent after a
+        // grant; relying on it here left the UI stuck on "Allow" until the
+        // app was relaunched. PermissionsKit still drives status reads on
+        // init and scenePhase transitions, which don't have this race.
+        let granted: Bool
+        do {
+            granted = try await ekStore.requestFullAccessToEvents()
+        } catch {
+            refreshAccessStatus()
+            return
         }
-        refreshAccessStatus()
-        if hasCalendarAccess {
-            // Flush any cached unauthorized state so calendars(for:) / events(matching:)
-            // see the newly granted data without an app restart.
+        hasCalendarAccess = granted
+        calendarAccessDenied = !granted
+            && EKEventStore.authorizationStatus(for: .event) == .denied
+        if granted {
+            // Flush any cached unauthorized state so calendars(for:) /
+            // events(matching:) see the newly granted data without a restart.
             ekStore.reset()
             reloadAll()
         }
