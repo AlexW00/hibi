@@ -28,6 +28,20 @@ A fixed-length ForEach over a huge range (e.g. `ForEach(-600...600)`) does not w
 
 Instead of "when near edge, add N items," maintain an **invariant**: always keep ≥ `windowRadius` items on each side of the visible item. `extendIfNearEdge` computes `neededAbove` / `neededBelow` and refills exactly that many (capped by `extendBatch`). This is self-throttling — extensions stop as soon as the buffer is restored, regardless of how the user scrolls.
 
+## Re-anchor after window extension to stop `.viewAligned` re-snapping
+
+**Symptom we hit:** scrolling the Week stream would "jump a few days" right as the fling settled. Small, occasional, always at the end of a scroll.
+
+**Cause:** when `onScrollPhaseChange` hits `.idle` near an edge, we prepend/append rows. `.scrollPosition(anchor: .center)` does re-center the pinned id, but the new layout lands a handful of pixels off the `.viewAligned` grid, so the scroll behavior animates a corrective snap — often landing on the neighbouring day/month.
+
+**Fix:** have `extendIfNearEdge` return `Bool` and, when it mutated the window, immediately call `position.scrollTo(id: pinnedID)`. The imperative command is queued after the data change and pre-empts `.viewAligned`'s snap. Cheap, no animation needed.
+
+## Preload the window's months so row heights don't shift mid-deceleration
+
+**Symptom we hit:** `StreamDayRow` has variable height (`minHeight: events.isEmpty ? 92 : nil`). `ensureLoaded` is triggered per-row via `.task(id: MonthKey(...))`, so on a fast scroll into an unseen month, rows first render empty (92pt) and grow a frame or two later once EventKit returns. If that height change lands during deceleration, `.viewAligned` recomputes its snap target against the new layout — user sees a jump.
+
+**Fix:** drive `ensureLoaded` from the window itself with `.task(id: windowMonthsSignature)` over the unique `MonthKey`s in `window.days`. Re-fires on extend, not on every scroll tick. Events are cached before the row even appears, so heights are stable when the scroll arrives.
+
 ## `ScrollPosition` (imperative) beats `scrollPosition(id: $binding)` for programmatic scroll
 
 **Symptom we hit:** tapping the active tab ("return to now") flakily jumped to the start of the list instead of today.

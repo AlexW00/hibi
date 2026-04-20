@@ -86,7 +86,24 @@ struct StreamView: View {
         .onScrollPhaseChange { _, newPhase in
             if newPhase == .idle {
                 let id = position.viewID(type: Int.self) ?? window.visibleDayID
-                window.extendIfNearEdge(visibleID: id)
+                // After inserting rows, the viewport's content offset shifts to
+                // keep the centered day centered — but `.viewAligned` may still
+                // decide to snap to a neighbour because the new layout lands a
+                // few pixels off-grid. Re-pinning to the same id pre-empts that
+                // snap, which the user saw as "jumping a few days after slowing
+                // down."
+                if window.extendIfNearEdge(visibleID: id), let id {
+                    position.scrollTo(id: id)
+                }
+            }
+        }
+        .task(id: windowMonthsSignature) {
+            var seen = Set<MonthKey>()
+            for key in window.days {
+                let month = MonthKey(year: key.year, month: key.month)
+                if seen.insert(month).inserted {
+                    eventStore.ensureLoaded(year: month.year, month: month.month)
+                }
             }
         }
         .onChange(of: position.viewID(type: Int.self)) { _, newID in
@@ -108,6 +125,14 @@ struct StreamView: View {
                 position.scrollTo(id: today.id)
             }
         }
+    }
+
+    // Signature that changes only when the window's month range changes, so the
+    // preload `.task` re-fires on extension but not on every scroll tick.
+    private var windowMonthsSignature: Int {
+        let first = window.days.first.map { $0.year * 100 + $0.month } ?? 0
+        let last = window.days.last.map { $0.year * 100 + $0.month } ?? 0
+        return first &* 1_000_000 &+ last
     }
 }
 
@@ -161,10 +186,13 @@ final class StreamWindow {
         self.visibleDayID = center.id
     }
 
-    func extendIfNearEdge(visibleID: DayKey.ID?) {
+    /// Returns `true` when the window was mutated, so the caller can re-anchor
+    /// the scroll position before `.viewAligned` decides to snap to a neighbour.
+    @discardableResult
+    func extendIfNearEdge(visibleID: DayKey.ID?) -> Bool {
         guard !isExtending,
               let id = visibleID,
-              let idx = days.firstIndex(where: { $0.id == id }) else { return }
+              let idx = days.firstIndex(where: { $0.id == id }) else { return false }
 
         let neededAbove = windowRadius - idx
         let neededBelow = windowRadius - (days.count - 1 - idx)
@@ -179,6 +207,7 @@ final class StreamWindow {
             days.insert(contentsOf: prepended, at: 0)
             trimTrailingIfOverflow()
             isExtending = false
+            return true
         } else if neededBelow > 0, let last = days.last {
             isExtending = true
             let count = min(neededBelow, cap)
@@ -186,7 +215,9 @@ final class StreamWindow {
             days.append(contentsOf: appended)
             trimLeadingIfOverflow()
             isExtending = false
+            return true
         }
+        return false
     }
 
     func recenter(on key: DayKey) {

@@ -194,7 +194,11 @@ struct MonthsScrollView: View {
         .onScrollPhaseChange { _, newPhase in
             if newPhase == .idle {
                 let id = position.viewID(type: Int.self) ?? window.visibleMonthID
-                window.extendIfNearEdge(visibleID: id)
+                // Re-pin the visible month after inserting rows so `.viewAligned`
+                // can't snap to a neighbour on the newly shifted layout.
+                if window.extendIfNearEdge(visibleID: id), let id {
+                    position.scrollTo(id: id)
+                }
             }
         }
         .onChange(of: position.viewID(type: Int.self)) { _, newID in
@@ -277,10 +281,13 @@ final class CalendarWindow {
         self.visibleMonthID = center.id
     }
 
-    func extendIfNearEdge(visibleID: MonthKey.ID?) {
+    /// Returns `true` when the window was mutated, so the caller can re-anchor
+    /// the scroll position before `.viewAligned` decides to snap to a neighbour.
+    @discardableResult
+    func extendIfNearEdge(visibleID: MonthKey.ID?) -> Bool {
         guard !isExtending,
               let id = visibleID,
-              let idx = months.firstIndex(where: { $0.id == id }) else { return }
+              let idx = months.firstIndex(where: { $0.id == id }) else { return false }
 
         let neededAbove = windowRadius - idx
         let neededBelow = windowRadius - (months.count - 1 - idx)
@@ -295,6 +302,7 @@ final class CalendarWindow {
             months.insert(contentsOf: prepended, at: 0)
             trimTrailingIfOverflow()
             isExtending = false
+            return true
         } else if neededBelow > 0, let last = months.last {
             isExtending = true
             let count = min(neededBelow, cap)
@@ -304,7 +312,9 @@ final class CalendarWindow {
             months.append(contentsOf: appended)
             trimLeadingIfOverflow()
             isExtending = false
+            return true
         }
+        return false
     }
 
     func recenter(on key: MonthKey) {
