@@ -28,6 +28,30 @@
     "A couple of permissions so Hibi can do its thing." : {
 
     },
+    "A first-launch sheet grants Calendar and Location access in one place, and dismisses itself once you're set." : {
+      "comment" : "What's New 1.2 — permissions onboarding feature subtitle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Sheet beim ersten Start erteilt Kalender- und Standortzugriff an einer Stelle – und schließt sich von selbst, sobald alles bereit ist."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A first-launch sheet grants Calendar and Location access in one place, and dismisses itself once you're set."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "初回起動時のシートで、カレンダーと位置情報のアクセスをまとめて許可できます。準備が整うと自動で閉じます。"
+          }
+        }
+      }
+    },
     "A new Settings toggle swaps the serif for the system sans, for a cleaner read." : {
       "comment" : "What's New 1.1 — Simple-font feature subtitle.",
       "extractionState" : "manual",
@@ -589,6 +613,30 @@
         }
       }
     },
+    "Fixed a case where Month could land on the wrong month if you'd scrolled Week first." : {
+      "comment" : "What's New 1.2 — month view fix subtitle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Fehler wurde behoben, bei dem der Monat auf dem falschen Monat landen konnte, wenn zuvor in der Wochenansicht gescrollt wurde."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fixed a case where Month could land on the wrong month if you'd scrolled Week first."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "週表示でスクロールした後に月表示が誤った月を開くことがある不具合を修正しました。"
+          }
+        }
+      }
+    },
     "Flip the swipe" : {
       "comment" : "What's New 1.1 — invert-swipe-direction feature title.",
       "extractionState" : "manual",
@@ -811,6 +859,30 @@
         }
       }
     },
+    "Month opens on today" : {
+      "comment" : "What's New 1.2 — month view fix title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monat öffnet auf heute"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month opens on today"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月表示は今日から開きます"
+          }
+        }
+      }
+    },
     "Multi-day events" : {
       "comment" : "What's New 1.1 — multi-day events feature title.",
       "extractionState" : "manual",
@@ -957,6 +1029,30 @@
     },
     "Permissions" : {
 
+    },
+    "Permissions, walked through" : {
+      "comment" : "What's New 1.2 — permissions onboarding feature title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berechtigungen, Schritt für Schritt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permissions, walked through"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "権限設定をステップごとに"
+          }
+        }
+      }
     },
     "Prefer swipe-up to go back? Invert the Day-view tear direction in Settings." : {
       "comment" : "What's New 1.1 — invert-swipe-direction feature subtitle.",
