@@ -11,6 +11,7 @@ import WeatherKit
 @Observable
 final class WeatherStore: NSObject {
     private(set) var hasLocationAccess: Bool
+    private(set) var locationAccessDenied: Bool
     private(set) var locationName: String?
 
     private var weatherByDay: [DayKey: DayWeather] = [:]
@@ -35,7 +36,9 @@ final class WeatherStore: NSObject {
     }
 
     override init() {
-        self.hasLocationAccess = Permission.location(access: .whenInUse).authorized
+        let permission = Permission.location(access: .whenInUse)
+        self.hasLocationAccess = permission.authorized
+        self.locationAccessDenied = permission.denied
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyKilometer
@@ -43,18 +46,22 @@ final class WeatherStore: NSObject {
 
     // MARK: - Access
 
-    func requestAccess() {
+    func requestAccess() async {
         let permission = Permission.location(access: .whenInUse)
         guard permission.notDetermined else { return }
-        permission.request {
-            // PermissionsKit calls completion on the main thread, but it's typed
-            // as non-isolated. Hop to the MainActor so we can touch store state.
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                self.hasLocationAccess = permission.authorized
-                if self.hasLocationAccess { self.refresh() }
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            permission.request {
+                continuation.resume()
             }
         }
+        hasLocationAccess = permission.authorized
+        locationAccessDenied = permission.denied
+        if hasLocationAccess { refresh() }
+    }
+
+    /// Deep-link to Hibi's Settings page where the user can toggle location access.
+    func openLocationSettings() {
+        Permission.location(access: .whenInUse).openSettingPage()
     }
 
     // MARK: - Query
@@ -160,7 +167,9 @@ extension WeatherStore: CLLocationManagerDelegate {
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         Task { @MainActor [weak self] in
             guard let self else { return }
-            self.hasLocationAccess = Permission.location(access: .whenInUse).authorized
+            let permission = Permission.location(access: .whenInUse)
+            self.hasLocationAccess = permission.authorized
+            self.locationAccessDenied = permission.denied
             if self.hasLocationAccess {
                 self.refresh()
             }

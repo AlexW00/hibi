@@ -129,6 +129,11 @@ final class EventStore {
         }
     }
 
+    /// Deep-link to Hibi's Settings page where the user can toggle calendar access.
+    func openCalendarSettings() {
+        Permission.calendar(access: .full).openSettingPage()
+    }
+
     // MARK: - Calendar selection
 
     /// All event calendars known to EventKit, across every account source.

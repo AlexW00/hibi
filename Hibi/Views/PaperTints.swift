@@ -72,3 +72,35 @@ extension Color {
         })
     }
 }
+
+/// Shared app canvas — cream radial in light, near-black radial in dark.
+/// Single source of truth used by `ContentView` and the onboarding sheet so
+/// the sheet reads as a continuation of the app surface, not system chrome.
+struct AppBackgroundGradient: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        if colorScheme == .dark {
+            RadialGradient(
+                colors: [
+                    Color(.displayP3, red: 0.102, green: 0.102, blue: 0.122),
+                    Color(.displayP3, red: 0.047, green: 0.047, blue: 0.055),
+                ],
+                center: UnitPoint(x: 0.2, y: 0.0),
+                startRadius: 0,
+                endRadius: 600
+            )
+        } else {
+            RadialGradient(
+                colors: [
+                    Color(.displayP3, red: 0.984, green: 0.980, blue: 0.965),
+                    Color(.displayP3, red: 0.953, green: 0.945, blue: 0.918),
+                    Color(.displayP3, red: 0.929, green: 0.914, blue: 0.867),
+                ],
+                center: UnitPoint(x: 0.15, y: -0.1),
+                startRadius: 0,
+                endRadius: 700
+            )
+        }
+    }
+}

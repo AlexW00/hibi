@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var eventStore = EventStore()
     @State private var weatherStore = WeatherStore()
     @State private var editorMode: EventEditorSheet.Mode?
+    @State private var showOnboarding = false
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearanceRaw: String = SettingsView.Appearance.system.rawValue
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
@@ -107,7 +108,7 @@ struct ContentView: View {
                     .disabled(eventStore.isDemoMode || !eventStore.hasCalendarAccess)
                 }
             }
-            .background(backgroundGradient.ignoresSafeArea())
+            .background(AppBackgroundGradient().ignoresSafeArea())
         }
         .environment(eventStore)
         .environment(weatherStore)
@@ -122,13 +123,22 @@ struct ContentView: View {
             }
             .ignoresSafeArea()
         }
-        .task {
-            if !eventStore.hasCalendarAccess, !eventStore.isDemoMode {
-                await eventStore.requestAccess()
-            }
+        .sheet(isPresented: $showOnboarding, onDismiss: {
             eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
-            weatherStore.requestAccess()
             weatherStore.refresh()
+        }) {
+            PermissionsOnboardingSheet(
+                items: onboardingItems,
+                onContinue: { }
+            )
+        }
+        .task {
+            eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
+            weatherStore.refresh()
+            if !eventStore.isDemoMode,
+               (!eventStore.hasCalendarAccess || !weatherStore.hasLocationAccess) {
+                showOnboarding = true
+            }
         }
         .onChange(of: displayedYear) { _, _ in
             eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
@@ -166,30 +176,31 @@ struct ContentView: View {
         editorMode = .new(defaultStart: date)
     }
 
-    @ViewBuilder
-    private var backgroundGradient: some View {
-        if colorScheme == .dark {
-            RadialGradient(
-                colors: [
-                    Color(.displayP3, red: 0.102, green: 0.102, blue: 0.122),
-                    Color(.displayP3, red: 0.047, green: 0.047, blue: 0.055),
-                ],
-                center: UnitPoint(x: 0.2, y: 0.0),
-                startRadius: 0,
-                endRadius: 600
-            )
-        } else {
-            RadialGradient(
-                colors: [
-                    Color(.displayP3, red: 0.984, green: 0.980, blue: 0.965),
-                    Color(.displayP3, red: 0.953, green: 0.945, blue: 0.918),
-                    Color(.displayP3, red: 0.929, green: 0.914, blue: 0.867),
-                ],
-                center: UnitPoint(x: 0.15, y: -0.1),
-                startRadius: 0,
-                endRadius: 700
-            )
-        }
+    private var onboardingItems: [PermissionOnboardingItem] {
+        [
+            PermissionOnboardingItem(
+                id: "calendar",
+                icon: "calendar",
+                tint: Color(.displayP3, red: 0.78, green: 0.49, blue: 0.42, opacity: 1),
+                title: "Calendar",
+                description: "Show and edit the events from your system calendars.",
+                isGranted: { eventStore.hasCalendarAccess },
+                isDenied: { eventStore.calendarAccessDenied },
+                request: { await eventStore.requestAccess() },
+                openSettings: { eventStore.openCalendarSettings() }
+            ),
+            PermissionOnboardingItem(
+                id: "location",
+                icon: "location.fill",
+                tint: Color(.displayP3, red: 0.38, green: 0.55, blue: 0.76, opacity: 1),
+                title: "Location",
+                description: "Local weather and sunrise / sunset on each day.",
+                isGranted: { weatherStore.hasLocationAccess },
+                isDenied: { weatherStore.locationAccessDenied },
+                request: { await weatherStore.requestAccess() },
+                openSettings: { weatherStore.openLocationSettings() }
+            ),
+        ]
     }
 
     private var colorScheme: ColorScheme? {
