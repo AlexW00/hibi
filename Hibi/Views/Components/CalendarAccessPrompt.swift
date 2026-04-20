@@ -1,9 +1,9 @@
-import EventKit
+import CalendarPermission
+import PermissionsKit
 import SwiftUI
-import UIKit
 
 struct CalendarAccessPrompt: View {
-    let status: EKAuthorizationStatus
+    let isDenied: Bool
     let onRequestAccess: () -> Void
 
     var body: some View {
@@ -19,13 +19,10 @@ struct CalendarAccessPrompt: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button {
-                switch status {
-                case .notDetermined:
+                if isDenied {
+                    Permission.calendar(access: .full).openSettingPage()
+                } else {
                     onRequestAccess()
-                default:
-                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                        UIApplication.shared.open(url)
-                    }
                 }
             } label: {
                 Text(buttonLabel)
@@ -38,24 +35,16 @@ struct CalendarAccessPrompt: View {
     }
 
     private var title: LocalizedStringResource {
-        switch status {
-        case .notDetermined: "Calendar access needed"
-        case .denied, .restricted: "Calendar access denied"
-        case .writeOnly: "Full calendar access needed"
-        default: "Calendar unavailable"
-        }
+        isDenied ? "Calendar access denied" : "Calendar access needed"
     }
 
     private var message: LocalizedStringResource {
-        switch status {
-        case .notDetermined: "Grant access to see and edit your events."
-        case .denied, .restricted: "Enable calendar access in Settings to see your events."
-        case .writeOnly: "Enable full calendar access in Settings to see your events."
-        default: "Your events can't be loaded right now."
-        }
+        isDenied
+            ? "Enable full calendar access in Settings to see your events."
+            : "Grant access to see and edit your events."
     }
 
     private var buttonLabel: LocalizedStringResource {
-        status == .notDetermined ? "Grant access" : "Open Settings"
+        isDenied ? "Open Settings" : "Grant access"
     }
 }

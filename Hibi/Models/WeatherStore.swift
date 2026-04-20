@@ -1,14 +1,17 @@
 import CoreLocation
 import Foundation
+import LocationPermission
 import MapKit
 import Observation
 import OSLog
+import PermissionsKit
 import WeatherKit
 
 @MainActor
 @Observable
 final class WeatherStore: NSObject {
-    private(set) var authorizationStatus: CLAuthorizationStatus
+    private(set) var hasLocationAccess: Bool
+    private(set) var locationAccessDenied: Bool
     private(set) var locationName: String?
 
     private var weatherByDay: [DayKey: DayWeather] = [:]
@@ -33,7 +36,9 @@ final class WeatherStore: NSObject {
     }
 
     override init() {
-        self.authorizationStatus = manager.authorizationStatus
+        let permission = Permission.location(access: .whenInUse)
+        self.hasLocationAccess = permission.authorized
+        self.locationAccessDenied = permission.denied
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyKilometer
@@ -41,9 +46,22 @@ final class WeatherStore: NSObject {
 
     // MARK: - Access
 
-    func requestAccess() {
-        guard authorizationStatus == .notDetermined else { return }
-        manager.requestWhenInUseAuthorization()
+    func requestAccess() async {
+        let permission = Permission.location(access: .whenInUse)
+        guard permission.notDetermined else { return }
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            permission.request {
+                continuation.resume()
+            }
+        }
+        hasLocationAccess = permission.authorized
+        locationAccessDenied = permission.denied
+        if hasLocationAccess { refresh() }
+    }
+
+    /// Deep-link to Hibi's Settings page where the user can toggle location access.
+    func openLocationSettings() {
+        Permission.location(access: .whenInUse).openSettingPage()
     }
 
     // MARK: - Query
@@ -57,9 +75,7 @@ final class WeatherStore: NSObject {
     /// Fetches a fresh location + weather if the cache is stale.
     /// Safe to call repeatedly — self-throttles.
     func refresh() {
-        guard authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways else {
-            return
-        }
+        guard hasLocationAccess else { return }
         if let last = lastFetchAt, Date().timeIntervalSince(last) < 30 * 60 {
             return
         }
@@ -149,11 +165,12 @@ final class WeatherStore: NSObject {
 
 extension WeatherStore: CLLocationManagerDelegate {
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        let status = manager.authorizationStatus
         Task { @MainActor [weak self] in
             guard let self else { return }
-            self.authorizationStatus = status
-            if status == .authorizedWhenInUse || status == .authorizedAlways {
+            let permission = Permission.location(access: .whenInUse)
+            self.hasLocationAccess = permission.authorized
+            self.locationAccessDenied = permission.denied
+            if self.hasLocationAccess {
                 self.refresh()
             }
         }

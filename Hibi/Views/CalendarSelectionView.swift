@@ -9,10 +9,10 @@ struct CalendarSelectionView: View {
 
     var body: some View {
         Group {
-            if eventStore.authorization == .fullAccess || eventStore.isDemoMode {
+            if eventStore.hasCalendarAccess || eventStore.isDemoMode {
                 content
             } else {
-                CalendarAccessPrompt(status: eventStore.authorization) {
+                CalendarAccessPrompt(isDenied: eventStore.calendarAccessDenied) {
                     Task { await eventStore.requestAccess() }
                 }
             }
