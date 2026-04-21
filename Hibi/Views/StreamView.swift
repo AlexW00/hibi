@@ -230,6 +230,11 @@ private struct StreamDayRow: View {
     @Environment(WeatherStore.self) private var weatherStore
     @State private var isDropTargeted: Bool = false
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
+    @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
+
+    private var temperatureUnit: TemperatureUnit {
+        TemperatureUnit(rawValue: temperatureUnitRaw) ?? .system
+    }
 
     var body: some View {
         let events = eventStore.events(year: year, month: month, day: day)
@@ -391,10 +396,10 @@ private struct StreamDayRow: View {
             VStack(spacing: 2) {
                 WeatherIcon(code: wx.code, size: 18)
                     .foregroundStyle(.secondary)
-                Text(verbatim: "\(wx.high)°")
+                Text(verbatim: "\(temperatureUnit.display(celsius: wx.high))°")
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(.secondary)
-                Text(verbatim: "\(wx.low)°")
+                Text(verbatim: "\(temperatureUnit.display(celsius: wx.low))°")
                     .font(.system(size: 9))
                     .foregroundStyle(.tertiary)
             }

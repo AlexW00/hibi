@@ -13,6 +13,8 @@ struct SettingsView: View {
     @AppStorage("appearance") private var appearanceRaw: String = Appearance.system.rawValue
     @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
+    @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
+    @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
     @State private var showWhatsNew = false
 
     enum Appearance: String, CaseIterable, Identifiable {
@@ -46,6 +48,19 @@ struct SettingsView: View {
                 Section("Day View") {
                     Toggle("Invert swipe direction", isOn: $invertDaySwipe)
                         .tint(.black)
+                }
+
+                Section("Units") {
+                    Picker("Temperature", selection: $temperatureUnitRaw) {
+                        ForEach(TemperatureUnit.allCases) { u in
+                            Text(u.labelResource).tag(u.rawValue)
+                        }
+                    }
+                    Picker("Time", selection: $timeFormatRaw) {
+                        ForEach(TimeFormat.allCases) { f in
+                            Text(f.labelResource).tag(f.rawValue)
+                        }
+                    }
                 }
 
                 Section("Calendars") {

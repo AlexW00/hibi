@@ -472,14 +472,16 @@ private struct PageContent: View {
     let preview: Bool
 
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
+    @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
+    @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
 
-    private static let sunFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.locale = .autoupdatingCurrent
-        f.dateStyle = .none
-        f.timeStyle = .short
-        return f
-    }()
+    private var timeFormat: TimeFormat {
+        TimeFormat(rawValue: timeFormatRaw) ?? .system
+    }
+
+    private var temperatureUnit: TemperatureUnit {
+        TemperatureUnit(rawValue: temperatureUnitRaw) ?? .system
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -500,7 +502,7 @@ private struct PageContent: View {
                 Image(systemName: "sunrise")
                     .font(.system(size: 16))
                     .foregroundStyle(.secondary)
-                Text(weather?.sunrise.map { Self.sunFormatter.string(from: $0) } ?? "")
+                Text(weather?.sunrise.map { timeFormat.string(from: $0) } ?? "")
                     .font(.system(size: 9.5, design: .monospaced))
                     .tracking(0.6)
                     .foregroundStyle(.secondary)
@@ -516,7 +518,7 @@ private struct PageContent: View {
                 Image(systemName: "sunset")
                     .font(.system(size: 16))
                     .foregroundStyle(.secondary)
-                Text(weather?.sunset.map { Self.sunFormatter.string(from: $0) } ?? "")
+                Text(weather?.sunset.map { timeFormat.string(from: $0) } ?? "")
                     .font(.system(size: 9.5, design: .monospaced))
                     .tracking(0.6)
                     .foregroundStyle(.secondary)
@@ -567,10 +569,10 @@ private struct PageContent: View {
                     .foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(spacing: 0) {
-                        Text(verbatim: "\(weather?.high ?? 0)°")
+                        Text(verbatim: "\(temperatureUnit.display(celsius: weather?.high ?? 0))°")
                             .font(.system(size: 15, weight: .medium))
                             .tracking(-0.3)
-                        Text(verbatim: " / \(weather?.low ?? 0)°")
+                        Text(verbatim: " / \(temperatureUnit.display(celsius: weather?.low ?? 0))°")
                             .font(.system(size: 15))
                             .foregroundStyle(.secondary)
                     }

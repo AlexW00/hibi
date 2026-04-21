@@ -128,8 +128,8 @@ final class WeatherStore: NSObject {
         for day in weather.dailyForecast {
             let comps = calendar.dateComponents([.year, .month, .day], from: day.date)
             guard let y = comps.year, let m = comps.month, let d = comps.day else { continue }
-            let high = Int(day.highTemperature.converted(to: .celsius).value.rounded())
-            let low = Int(day.lowTemperature.converted(to: .celsius).value.rounded())
+            let high = day.highTemperature.converted(to: .celsius).value
+            let low = day.lowTemperature.converted(to: .celsius).value
             byDay[DayKey(year: y, month: m, day: d)] = DayWeather(
                 high: high,
                 low: low,

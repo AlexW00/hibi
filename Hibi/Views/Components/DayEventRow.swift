@@ -6,15 +6,25 @@ struct DayEventRow: View {
     /// Ignored for all-day events — those always render fully filled.
     var progress: Double = 0
 
+    @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
+
+    private var timeFormat: TimeFormat {
+        TimeFormat(rawValue: timeFormatRaw) ?? .system
+    }
+
     private var fillAmount: Double {
         event.allDay ? 1 : max(0, min(1, progress))
+    }
+
+    private var startText: String {
+        event.startDate.map { timeFormat.string(from: $0) } ?? ""
     }
 
     var body: some View {
         HStack(spacing: 0) {
             // "ALL DAY" goes through LocalizedStringKey (auto-localized);
-            // formatted times are already locale-formatted by EventStore.
-            timeLabel(event.allDay ? Text("ALL DAY") : Text(verbatim: event.start ?? ""))
+            // timed events format against the user's time-format preference.
+            timeLabel(event.allDay ? Text("ALL DAY") : Text(verbatim: startText))
             Rectangle()
                 .fill(event.tint.opacity(0.4))
                 .frame(width: 1)

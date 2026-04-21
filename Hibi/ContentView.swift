@@ -240,6 +240,11 @@ struct ContentView: View {
 private struct SearchResultsView: View {
     let query: String
     @Environment(EventStore.self) private var eventStore
+    @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
+
+    private var timeFormat: TimeFormat {
+        TimeFormat(rawValue: timeFormatRaw) ?? .system
+    }
 
     var body: some View {
         let matches: [(year: Int, month: Int, event: CalendarEvent)] = {
@@ -285,7 +290,9 @@ private struct SearchResultsView: View {
         if item.event.allDay {
             return "\(date) · \(String(localized: "All day"))"
         }
-        let time = "\(item.event.start ?? "")–\(item.event.end ?? "")"
+        let start = item.event.startDate.map { timeFormat.string(from: $0) } ?? ""
+        let end = item.event.endDate.map { timeFormat.string(from: $0) } ?? ""
+        let time = "\(start)–\(end)"
         if let loc = item.event.location {
             return "\(date) · \(time) · \(loc)"
         }
