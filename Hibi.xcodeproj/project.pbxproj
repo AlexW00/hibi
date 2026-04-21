@@ -272,7 +272,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Hibi/Hibi.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = YWRT8FQN6F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -280,6 +280,8 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Hibi would like to access your Calendar so it can display your events.";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Hibi would like to access your Calendar so it can display your events.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Hibi uses your location to show local weather and sunrise/sunset on each day.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hibi uses your location to show local weather and sunrise/sunset on each day.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -316,7 +318,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Hibi/Hibi.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = YWRT8FQN6F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -324,6 +326,8 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Hibi would like to access your Calendar so it can display your events.";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Hibi would like to access your Calendar so it can display your events.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Hibi uses your location to show local weather and sunrise/sunset on each day.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hibi uses your location to show local weather and sunrise/sunset on each day.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
