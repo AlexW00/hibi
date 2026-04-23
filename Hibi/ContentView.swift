@@ -6,7 +6,7 @@ enum CalendarTab: Hashable {
 }
 
 struct ContentView: View {
-    @State private var selection: CalendarTab = .stream
+    @State private var selection: CalendarTab = .day
     @State private var scrollToNowToken: Int = 0
     @State private var showSettings = false
     @State private var displayedYear = SampleData.todayYear
