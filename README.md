@@ -2,8 +2,6 @@
 
 A personal calendar app for iOS with an editorial, paper-stationery aesthetic.
 
-Hibi reads your system calendars and presents them across three views — Month, Week, and Day — with a tear-off paper-pad metaphor, hand-picked pastel tints, and weather at a glance.
-
 <p align="center">
   <img src="res/1.png" width="24%" />
   <img src="res/2.png" width="24%" />
