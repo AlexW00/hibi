@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#
+# Pre-commit hook: reject hardcoded DEVELOPMENT_TEAM values in .pbxproj files.
+# Installed by scripts/bootstrap.sh.
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM -- '*.pbxproj')
+
+if [ -z "$STAGED" ]; then
+  exit 0
+fi
+
+# Match lines like: DEVELOPMENT_TEAM = ABC1234DEF;
+if git diff --cached -- $STAGED | grep -qE '^\+.*DEVELOPMENT_TEAM\s*=\s*[A-Z0-9]{10}'; then
+  echo ""
+  echo "ERROR: Staged .pbxproj contains a hardcoded DEVELOPMENT_TEAM."
+  echo ""
+  echo "  DEVELOPMENT_TEAM should come from Local.xcconfig (gitignored),"
+  echo "  not from the project file. Remove the line from the pbxproj"
+  echo "  and set it in Local.xcconfig instead."
+  echo ""
+  exit 1
+fi

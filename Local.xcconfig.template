@@ -1,0 +1,8 @@
+// Copy this file to Local.xcconfig and fill in your values.
+// Local.xcconfig is gitignored — your settings stay local.
+//
+// Run `scripts/bootstrap.sh` to do this automatically.
+
+// Your Apple Developer team ID (10-character alphanumeric).
+// Find it at https://developer.apple.com/account → Membership details.
+DEVELOPMENT_TEAM = YOUR_TEAM_ID

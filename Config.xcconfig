@@ -1,0 +1,5 @@
+// Checked-in wrapper — pulls in developer-specific overrides if present.
+// The optional include (?) means a missing Local.xcconfig is not an error;
+// Xcode will simply prompt you to pick a signing team.
+
+#include? "Local.xcconfig"

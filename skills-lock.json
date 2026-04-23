@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": {
+    "liquid-glass-design": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "computedHash": "cdd47ce273b84d1e630aa6ea8086baa9b4affd9f881b3f95a7b25334b67a1dc5"
+    },
+    "nothing-design": {
+      "source": "dominikmartn/nothing-design-skill",
+      "sourceType": "github",
+      "computedHash": "005ed742f5cb829f0fbe1ee959a91b3802e15ed1b521c774cc78483caf406a95"
+    },
+    "swift-concurrency": {
+      "source": "avdlee/swift-concurrency-agent-skill",
+      "sourceType": "github",
+      "computedHash": "05ef28a2e0eb4eacd6a958cf07c1f5bd5d600e147c844b26dde42a9bdd2f633d"
+    }
+  }
+}
