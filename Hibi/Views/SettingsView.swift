@@ -104,6 +104,14 @@ struct SettingsView: View {
                         .tint(.primary)
                     LabeledContent("Version", value: Self.versionLabel)
                 }
+
+                Section("Credits") {
+                    Link(destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!) {
+                        (Text("Weather data provided by ") + Text(Image(systemName: "apple.logo")) + Text(verbatim: "\u{00a0}Weather"))
+                            .foregroundStyle(.secondary)
+                            .font(.footnote)
+                    }
+                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)

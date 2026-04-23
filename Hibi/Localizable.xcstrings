@@ -133,9 +133,6 @@
     "All set" : {
 
     },
-    "Allow" : {
-
-    },
     "An open day." : {
       "comment" : "Day tab empty state when no events are scheduled.",
       "extractionState" : "manual",
@@ -288,6 +285,30 @@
     },
     "Choose Celsius or Fahrenheit, and 12-hour or 24-hour time — or let the system decide." : {
 
+    },
+    "Credits" : {
+      "comment" : "Settings section header for the Apple Weather attribution.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credits"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credits"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クレジット"
+          }
+        }
+      }
     },
     "Continue" : {
       "comment" : "What's New 1.1 — primary action that dismisses the sheet.",
@@ -1329,6 +1350,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "バージョン"
+          }
+        }
+      }
+    },
+    "Weather data provided by " : {
+      "comment" : "Credits row in Settings. Followed inline by the Apple Weather trademark (logo + 'Weather'), which is not localised.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wetterdaten bereitgestellt von "
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather data provided by "
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "天気データの提供元: "
           }
         }
       }

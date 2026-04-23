@@ -237,7 +237,7 @@ private struct PermissionRow: View {
                         isRequesting = false
                     }
                 } label: {
-                    Text("Allow")
+                    Text("Continue")
                         .font(.system(size: 13, weight: .semibold))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 7)
