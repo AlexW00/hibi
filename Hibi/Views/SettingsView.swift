@@ -15,6 +15,7 @@ struct SettingsView: View {
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
     @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
+    @AppStorage(IconStyle.defaultsKey) private var iconStyleRaw: String = IconStyle.standard.rawValue
     @State private var showWhatsNew = false
 
     enum Appearance: String, CaseIterable, Identifiable {
@@ -43,6 +44,13 @@ struct SettingsView: View {
 
                     Toggle("Simple font", isOn: $useSimpleFont)
                         .tint(.black)
+
+                    Picker("Icons", selection: $iconStyleRaw) {
+                        ForEach(IconStyle.allCases) { style in
+                            Text(style.rawValue.capitalized).tag(style.rawValue)
+                        }
+                    }
+                    .pickerStyle(.segmented)
                 }
 
                 Section("Day View") {

@@ -286,30 +286,6 @@
     "Choose Celsius or Fahrenheit, and 12-hour or 24-hour time — or let the system decide." : {
 
     },
-    "Credits" : {
-      "comment" : "Settings section header for the Apple Weather attribution.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Credits"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Credits"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "クレジット"
-          }
-        }
-      }
-    },
     "Continue" : {
       "comment" : "What's New 1.1 — primary action that dismisses the sheet.",
       "extractionState" : "manual",
@@ -330,6 +306,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "続ける"
+          }
+        }
+      }
+    },
+    "Credits" : {
+      "comment" : "Settings section header for the Apple Weather attribution.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credits"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credits"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クレジット"
           }
         }
       }
@@ -792,6 +792,9 @@
           }
         }
       }
+    },
+    "Icons" : {
+
     },
     "Invert swipe direction" : {
       "comment" : "Toggle label in Settings → Day View: flips tear-up-for-next gesture.",

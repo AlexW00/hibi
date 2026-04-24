@@ -557,6 +557,11 @@ private struct PageContent: View {
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
     @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
+    @AppStorage(IconStyle.defaultsKey) private var iconStyleRaw: String = IconStyle.standard.rawValue
+
+    private var isKawaii: Bool {
+        IconStyle(rawValue: iconStyleRaw) == .kawaii
+    }
 
     private var timeFormat: TimeFormat {
         TimeFormat(rawValue: timeFormatRaw) ?? .system
@@ -582,9 +587,17 @@ private struct PageContent: View {
     private var topRow: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 2) {
-                Image(systemName: "sunrise")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
+                if isKawaii {
+                    Image("kawaii-sunrise")
+                        .renderingMode(.original)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 36, height: 36)
+                } else {
+                    Image(systemName: "sunrise")
+                        .font(.system(size: 16))
+                        .foregroundStyle(.secondary)
+                }
                 Text(weather?.sunrise.map { timeFormat.string(from: $0) } ?? "")
                     .font(.system(size: 9.5, design: .monospaced))
                     .tracking(0.6)
@@ -598,9 +611,17 @@ private struct PageContent: View {
                 .padding(.top, 2)
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
-                Image(systemName: "sunset")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
+                if isKawaii {
+                    Image("kawaii-sunset")
+                        .renderingMode(.original)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 36, height: 36)
+                } else {
+                    Image(systemName: "sunset")
+                        .font(.system(size: 16))
+                        .foregroundStyle(.secondary)
+                }
                 Text(weather?.sunset.map { timeFormat.string(from: $0) } ?? "")
                     .font(.system(size: 9.5, design: .monospaced))
                     .tracking(0.6)
@@ -628,18 +649,36 @@ private struct PageContent: View {
                             .offset(y: -8)
                     }
                 }
-            // Month name is already localized via the MonthNames accessor;
-            // separator + year are locale-invariant. `verbatim:` skips the
-            // LocalizedStringKey lookup so we don't pollute the catalog with a
-            // generic "%@ · %@" key.
-            Text(verbatim: "\(MonthNames.full[month - 1].uppercased(with: .autoupdatingCurrent)) · \(String(year))")
-                .font(.system(size: 11, weight: .semibold))
-                .tracking(3.2)
-                .foregroundStyle(.secondary)
+            monthYearSeparator
                 .padding(.top, 2)
                 .frame(height: 18)
         }
         .frame(maxWidth: .infinity)
+    }
+
+    @ViewBuilder
+    private var monthYearSeparator: some View {
+        let monthName = MonthNames.full[month - 1].uppercased(with: .autoupdatingCurrent)
+        let yearStr = String(year)
+        let style: Font = .system(size: 11, weight: .semibold)
+        if isKawaii {
+            HStack(spacing: 4) {
+                Text(verbatim: monthName)
+                    .font(style).tracking(3.2).foregroundStyle(.secondary)
+                Image("kawaii-heart")
+                    .renderingMode(.original)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 18, height: 18)
+                Text(verbatim: yearStr)
+                    .font(style).tracking(3.2).foregroundStyle(.secondary)
+            }
+        } else {
+            Text(verbatim: "\(monthName) · \(yearStr)")
+                .font(style)
+                .tracking(3.2)
+                .foregroundStyle(.secondary)
+        }
     }
 
     private var bottomRow: some View {

@@ -1,6 +1,12 @@
 import Foundation
 import SwiftUI
 
+enum IconStyle: String, CaseIterable, Identifiable {
+    case standard, kawaii
+    var id: String { rawValue }
+    static let defaultsKey = "iconStyle"
+}
+
 enum WeatherCode: String, Hashable {
     case sun, pcloud, cloud, rain, wind, storm
 
@@ -12,6 +18,17 @@ enum WeatherCode: String, Hashable {
         case .rain:   "cloud.rain"
         case .wind:   "wind"
         case .storm:  "cloud.bolt.rain"
+        }
+    }
+
+    var kawaiiAsset: String? {
+        switch self {
+        case .sun:    "kawaii-sun"
+        case .pcloud: "kawaii-sun-cloudy"
+        case .cloud:  "kawaii-cloud"
+        case .rain:   nil
+        case .wind:   "kawaii-wind"
+        case .storm:  "kawaii-storm"
         }
     }
 }
