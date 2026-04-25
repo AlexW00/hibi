@@ -721,30 +721,6 @@
         }
       }
     },
-    "Grant access" : {
-      "comment" : "Button label: trigger the system Calendar permission prompt.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zugriff gewähren"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grant access"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アクセスを許可"
-          }
-        }
-      }
-    },
     "Grant access to see and edit your events." : {
       "comment" : "Prompt body when Calendar access has not been requested yet.",
       "extractionState" : "manual",
