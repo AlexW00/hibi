@@ -664,12 +664,12 @@ private struct PageContent: View {
                         .font(.system(size: 9.5))
                         .tracking(1.4)
                         .foregroundStyle(.secondary)
-                    AppleWeatherAttribution()
-                        .padding(.top, 1)
                 }
             }
             .opacity(weather == nil ? 0 : 1)
             Spacer()
+            AppleWeatherAttribution()
+                .opacity(weather == nil ? 0 : 1)
         }
         .frame(height: 56)
     }
