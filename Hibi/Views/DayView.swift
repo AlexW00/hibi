@@ -668,7 +668,24 @@ private struct PageContent: View {
             }
             .opacity(weather == nil ? 0 : 1)
             Spacer()
+            AppleWeatherAttribution()
+                .opacity(weather == nil ? 0 : 1)
         }
         .frame(height: 56)
+    }
+}
+
+/// Apple Weather attribution required by WeatherKit when weather data is
+/// displayed (App Store Review Guideline 5.2.5). Renders the Apple Weather
+/// trademark — the apple-logo glyph + the word "Weather" — and links to the
+/// legal source page. Tappable; opens the attribution page in Safari.
+private struct AppleWeatherAttribution: View {
+    var body: some View {
+        Link(destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!) {
+            (Text(Image(systemName: "apple.logo")) + Text(verbatim: "\u{00a0}Weather"))
+                .font(.system(size: 10, weight: .regular))
+                .foregroundStyle(.secondary)
+        }
+        .accessibilityLabel(Text("Apple Weather"))
     }
 }

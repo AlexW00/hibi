@@ -45,6 +45,6 @@ struct CalendarAccessPrompt: View {
     }
 
     private var buttonLabel: LocalizedStringResource {
-        isDenied ? "Open Settings" : "Grant access"
+        isDenied ? "Open Settings" : "Continue"
     }
 }
