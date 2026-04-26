@@ -181,6 +181,9 @@
         }
       }
     },
+    "Apple Weather" : {
+
+    },
     "Calendar" : {
 
     },
@@ -284,28 +287,25 @@
 
     },
     "Choose Celsius or Fahrenheit, and 12-hour or 24-hour time — or let the system decide." : {
-
-    },
-    "Credits" : {
-      "comment" : "Settings section header for the Apple Weather attribution.",
+      "comment" : "What's New 1.3 — temperature & time format feature subtitle.",
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Credits"
+            "value" : "Wähle Celsius oder Fahrenheit und 12- oder 24-Stunden-Format – oder lass das System entscheiden."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Credits"
+            "value" : "Choose Celsius or Fahrenheit, and 12-hour or 24-hour time — or let the system decide."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "クレジット"
+            "value" : "摂氏・華氏、12時間・24時間表記を選べます。システム設定に任せることも。"
           }
         }
       }
@@ -330,6 +330,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "続ける"
+          }
+        }
+      }
+    },
+    "Credits" : {
+      "comment" : "Settings section header for the Apple Weather attribution.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credits"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Credits"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クレジット"
           }
         }
       }
@@ -920,10 +944,52 @@
       }
     },
     "Navigating to the previous day now slides a new page onto the stack instead of tearing one away." : {
-
+      "comment" : "What's New 1.3 — back animation feature subtitle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Vortag wird jetzt eine neue Seite auf den Stapel geschoben, statt eine abzureißen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navigating to the previous day now slides a new page onto the stack instead of tearing one away."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前の日への移動が、ページを引きはがす代わりに新しいページをスライドさせる動きに変わりました。"
+          }
+        }
+      }
     },
     "New back animation" : {
-
+      "comment" : "What's New 1.3 — back animation feature title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neue Zurück-Animation"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New back animation"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新しい「戻る」アニメーション"
+          }
+        }
+      }
     },
     "No calendars" : {
       "comment" : "Empty state title on the Calendars picker when no EKCalendars exist.",
@@ -1171,6 +1237,30 @@
         }
       }
     },
+    "Seamless month transitions" : {
+      "comment" : "What's New 1.4 — month transition fix feature title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nahtlose Monatswechsel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seamless month transitions"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月またぎがスムーズに"
+          }
+        }
+      }
+    },
     "Search events" : {
       "comment" : "ContentUnavailable title shown in the empty search results state.",
       "extractionState" : "manual",
@@ -1273,8 +1363,53 @@
     "Temperature" : {
 
     },
+    "Tearing past the last or first day of a month now smoothly continues into the next or previous month." : {
+      "comment" : "What's New 1.4 — month transition fix feature subtitle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Über den letzten oder ersten Tag eines Monats hinaus zu blättern wechselt jetzt nahtlos in den nächsten oder vorherigen Monat."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tearing past the last or first day of a month now smoothly continues into the next or previous month."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月の最終日や初日を過ぎてめくると、次の月や前の月にスムーズに切り替わるようになりました。"
+          }
+        }
+      }
+    },
     "Temperature & time format" : {
-
+      "comment" : "What's New 1.3 — temperature & time format feature title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatur- & Zeitformat"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature & time format"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "温度と時刻の形式"
+          }
+        }
+      }
     },
     "Theme" : {
       "comment" : "Picker label in Settings for choosing the theme (System/Light/Dark).",

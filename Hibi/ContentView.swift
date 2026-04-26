@@ -83,7 +83,12 @@ struct ContentView: View {
                         month: displayedMonth,
                         day: $selectedDay,
                         scrollToNowToken: scrollToNowToken,
-                        onTapEvent: openEditor(for:)
+                        onTapEvent: openEditor(for:),
+                        onDateChange: { y, m, d in
+                            displayedYear = y
+                            displayedMonth = m
+                            selectedDay = d
+                        }
                     )
                 }
             }

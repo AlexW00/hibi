@@ -7,6 +7,11 @@ struct DayView: View {
     @Binding var day: Int
     let scrollToNowToken: Int
     let onTapEvent: (CalendarEvent) -> Void
+    /// Called when a tear commits a day change that crosses a month or year
+    /// boundary. ContentView uses this to update displayedYear/Month/selectedDay
+    /// atomically in a single state transaction — avoids a flicker frame where
+    /// day=1 still shows the old month.
+    var onDateChange: ((_ year: Int, _ month: Int, _ day: Int) -> Void)?
 
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
@@ -71,10 +76,11 @@ struct DayView: View {
         }
     }
 
-    /// Day used by the schedule section. Stays on the current day during the
-    /// fade-out phase, flips to the incoming day once old events are hidden.
-    private var scheduleDay: Int {
-        scheduleShowsIncomingDay ? dayInfo(offsetBy: tearDirection).day : day
+    /// Date used by the schedule section. Stays on the current day during the
+    /// fade-out phase, flips to the incoming day (including month/year) once
+    /// old events are hidden.
+    private var scheduleDate: (day: Int, month: Int, year: Int) {
+        scheduleShowsIncomingDay ? dayInfo(offsetBy: tearDirection) : (day, month, year)
     }
 
     /// Opacity applied to the event rows only — the "SCHEDULE" header stays opaque.
@@ -341,7 +347,8 @@ struct DayView: View {
     }
 
     private var scheduleEvents: some View {
-        let events = eventStore.events(year: year, month: month, day: scheduleDay)
+        let sd = scheduleDate
+        let events = eventStore.events(year: sd.year, month: sd.month, day: sd.day)
         return Group {
             if !eventStore.showsCalendarContent {
                 CalendarAccessPrompt(isDenied: eventStore.calendarAccessDenied) {
@@ -366,9 +373,9 @@ struct DayView: View {
                                     progress: e.progress(
                                         at: ctx.date,
                                         useDemoTimeOfDay: eventStore.isDemoMode,
-                                        listYear: year,
-                                        listMonth: month,
-                                        listDay: scheduleDay
+                                        listYear: sd.year,
+                                        listMonth: sd.month,
+                                        listDay: sd.day
                                     )
                                 )
                             }
@@ -433,6 +440,13 @@ struct DayView: View {
     private func tear(to destination: CGFloat, next: Bool) {
         tearCommitCount &+= 1
         tearDirection = next ? 1 : -1
+
+        // Ensure the incoming day's month is loaded so the schedule swap
+        // doesn't show an empty list while waiting for a fetch.
+        let incoming = dayInfo(offsetBy: tearDirection)
+        if incoming.month != month || incoming.year != year {
+            eventStore.ensureLoaded(year: incoming.year, month: incoming.month)
+        }
 
         // Seed scheduleOpacity with the drag's current value so the fade-out
         // starts smoothly from the release point (~0.35) rather than snapping.
@@ -534,11 +548,12 @@ struct DayView: View {
     }
 
     private func advance(next: Bool) {
-        let total = SampleData.daysInMonth(year: year, month: month)
-        if next {
-            day = (day == total) ? 1 : day + 1
+        let target = dayInfo(offsetBy: next ? 1 : -1)
+        if target.month != month || target.year != year {
+            // Cross-month: let the parent update all three atomically.
+            onDateChange?(target.year, target.month, target.day)
         } else {
-            day = (day == 1) ? total : day - 1
+            day = target.day
         }
     }
 }

@@ -5,14 +5,36 @@ import WhatsNewKit
 ///
 /// Version string must match `CFBundleShortVersionString` so
 /// `UserDefaultsWhatsNewVersionStore` correctly records the presentation.
-/// We currently ship `MARKETING_VERSION = 1.3`.
+/// We currently ship `MARKETING_VERSION = 1.4`.
 enum WhatsNewContent {
-    static let version: WhatsNew.Version = "1.3"
+    static let version: WhatsNew.Version = "1.4"
 
     /// Built on access so `String(localized:)` resolves against the user's current locale.
     static var latest: WhatsNew {
         WhatsNew(
             version: version,
+            title: .init(stringLiteral: String(localized: "What's New in Hibi")),
+            features: [
+                WhatsNew.Feature(
+                    image: .init(systemName: "calendar.badge.arrow.right"),
+                    title: .init(String(localized: "Seamless month transitions")),
+                    subtitle: .init(String(localized: "Tearing past the last or first day of a month now smoothly continues into the next or previous month."))
+                ),
+            ],
+            primaryAction: WhatsNew.PrimaryAction(
+                title: .init(String(localized: "Continue")),
+                backgroundColor: .primary,
+                foregroundColor: Color(uiColor: .systemBackground),
+                hapticFeedback: .selection
+            )
+        )
+    }
+
+    // MARK: - Previous versions
+
+    static var v1_3: WhatsNew {
+        WhatsNew(
+            version: "1.3",
             title: .init(stringLiteral: String(localized: "What's New in Hibi")),
             features: [
                 WhatsNew.Feature(
@@ -34,8 +56,6 @@ enum WhatsNewContent {
             )
         )
     }
-
-    // MARK: - Previous versions
 
     static var v1_2: WhatsNew {
         WhatsNew(
@@ -62,5 +82,5 @@ enum WhatsNewContent {
         )
     }
 
-    static var collection: WhatsNewCollection { [latest, v1_2] }
+    static var collection: WhatsNewCollection { [latest, v1_3, v1_2] }
 }
