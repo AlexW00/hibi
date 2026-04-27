@@ -99,18 +99,39 @@ struct SettingsView: View {
                 }
                 #endif
 
-                Section {
-                    Button("What's New") { showWhatsNew = true }
-                        .tint(.primary)
-                    LabeledContent("Version", value: Self.versionLabel)
-                }
+                Section("About") {
+                    Link(destination: URL(string: "https://apps.weichart.de")!) {
+                        HStack(spacing: 12) {
+                            Image("WeichartApps")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 28, height: 28)
+                                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("More Apps")
+                                    .foregroundStyle(.primary)
+                                Text(verbatim: "apps.weichart.de")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
 
-                Section("Credits") {
                     Link(destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!) {
                         (Text("Weather data provided by ") + Text(Image(systemName: "apple.logo")) + Text(verbatim: "\u{00a0}Weather"))
                             .foregroundStyle(.secondary)
                             .font(.footnote)
                     }
+                }
+
+                Section("Release") {
+                    Button("What's New") { showWhatsNew = true }
+                        .tint(.primary)
+                    LabeledContent("Version", value: Self.versionLabel)
                 }
             }
             .navigationTitle("Settings")

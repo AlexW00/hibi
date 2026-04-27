@@ -334,26 +334,50 @@
         }
       }
     },
-    "Credits" : {
-      "comment" : "Settings section header for the Apple Weather attribution.",
+    "About" : {
+      "comment" : "Settings section header for app info: more apps from the developer and the Apple Weather attribution.",
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Credits"
+            "value" : "Info"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Credits"
+            "value" : "About"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "クレジット"
+            "value" : "情報"
+          }
+        }
+      }
+    },
+    "More Apps" : {
+      "comment" : "Settings About row label: link to apps.weichart.de listing the developer's other apps.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weitere Apps"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More Apps"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "他のアプリ"
           }
         }
       }
@@ -498,6 +522,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "デモモード"
+          }
+        }
+      }
+    },
+    "Discover more apps" : {
+      "comment" : "What's New 1.5 — feature title for the new 'More Apps' link in Settings.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weitere Apps entdecken"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discover more apps"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "他のアプリを見る"
           }
         }
       }
@@ -1213,6 +1261,30 @@
     "Review permissions" : {
 
     },
+    "Release" : {
+      "comment" : "Settings section header above the What's New button and Version row.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Release"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Release"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リリース"
+          }
+        }
+      }
+    },
     "SCHEDULE" : {
       "comment" : "Section header above the list of timed events on the Day tab. Uppercase in English.",
       "extractionState" : "manual",
@@ -1305,6 +1377,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "設定"
+          }
+        }
+      }
+    },
+    "Settings now links to apps.weichart.de, where you can find my other apps ^^" : {
+      "comment" : "What's New 1.5 — feature subtitle for the new 'More Apps' link in Settings.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Einstellungen verlinken jetzt apps.weichart.de, wo du meine anderen Apps findest ^^"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings now links to apps.weichart.de, where you can find my other apps ^^"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定に apps.weichart.de へのリンクを追加しました。他のアプリはそちらから ^^"
           }
         }
       }
@@ -1466,7 +1562,7 @@
       }
     },
     "Weather data provided by " : {
-      "comment" : "Credits row in Settings. Followed inline by the Apple Weather trademark (logo + 'Weather'), which is not localised.",
+      "comment" : "About row in Settings. Followed inline by the Apple Weather trademark (logo + 'Weather'), which is not localised.",
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
