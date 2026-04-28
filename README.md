@@ -11,7 +11,7 @@ A personal calendar app for iOS with an editorial, paper-stationery aesthetic.
 
 ## Download
 
-Coming soon on the App Store.
+Download on the [App Store](https://apps.apple.com/us/app/hibi-calendar/id6762520622)
 
 <!-- [![Download on the App Store](https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg)](https://apps.apple.com/app/hibi/id000000000) -->
 
