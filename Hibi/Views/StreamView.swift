@@ -357,7 +357,7 @@ private struct StreamDayRow: View {
 
     private func dateRail(weekday: Int, isToday: Bool) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(DayNames.upper[weekday])
+            Text(DayNames.short[weekday])
                 .font(.system(size: 10, weight: isToday ? .semibold : .regular))
                 .tracking(1.4)
                 .foregroundStyle(.secondary)

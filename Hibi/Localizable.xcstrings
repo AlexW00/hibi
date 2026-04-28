@@ -26,13 +26,76 @@
       }
     },
     "12-hour" : {
-
+      "comment" : "Time format option in Settings → Units.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12-Stunden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12-hour"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12時間制"
+          }
+        }
+      }
     },
     "24-hour" : {
-
+      "comment" : "Time format option in Settings → Units.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24-Stunden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24-hour"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24時間制"
+          }
+        }
+      }
     },
     "A couple of permissions so Hibi can do its thing." : {
-
+      "comment" : "Onboarding sheet body copy.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein paar Berechtigungen, damit Hibi funktionieren kann."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A couple of permissions so Hibi can do its thing."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibiが動作するための、いくつかの許可です。"
+          }
+        }
+      }
     },
     "A first-launch sheet grants Calendar and Location access in one place, and dismisses itself once you're set." : {
       "comment" : "What's New 1.2 — permissions onboarding feature subtitle.",
@@ -78,6 +141,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "設定の新しいスイッチで、セリフ体をシステムのサンセリフ体に切り替えられます。読みやすさ重視のときに。"
+          }
+        }
+      }
+    },
+    "About" : {
+      "comment" : "Settings section header for app info: more apps from the developer and the Apple Weather attribution.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Info"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "情報"
           }
         }
       }
@@ -131,7 +218,28 @@
       }
     },
     "All set" : {
-
+      "comment" : "Continue button label after all permissions are granted.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fertig"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All set"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完了"
+          }
+        }
+      }
     },
     "An open day." : {
       "comment" : "Day tab empty state when no events are scheduled.",
@@ -182,10 +290,52 @@
       }
     },
     "Apple Weather" : {
-
+      "comment" : "VoiceOver / accessibility label for the Apple Weather attribution.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Weather"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Weather"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Weather"
+          }
+        }
+      }
     },
     "Calendar" : {
-
+      "comment" : "Permission row title for Calendar access.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kalender"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendar"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カレンダー"
+          }
+        }
+      }
     },
     "Calendar access denied" : {
       "comment" : "Error title when the user has denied Calendar access.",
@@ -284,7 +434,28 @@
       }
     },
     "Celsius" : {
-
+      "comment" : "Temperature unit option in Settings → Units.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Celsius"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Celsius"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "摂氏"
+          }
+        }
+      }
     },
     "Choose Celsius or Fahrenheit, and 12-hour or 24-hour time — or let the system decide." : {
       "comment" : "What's New 1.3 — temperature & time format feature subtitle.",
@@ -330,54 +501,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "続ける"
-          }
-        }
-      }
-    },
-    "About" : {
-      "comment" : "Settings section header for app info: more apps from the developer and the Apple Weather attribution.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Info"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "About"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "情報"
-          }
-        }
-      }
-    },
-    "More Apps" : {
-      "comment" : "Settings About row label: link to apps.weichart.de listing the developer's other apps.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weitere Apps"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "More Apps"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "他のアプリ"
           }
         }
       }
@@ -526,30 +649,6 @@
         }
       }
     },
-    "Discover more apps" : {
-      "comment" : "What's New 1.5 — feature title for the new 'More Apps' link in Settings.",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weitere Apps entdecken"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Discover more apps"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "他のアプリを見る"
-          }
-        }
-      }
-    },
     "Deutsch & 日本語" : {
       "comment" : "What's New 1.1 — localization feature title; kept identical across locales.",
       "extractionState" : "manual",
@@ -570,6 +669,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Deutsch & 日本語"
+          }
+        }
+      }
+    },
+    "Discover more apps" : {
+      "comment" : "What's New 1.5 — feature title for the new 'More Apps' link in Settings.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weitere Apps entdecken"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discover more apps"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "他のアプリを見る"
           }
         }
       }
@@ -695,7 +818,28 @@
       }
     },
     "Fahrenheit" : {
-
+      "comment" : "Temperature unit option in Settings → Units.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fahrenheit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fahrenheit"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "華氏"
+          }
+        }
+      }
     },
     "Find events by title or location." : {
       "comment" : "Empty state subtitle shown in the search results view.",
@@ -890,10 +1034,52 @@
       }
     },
     "Local weather and sunrise / sunset on each day." : {
-
+      "comment" : "Onboarding row description for Location permission.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lokales Wetter sowie Sonnenauf- und -untergang für jeden Tag."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local weather and sunrise / sunset on each day."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "各日の地域の天気と日の出・日の入り。"
+          }
+        }
+      }
     },
     "Location" : {
-
+      "comment" : "Permission row title for Location access.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standort"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "位置情報"
+          }
+        }
+      }
     },
     "Long-press an event in the Week view and drop it on another day to move it." : {
       "comment" : "What's New 1.1 — drag-to-move feature subtitle.",
@@ -963,6 +1149,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "月表示は今日から開きます"
+          }
+        }
+      }
+    },
+    "More Apps" : {
+      "comment" : "Settings About row label: link to apps.weichart.de listing the developer's other apps.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weitere Apps"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More Apps"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "他のアプリ"
           }
         }
       }
@@ -1160,7 +1370,28 @@
       }
     },
     "Permissions" : {
-
+      "comment" : "Settings section header above the permissions review button.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berechtigungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permissions"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "権限"
+          }
+        }
+      }
     },
     "Permissions, walked through" : {
       "comment" : "What's New 1.2 — permissions onboarding feature title.",
@@ -1210,20 +1441,20 @@
         }
       }
     },
-    "PULL TO TEAR · ↑ NEXT · ↓ PREV" : {
-      "comment" : "Day tab hint text above the tear-off paper stack. Uppercase tracked caps.",
+    "Pull to tear · ↑ Next · ↓ Prev" : {
+      "comment" : "Day tab hint text above the tear-off paper stack.",
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZIEHEN ZUM ABREISSEN · ↑ WEITER · ↓ ZURÜCK"
+            "value" : "Ziehen zum Abreißen · ↑ Weiter · ↓ Zurück"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PULL TO TEAR · ↑ NEXT · ↓ PREV"
+            "value" : "Pull to tear · ↑ Next · ↓ Prev"
           }
         },
         "ja" : {
@@ -1234,20 +1465,20 @@
         }
       }
     },
-    "PULL TO TEAR · ↑ PREV · ↓ NEXT" : {
-      "comment" : "Day tab hint text when the invert-swipe setting is on. Uppercase tracked caps.",
+    "Pull to tear · ↑ Prev · ↓ Next" : {
+      "comment" : "Day tab hint text when the invert-swipe setting is on.",
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZIEHEN ZUM ABREISSEN · ↑ ZURÜCK · ↓ WEITER"
+            "value" : "Ziehen zum Abreißen · ↑ Zurück · ↓ Weiter"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PULL TO TEAR · ↑ PREV · ↓ NEXT"
+            "value" : "Pull to tear · ↑ Prev · ↓ Next"
           }
         },
         "ja" : {
@@ -1257,9 +1488,6 @@
           }
         }
       }
-    },
-    "Review permissions" : {
-
     },
     "Release" : {
       "comment" : "Settings section header above the What's New button and Version row.",
@@ -1285,20 +1513,44 @@
         }
       }
     },
-    "SCHEDULE" : {
-      "comment" : "Section header above the list of timed events on the Day tab. Uppercase in English.",
+    "Review permissions" : {
+      "comment" : "Settings button that re-opens the onboarding sheet.",
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "TERMINE"
+            "value" : "Berechtigungen prüfen"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SCHEDULE"
+            "value" : "Review permissions"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "権限を確認"
+          }
+        }
+      }
+    },
+    "Schedule" : {
+      "comment" : "Section header above the list of timed events on the Day tab.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Termine"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schedule"
           }
         },
         "ja" : {
@@ -1406,7 +1658,28 @@
       }
     },
     "Show and edit the events from your system calendars." : {
-
+      "comment" : "Onboarding row description for Calendar permission.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Termine aus deinen Systemkalendern anzeigen und bearbeiten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show and edit the events from your system calendars."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システムカレンダーの予定を表示・編集します。"
+          }
+        }
+      }
     },
     "Simple font" : {
       "comment" : "Toggle label in Settings → Appearance: swap Instrument Serif for system sans.",
@@ -1456,9 +1729,6 @@
         }
       }
     },
-    "Temperature" : {
-
-    },
     "Tearing past the last or first day of a month now smoothly continues into the next or previous month." : {
       "comment" : "What's New 1.4 — month transition fix feature subtitle.",
       "extractionState" : "manual",
@@ -1479,6 +1749,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "月の最終日や初日を過ぎてめくると、次の月や前の月にスムーズに切り替わるようになりました。"
+          }
+        }
+      }
+    },
+    "Temperature" : {
+      "comment" : "Picker label in Settings → Units.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperatur"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temperature"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気温"
           }
         }
       }
@@ -1532,10 +1826,52 @@
       }
     },
     "Time" : {
-
+      "comment" : "Picker label in Settings → Units.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uhrzeit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時刻"
+          }
+        }
+      }
     },
     "Units" : {
-
+      "comment" : "Settings section header for unit pickers (temperature, time).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einheiten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Units"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "単位"
+          }
+        }
+      }
     },
     "Version" : {
       "comment" : "LabeledContent row label in Settings showing the app's version string.",
@@ -1610,7 +1946,28 @@
       }
     },
     "Welcome" : {
-
+      "comment" : "Onboarding sheet headline.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Willkommen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welcome"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ようこそ"
+          }
+        }
+      }
     },
     "What's New" : {
       "comment" : "Settings row + 1.1 sheet entry point. Opens the changelog.",
@@ -1660,20 +2017,20 @@
         }
       }
     },
-    "WK %lld" : {
-      "comment" : "Week count label in the Month header, e.g. 'WK 6' / 'KW 6' / '第6週'.",
+    "Wk %lld" : {
+      "comment" : "Week count label in the Month header, e.g. 'Wk 6' / 'Kw 6' / '第6週'.",
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "KW %lld"
+            "value" : "Kw %lld"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "WK %lld"
+            "value" : "Wk %lld"
           }
         },
         "ja" : {

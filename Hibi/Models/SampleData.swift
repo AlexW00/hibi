@@ -82,10 +82,6 @@ enum MonthNames {
 /// `firstWeekday` do so at the view layer (see `MonthView.weekdayHeader`).
 enum DayNames {
     static var full: [String]  { Calendar.autoupdatingCurrent.standaloneWeekdaySymbols }
-    static var upper: [String] {
-        Calendar.autoupdatingCurrent.shortStandaloneWeekdaySymbols
-            .map { $0.uppercased(with: .autoupdatingCurrent) }
-    }
     static var short: [String] { Calendar.autoupdatingCurrent.veryShortStandaloneWeekdaySymbols }
 }
 

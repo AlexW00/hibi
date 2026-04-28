@@ -39,7 +39,7 @@ struct MonthView: View {
                     .tracking(-1.5)
                     .foregroundStyle(.primary)
                 Spacer()
-                Text("WK \(weekCount)")
+                Text("Wk \(weekCount)")
                     .font(.system(size: 11))
                     .tracking(1.5)
                     .foregroundStyle(.secondary)

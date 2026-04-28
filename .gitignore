@@ -46,3 +46,6 @@ Local.xcconfig
 # Code Injection / tooling
 iOSInjectionProject/
 .claude/worktrees
+
+# Raw font sources (selected TTFs are copied into Hibi/Fonts/)
+new-fonts/

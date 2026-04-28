@@ -102,8 +102,8 @@ struct DayView: View {
 
     private var pullToTearHint: some View {
         Text(invertDaySwipe
-             ? "PULL TO TEAR · ↑ PREV · ↓ NEXT"
-             : "PULL TO TEAR · ↑ NEXT · ↓ PREV")
+             ? "Pull to tear · ↑ Prev · ↓ Next"
+             : "Pull to tear · ↑ Next · ↓ Prev")
             .font(.system(size: 10))
             .tracking(1.2)
             .foregroundStyle(.secondary.opacity(0.6))
@@ -121,7 +121,6 @@ struct DayView: View {
             Text(verbatim: "日々 · No. \(String(format: "%03d", day))")
                 .font(.system(size: 11, weight: .medium))
                 .tracking(1.8)
-                .textCase(.uppercase)
                 .foregroundStyle(.secondary)
                 .contentTransition(.numericText(value: Double(day)))
             Spacer()
@@ -336,7 +335,7 @@ struct DayView: View {
     private var scheduleHeader: some View {
         HStack(spacing: 10) {
             Rectangle().fill(.quaternary).frame(height: 0.5)
-            Text("SCHEDULE")
+            Text("Schedule")
                 .font(.system(size: 10, weight: .semibold))
                 .tracking(2.2)
                 .foregroundStyle(.secondary)
@@ -647,9 +646,8 @@ private struct PageContent: View {
             // separator + year are locale-invariant. `verbatim:` skips the
             // LocalizedStringKey lookup so we don't pollute the catalog with a
             // generic "%@ · %@" key.
-            Text(verbatim: "\(MonthNames.full[month - 1].uppercased(with: .autoupdatingCurrent)) · \(String(year))")
-                .font(.system(size: 11, weight: .semibold))
-                .tracking(3.2)
+            Text(verbatim: "\(MonthNames.full[month - 1]) · \(String(year))")
+                .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
                 .foregroundStyle(.secondary)
                 .padding(.top, 2)
                 .frame(height: 18)
@@ -675,7 +673,7 @@ private struct PageContent: View {
                             .foregroundStyle(.secondary)
                     }
                     .foregroundStyle(.primary)
-                    Text(locationName?.uppercased() ?? "")
+                    Text(locationName ?? "")
                         .font(.system(size: 9.5))
                         .tracking(1.4)
                         .foregroundStyle(.secondary)
