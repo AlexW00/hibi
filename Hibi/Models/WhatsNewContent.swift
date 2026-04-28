@@ -5,14 +5,41 @@ import WhatsNewKit
 ///
 /// Version string must match `CFBundleShortVersionString` so
 /// `UserDefaultsWhatsNewVersionStore` correctly records the presentation.
-/// We currently ship `MARKETING_VERSION = 1.5`.
+/// We currently ship `MARKETING_VERSION = 1.6`.
 enum WhatsNewContent {
-    static let version: WhatsNew.Version = "1.5"
+    static let version: WhatsNew.Version = "1.6"
 
     /// Built on access so `String(localized:)` resolves against the user's current locale.
     static var latest: WhatsNew {
         WhatsNew(
             version: version,
+            title: .init(stringLiteral: String(localized: "What's New in Hibi")),
+            features: [
+                WhatsNew.Feature(
+                    image: .init(systemName: "textformat"),
+                    title: .init(String(localized: "Quieter labels")),
+                    subtitle: .init(String(localized: "Headers and hints now read in mixed case instead of all-caps, and the day card matches the app's editorial type throughout."))
+                ),
+                WhatsNew.Feature(
+                    image: .init(systemName: "character.bubble"),
+                    title: .init(String(localized: "Filled-in translations")),
+                    subtitle: .init(String(localized: "Settings, onboarding, and units are now fully translated into German and Japanese."))
+                ),
+            ],
+            primaryAction: WhatsNew.PrimaryAction(
+                title: .init(String(localized: "Continue")),
+                backgroundColor: .primary,
+                foregroundColor: Color(uiColor: .systemBackground),
+                hapticFeedback: .selection
+            )
+        )
+    }
+
+    // MARK: - Previous versions
+
+    static var v1_5: WhatsNew {
+        WhatsNew(
+            version: "1.5",
             title: .init(stringLiteral: String(localized: "What's New in Hibi")),
             features: [
                 WhatsNew.Feature(
@@ -29,8 +56,6 @@ enum WhatsNewContent {
             )
         )
     }
-
-    // MARK: - Previous versions
 
     static var v1_4: WhatsNew {
         WhatsNew(
@@ -102,5 +127,5 @@ enum WhatsNewContent {
         )
     }
 
-    static var collection: WhatsNewCollection { [latest, v1_4, v1_3, v1_2] }
+    static var collection: WhatsNewCollection { [latest, v1_5, v1_4, v1_3, v1_2] }
 }

@@ -841,6 +841,30 @@
         }
       }
     },
+    "Filled-in translations" : {
+      "comment" : "What's New 1.6 — feature title for completed German and Japanese localization.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vervollständigte Übersetzungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filled-in translations"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "翻訳の補完"
+          }
+        }
+      }
+    },
     "Find events by title or location." : {
       "comment" : "Empty state subtitle shown in the search results view.",
       "extractionState" : "manual",
@@ -957,6 +981,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "イベントを表示・編集するには、アクセスを許可してください。"
+          }
+        }
+      }
+    },
+    "Headers and hints now read in mixed case instead of all-caps, and the day card matches the app's editorial type throughout." : {
+      "comment" : "What's New 1.6 — feature subtitle describing the typography refresh.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überschriften und Hinweise stehen jetzt in gemischter Schreibung statt in Großbuchstaben, und die Tageskarte passt durchgehend zur Schrift der App."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Headers and hints now read in mixed case instead of all-caps, and the day card matches the app's editorial type throughout."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "見出しやヒントが大文字ではなく自然な大小混合の表記になり、デイビューもアプリ全体と同じ書体に統一されました。"
           }
         }
       }
@@ -1489,6 +1537,30 @@
         }
       }
     },
+    "Quieter labels" : {
+      "comment" : "What's New 1.6 — feature title for the typography refresh.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leisere Beschriftungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quieter labels"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "より静かなラベル"
+          }
+        }
+      }
+    },
     "Release" : {
       "comment" : "Settings section header above the What's New button and Version row.",
       "extractionState" : "manual",
@@ -1653,6 +1725,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "設定に apps.weichart.de へのリンクを追加しました。他のアプリはそちらから ^^"
+          }
+        }
+      }
+    },
+    "Settings, onboarding, and units are now fully translated into German and Japanese." : {
+      "comment" : "What's New 1.6 — feature subtitle for completed German and Japanese localization.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen, Onboarding und Einheiten sind jetzt vollständig auf Deutsch und Japanisch verfügbar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings, onboarding, and units are now fully translated into German and Japanese."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定・オンボーディング・単位を、ドイツ語と日本語で完全に翻訳しました。"
           }
         }
       }
