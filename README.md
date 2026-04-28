@@ -2,12 +2,7 @@
 
 A personal calendar app for iOS with an editorial, paper-stationery aesthetic.
 
-<p align="center">
-  <img src="res/1.png" width="24%" />
-  <img src="res/2.png" width="24%" />
-  <img src="res/3.png" width="24%" />
-  <img src="res/4.png" width="24%" />
-</p>
+https://github.com/user-attachments/assets/6a61c21f-c857-4d85-ab6a-4dcc612955e8
 
 ## Download
 
