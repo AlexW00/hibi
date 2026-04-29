@@ -16,14 +16,9 @@ enum WhatsNewContent {
             title: .init(stringLiteral: String(localized: "What's New in Hibi")),
             features: [
                 WhatsNew.Feature(
-                    image: .init(systemName: "textformat"),
-                    title: .init(String(localized: "Quieter labels")),
-                    subtitle: .init(String(localized: "Headers and hints now read in mixed case instead of all-caps, and the day card matches the app's editorial type throughout."))
-                ),
-                WhatsNew.Feature(
                     image: .init(systemName: "character.bubble"),
-                    title: .init(String(localized: "Filled-in translations")),
-                    subtitle: .init(String(localized: "Settings, onboarding, and units are now fully translated into German and Japanese."))
+                    title: .init(String(localized: "More languages")),
+                    subtitle: .init(String(localized: "Hibi now includes Traditional Chinese for Taiwan and Hong Kong, Simplified Chinese for Mainland China, plus Korean, Malay, Spanish, Brazilian Portuguese, and Italian."))
                 ),
             ],
             primaryAction: WhatsNew.PrimaryAction(
