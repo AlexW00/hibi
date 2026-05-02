@@ -94,3 +94,22 @@ enum TimeFormat: String, CaseIterable, Identifiable {
         formatter.string(from: date)
     }
 }
+
+/// Settings-screen preference for which sun-related times appear on the
+/// Day-view paper card. Civil dawn/dusk (sun 6° below the horizon) is the
+/// "everyday twilight" most people mean by Morgen-/Abenddämmerung.
+enum SunTimeMode: String, CaseIterable, Identifiable {
+    case sunriseSunset, dawnDusk, both
+
+    static let defaultsKey = "sunTimeMode"
+
+    var id: String { rawValue }
+
+    var labelResource: LocalizedStringResource {
+        switch self {
+        case .sunriseSunset: "Sunrise / sunset"
+        case .dawnDusk:      "Dawn / dusk"
+        case .both:          "Both"
+        }
+    }
+}

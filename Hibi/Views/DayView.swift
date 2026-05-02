@@ -571,6 +571,7 @@ private struct PageContent: View {
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
     @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
+    @AppStorage(SunTimeMode.defaultsKey) private var sunTimeModeRaw: String = SunTimeMode.sunriseSunset.rawValue
 
     private var timeFormat: TimeFormat {
         TimeFormat(rawValue: timeFormatRaw) ?? .system
@@ -578,6 +579,44 @@ private struct PageContent: View {
 
     private var temperatureUnit: TemperatureUnit {
         TemperatureUnit(rawValue: temperatureUnitRaw) ?? .system
+    }
+
+    private var sunTimeMode: SunTimeMode {
+        SunTimeMode(rawValue: sunTimeModeRaw) ?? .sunriseSunset
+    }
+
+    /// Symbol used for civil twilight (dawn / dusk). `sun.horizon` reads as
+    /// "sun at the horizon" — the in-between state of partial daylight.
+    private static let twilightSymbol = "sun.horizon"
+
+    private struct SunTimeEntry: Identifiable {
+        /// Index within the column (0 = first/topmost). Using the position
+        /// rather than the icon string keeps IDs stable when both entries
+        /// share the same icon (dawn + dusk both use the twilight symbol).
+        let id: Int
+        let icon: String
+        let date: Date?
+    }
+
+    private func sunEntries(side: HorizontalEdge) -> [SunTimeEntry] {
+        switch sunTimeMode {
+        case .sunriseSunset:
+            return side == .leading
+                ? [SunTimeEntry(id: 0, icon: "sunrise", date: weather?.sunrise)]
+                : [SunTimeEntry(id: 0, icon: "sunset",  date: weather?.sunset)]
+        case .dawnDusk:
+            return side == .leading
+                ? [SunTimeEntry(id: 0, icon: Self.twilightSymbol, date: weather?.dawn)]
+                : [SunTimeEntry(id: 0, icon: Self.twilightSymbol, date: weather?.dusk)]
+        case .both:
+            // Order chronologically top→bottom on each side: dawn before
+            // sunrise on the morning side; sunset before dusk on the evening side.
+            return side == .leading
+                ? [SunTimeEntry(id: 0, icon: Self.twilightSymbol, date: weather?.dawn),
+                   SunTimeEntry(id: 1, icon: "sunrise",           date: weather?.sunrise)]
+                : [SunTimeEntry(id: 0, icon: "sunset",            date: weather?.sunset),
+                   SunTimeEntry(id: 1, icon: Self.twilightSymbol, date: weather?.dusk)]
+        }
     }
 
     var body: some View {
@@ -595,34 +634,42 @@ private struct PageContent: View {
 
     private var topRow: some View {
         HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 2) {
-                Image(systemName: "sunrise")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
-                Text(weather?.sunrise.map { timeFormat.string(from: $0) } ?? "")
-                    .font(.system(size: 9.5, design: .monospaced))
-                    .tracking(0.6)
-                    .foregroundStyle(.secondary)
-            }
-            .opacity(weather?.sunrise == nil ? 0 : 1)
+            sunTimeColumn(side: .leading)
             Spacer()
             Text(DayNames.full[SampleData.weekday(year: year, month: month, day: day)])
                 .font(.appSerif(size: 19, italic: true, simple: useSimpleFont))
                 .foregroundStyle(.primary)
                 .padding(.top, 2)
             Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Image(systemName: "sunset")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
-                Text(weather?.sunset.map { timeFormat.string(from: $0) } ?? "")
-                    .font(.system(size: 9.5, design: .monospaced))
-                    .tracking(0.6)
-                    .foregroundStyle(.secondary)
-            }
-            .opacity(weather?.sunset == nil ? 0 : 1)
+            sunTimeColumn(side: .trailing)
         }
-        .frame(height: 44)
+        // "Both" mode stacks two icon+time pairs per side; it needs more
+        // vertical space. The two outer Spacer(minLength: 0)s in `body`
+        // absorb the difference.
+        .frame(height: sunTimeMode == .both ? 64 : 44)
+    }
+
+    private func sunTimeColumn(side: HorizontalEdge) -> some View {
+        let entries = sunEntries(side: side)
+        let alignment: HorizontalAlignment = side == .leading ? .leading : .trailing
+        // Hide the column entirely if no entry has a value — the opposite
+        // side is hidden independently via the same rule.
+        let hasAnyValue = entries.contains { $0.date != nil }
+        return VStack(alignment: alignment, spacing: 4) {
+            ForEach(entries) { entry in
+                VStack(alignment: alignment, spacing: 2) {
+                    Image(systemName: entry.icon)
+                        .font(.system(size: 16))
+                        .foregroundStyle(.secondary)
+                    Text(entry.date.map { timeFormat.string(from: $0) } ?? "")
+                        .font(.system(size: 9.5, design: .monospaced))
+                        .tracking(0.6)
+                        .foregroundStyle(.secondary)
+                }
+                .opacity(entry.date == nil ? 0 : 1)
+            }
+        }
+        .opacity(hasAnyValue ? 1 : 0)
     }
 
     private var numeralBlock: some View {

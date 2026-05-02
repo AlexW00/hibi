@@ -15,6 +15,7 @@ struct SettingsView: View {
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
     @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
+    @AppStorage(SunTimeMode.defaultsKey) private var sunTimeModeRaw: String = SunTimeMode.sunriseSunset.rawValue
     @State private var showWhatsNew = false
 
     enum Appearance: String, CaseIterable, Identifiable {
@@ -48,6 +49,12 @@ struct SettingsView: View {
                 Section("Day View") {
                     Toggle("Invert swipe direction", isOn: $invertDaySwipe)
                         .tint(.black)
+
+                    Picker("Sun times", selection: $sunTimeModeRaw) {
+                        ForEach(SunTimeMode.allCases) { mode in
+                            Text(mode.labelResource).tag(mode.rawValue)
+                        }
+                    }
                 }
 
                 Section("Units") {

@@ -135,7 +135,9 @@ final class WeatherStore: NSObject {
                 low: low,
                 code: Self.code(for: day.condition),
                 sunrise: day.sun.sunrise,
-                sunset: day.sun.sunset
+                sunset: day.sun.sunset,
+                dawn: day.sun.civilDawn,
+                dusk: day.sun.civilDusk
             )
         }
         self.weatherByDay = byDay
