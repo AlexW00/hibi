@@ -57,6 +57,19 @@ enum SampleData {
         return cal.component(.weekday, from: date) - 1
     }
 
+    /// ISO 8601 week number (Monday-start, week 1 contains the first Thursday).
+    /// Uses the dedicated `.iso8601` calendar so the result is independent of
+    /// the user's locale or `firstWeekday` setting.
+    static func isoWeek(year: Int, month: Int, day: Int) -> Int {
+        var comps = DateComponents()
+        comps.year = year
+        comps.month = month
+        comps.day = day
+        let cal = Calendar(identifier: .iso8601)
+        guard let date = cal.date(from: comps) else { return 0 }
+        return cal.component(.weekOfYear, from: date)
+    }
+
     static func isToday(year: Int, month: Int, day: Int) -> Bool {
         let t = todayComponents
         return year == t.year && month == t.month && day == t.day
