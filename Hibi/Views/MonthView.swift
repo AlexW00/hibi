@@ -20,6 +20,7 @@ struct MonthView: View {
             header(weekCount: weekCount)
             weekdayHeader
             grid(cells: padded)
+                .padding(.bottom, 12)
         }
         .padding(.horizontal, 20)
         .task(id: MonthKey(year: year, month: month)) {
