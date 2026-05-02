@@ -15,21 +15,23 @@ extension DemoFixtures {
             _ id: String,
             _ y: Int, _ m: Int, _ day: Int,
             _ h1: Int, _ m1: Int, _ h2: Int, _ m2: Int,
-            title: String, tint: Color, location: String? = nil
+            title: String, tint: Color, location: String? = nil,
+            recurring: Bool = false
         ) {
             let s = date(y, m, day, h: h1, min: m1)
             let e = date(y, m, day, h: h2, min: m2)
             add(y, m, day, CalendarEvent(
                 id: id, eventIdentifier: nil, day: day,
                 startDate: s, endDate: e,
-                title: title, tint: tint, location: location, allDay: false
+                title: title, tint: tint, location: location, allDay: false,
+                isRecurring: recurring
             ))
         }
 
         // MARK: 2月
         add(2026, 2, 1, CalendarEvent(id: "demo-feb-101", eventIdentifier: nil, day: 1, title: "月次予算レビュー", tint: butter, allDay: true))
         timed("demo-feb-101b", 2026, 2, 1, 15, 0, 15, 45, title: "四半期計画 — 経理", tint: sea, location: "Zoom")
-        timed("demo-feb-102", 2026, 2, 2, 9, 0, 9, 45, title: "朝ヨガ", tint: mint, location: "スタジオ青山")
+        timed("demo-feb-102", 2026, 2, 2, 9, 0, 9, 45, title: "朝ヨガ", tint: mint, location: "スタジオ青山", recurring: true)
         add(2026, 2, 3, CalendarEvent(id: "demo-feb-001", eventIdentifier: nil, day: 3, title: "節分 — 豆まき", tint: rose, allDay: true))
         timed("demo-feb-001b", 2026, 2, 3, 19, 0, 22, 0, title: "恵方巻きディナー", tint: lilac, location: "自宅")
         timed("demo-feb-103", 2026, 2, 4, 12, 0, 12, 30, title: "歯医者 — クリーニング", tint: sea, location: "田中歯科")
@@ -38,12 +40,12 @@ extension DemoFixtures {
         timed("demo-feb-106", 2026, 2, 7, 10, 30, 11, 30, title: "読書会", tint: sky, location: "蔦屋書店 代官山")
         timed("demo-feb-106b", 2026, 2, 7, 16, 0, 17, 0, title: "買い出し + 作り置き", tint: butter, location: "成城石井")
         timed("demo-feb-107", 2026, 2, 8, 15, 0, 16, 0, title: "子どものサッカー練習", tint: coral, location: "駒沢グラウンド")
-        timed("demo-feb-108", 2026, 2, 9, 8, 30, 9, 15, title: "1on1 ミーティング", tint: sea, location: "Meet — 会議室A")
+        timed("demo-feb-108", 2026, 2, 9, 8, 30, 9, 15, title: "1on1 ミーティング", tint: sea, location: "Meet — 会議室A", recurring: true)
         timed("demo-feb-109", 2026, 2, 10, 19, 0, 20, 30, title: "ジャズライブ", tint: lilac, location: "Blue Note 東京")
         add(2026, 2, 11, CalendarEvent(id: "demo-feb-110", eventIdentifier: nil, day: 11, title: "建国記念の日", tint: butter, allDay: true))
         timed("demo-feb-110b", 2026, 2, 11, 14, 0, 15, 30, title: "車の点検受け取り", tint: coral, location: "オートバックス")
         // 2/12: sparse
-        timed("demo-feb-112", 2026, 2, 13, 17, 30, 18, 30, title: "カウンセリング", tint: sky)
+        timed("demo-feb-112", 2026, 2, 13, 17, 30, 18, 30, title: "カウンセリング", tint: sky, recurring: true)
         add(2026, 2, 14, CalendarEvent(
             id: "demo-feb-002", eventIdentifier: nil, day: 14,
             startDate: date(2026, 2, 14, h: 10, min: 0),
@@ -166,12 +168,13 @@ extension DemoFixtures {
             endDate: date(2026, 4, 18, h: 9, min: 30),
             title: "朝食 — 美咲と", tint: peach, location: "パン屋 小麦の丘", allDay: false
         ))
-        timed("demo-apr-today-progress", 2026, 4, 18, 10, 0, 20, 0, title: "App Store仕上げ — 集中ブロック", tint: sea, location: "ホームオフィス")
+        timed("demo-apr-today-progress", 2026, 4, 18, 10, 0, 20, 0, title: "App Store仕上げ — 集中ブロック", tint: sea, location: "ホームオフィス", recurring: true)
         add(2026, 4, 18, CalendarEvent(
             id: "demo-apr-today-002", eventIdentifier: nil, day: 18,
             startDate: date(2026, 4, 18, h: 12, min: 30),
             endDate: date(2026, 4, 18, h: 13, min: 45),
-            title: "チームランチ", tint: mint, location: "トラットリア", allDay: false
+            title: "チームランチ", tint: mint, location: "トラットリア", allDay: false,
+            isRecurring: true
         ))
         add(2026, 4, 18, CalendarEvent(id: "demo-apr-today-003", eventIdentifier: nil, day: 18, title: "家族の集まり（終日）", tint: rose, location: "祖父母の家", allDay: true))
         add(2026, 4, 18, CalendarEvent(

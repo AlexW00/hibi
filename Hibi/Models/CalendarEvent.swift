@@ -30,6 +30,7 @@ struct CalendarEvent: Identifiable, Hashable {
     let tint: Color
     let location: String?
     let allDay: Bool
+    let isRecurring: Bool
 
     init(id: String = UUID().uuidString,
          eventIdentifier: String? = nil,
@@ -39,7 +40,8 @@ struct CalendarEvent: Identifiable, Hashable {
          title: String,
          tint: Color,
          location: String? = nil,
-         allDay: Bool = false) {
+         allDay: Bool = false,
+         isRecurring: Bool = false) {
         self.id = id
         self.eventIdentifier = eventIdentifier
         self.day = day
@@ -49,6 +51,7 @@ struct CalendarEvent: Identifiable, Hashable {
         self.tint = tint
         self.location = location
         self.allDay = allDay
+        self.isRecurring = isRecurring
     }
 }
 

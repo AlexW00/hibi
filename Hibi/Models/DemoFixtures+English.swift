@@ -15,21 +15,23 @@ extension DemoFixtures {
             _ id: String,
             _ y: Int, _ m: Int, _ day: Int,
             _ h1: Int, _ m1: Int, _ h2: Int, _ m2: Int,
-            title: String, tint: Color, location: String? = nil
+            title: String, tint: Color, location: String? = nil,
+            recurring: Bool = false
         ) {
             let s = date(y, m, day, h: h1, min: m1)
             let e = date(y, m, day, h: h2, min: m2)
             add(y, m, day, CalendarEvent(
                 id: id, eventIdentifier: nil, day: day,
                 startDate: s, endDate: e,
-                title: title, tint: tint, location: location, allDay: false
+                title: title, tint: tint, location: location, allDay: false,
+                isRecurring: recurring
             ))
         }
 
         // MARK: February
         add(2026, 2, 1, CalendarEvent(id: "demo-feb-101", eventIdentifier: nil, day: 1, title: "Monthly budget review", tint: butter, allDay: true))
         timed("demo-feb-101b", 2026, 2, 1, 15, 0, 15, 45, title: "Quarterly planning — finance", tint: sea, location: "Zoom")
-        timed("demo-feb-102", 2026, 2, 2, 9, 0, 9, 45, title: "Yoga — early bird", tint: mint, location: "Studio North")
+        timed("demo-feb-102", 2026, 2, 2, 9, 0, 9, 45, title: "Yoga — early bird", tint: mint, location: "Studio North", recurring: true)
         add(2026, 2, 3, CalendarEvent(id: "demo-feb-001", eventIdentifier: nil, day: 3, title: "Anna's birthday", tint: rose, allDay: true))
         timed("demo-feb-001b", 2026, 2, 3, 19, 0, 22, 0, title: "Birthday dinner — close friends", tint: lilac, location: "Saffron Table")
         timed("demo-feb-103", 2026, 2, 4, 12, 0, 12, 30, title: "Dentist — quick polish", tint: sea, location: "Bright Smile Clinic")
@@ -37,11 +39,11 @@ extension DemoFixtures {
         timed("demo-feb-106", 2026, 2, 7, 10, 30, 11, 30, title: "Book club", tint: sky, location: "River Café")
         timed("demo-feb-106b", 2026, 2, 7, 16, 0, 17, 0, title: "Groceries + meal prep", tint: butter, location: "Whole Foods")
         timed("demo-feb-107", 2026, 2, 8, 15, 0, 16, 0, title: "Kids' soccer practice", tint: coral, location: "East Fields")
-        timed("demo-feb-108", 2026, 2, 9, 8, 30, 9, 15, title: "1:1 with Alex", tint: sea, location: "Meet — Boreal room")
+        timed("demo-feb-108", 2026, 2, 9, 8, 30, 9, 15, title: "1:1 with Alex", tint: sea, location: "Meet — Boreal room", recurring: true)
         timed("demo-feb-109", 2026, 2, 10, 19, 0, 20, 30, title: "Jazz night", tint: lilac, location: "Blue Note Loft")
         add(2026, 2, 11, CalendarEvent(id: "demo-feb-110", eventIdentifier: nil, day: 11, title: "Car service & inspection", tint: butter, location: "AutoCare Plus", allDay: true))
         timed("demo-feb-110b", 2026, 2, 11, 14, 0, 15, 30, title: "Pick up rental car", tint: coral, location: "AutoCare Plus")
-        timed("demo-feb-112", 2026, 2, 13, 17, 30, 18, 30, title: "Therapy session", tint: sky)
+        timed("demo-feb-112", 2026, 2, 13, 17, 30, 18, 30, title: "Therapy session", tint: sky, recurring: true)
         add(2026, 2, 14, CalendarEvent(
             id: "demo-feb-002", eventIdentifier: nil, day: 14,
             startDate: date(2026, 2, 14, h: 10, min: 0),
@@ -154,12 +156,13 @@ extension DemoFixtures {
             endDate: date(2026, 4, 18, h: 9, min: 30),
             title: "Breakfast with Maria", tint: peach, location: "Schmitt Bakery", allDay: false
         ))
-        timed("demo-apr-today-progress", 2026, 4, 18, 10, 0, 20, 0, title: "App Store polish — focus block", tint: sea, location: "Home office")
+        timed("demo-apr-today-progress", 2026, 4, 18, 10, 0, 20, 0, title: "App Store polish — focus block", tint: sea, location: "Home office", recurring: true)
         add(2026, 4, 18, CalendarEvent(
             id: "demo-apr-today-002", eventIdentifier: nil, day: 18,
             startDate: date(2026, 4, 18, h: 12, min: 30),
             endDate: date(2026, 4, 18, h: 13, min: 45),
-            title: "Team lunch", tint: mint, location: "Osteria Due", allDay: false
+            title: "Team lunch", tint: mint, location: "Osteria Due", allDay: false,
+            isRecurring: true
         ))
         add(2026, 4, 18, CalendarEvent(id: "demo-apr-today-003", eventIdentifier: nil, day: 18, title: "Family gathering (all day)", tint: rose, location: "Grandparents' garden", allDay: true))
         add(2026, 4, 18, CalendarEvent(
