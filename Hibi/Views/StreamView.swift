@@ -368,6 +368,10 @@ private struct StreamDayRow: View {
                         Circle()
                             .strokeBorder(.primary, lineWidth: 1.25)
                             .frame(width: 44, height: 44)
+                            // Optical centering: digit caps sit above the line-box
+                            // center (empty descender area below baseline) and the
+                            // serif "0" has more right-side bearing than "3"'s left.
+                            .offset(x: -0.5, y: -2)
                     }
                 }
                 .frame(minHeight: 36, alignment: .leading)

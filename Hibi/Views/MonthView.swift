@@ -113,6 +113,10 @@ private struct DayCell: View {
                             Circle()
                                 .strokeBorder(.primary, lineWidth: 1.25)
                                 .frame(width: 36, height: 36)
+                                // Optical centering: digit caps sit above the line-box
+                                // center (descender area below baseline is empty), and
+                                // serif side bearings on "0" extend slightly right.
+                                .offset(x: -0.5, y: -1.5)
                         }
                     }
 
