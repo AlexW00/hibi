@@ -571,6 +571,7 @@ private struct PageContent: View {
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
     @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
+    @AppStorage(SunTimeMode.defaultsKey) private var sunTimeModeRaw: String = SunTimeMode.sunriseSunset.rawValue
 
     private var timeFormat: TimeFormat {
         TimeFormat(rawValue: timeFormatRaw) ?? .system
@@ -578,6 +579,26 @@ private struct PageContent: View {
 
     private var temperatureUnit: TemperatureUnit {
         TemperatureUnit(rawValue: temperatureUnitRaw) ?? .system
+    }
+
+    private var sunTimeMode: SunTimeMode {
+        SunTimeMode(rawValue: sunTimeModeRaw) ?? .sunriseSunset
+    }
+
+    /// Time shown on the leading (morning) edge — sunrise or civil dawn.
+    private var leadingTime: Date? {
+        switch sunTimeMode {
+        case .sunriseSunset: weather?.sunrise
+        case .dawnDusk:      weather?.dawn
+        }
+    }
+
+    /// Time shown on the trailing (evening) edge — sunset or civil dusk.
+    private var trailingTime: Date? {
+        switch sunTimeMode {
+        case .sunriseSunset: weather?.sunset
+        case .dawnDusk:      weather?.dusk
+        }
     }
 
     var body: some View {
@@ -594,17 +615,22 @@ private struct PageContent: View {
     }
 
     private var topRow: some View {
+        // The same `sunrise` / `sunset` glyphs are used for both modes —
+        // they encode "morning sun event" / "evening sun event" and preserve
+        // the left-rises / right-sets visual rhythm. The picker in Settings
+        // determines whether the time underneath is sunrise/sunset or civil
+        // dawn/dusk.
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 2) {
                 Image(systemName: "sunrise")
                     .font(.system(size: 16))
                     .foregroundStyle(.secondary)
-                Text(weather?.sunrise.map { timeFormat.string(from: $0) } ?? "")
+                Text(leadingTime.map { timeFormat.string(from: $0) } ?? "")
                     .font(.system(size: 9.5, design: .monospaced))
                     .tracking(0.6)
                     .foregroundStyle(.secondary)
             }
-            .opacity(weather?.sunrise == nil ? 0 : 1)
+            .opacity(leadingTime == nil ? 0 : 1)
             Spacer()
             Text(DayNames.full[SampleData.weekday(year: year, month: month, day: day)])
                 .font(.appSerif(size: 19, italic: true, simple: useSimpleFont))
@@ -615,12 +641,12 @@ private struct PageContent: View {
                 Image(systemName: "sunset")
                     .font(.system(size: 16))
                     .foregroundStyle(.secondary)
-                Text(weather?.sunset.map { timeFormat.string(from: $0) } ?? "")
+                Text(trailingTime.map { timeFormat.string(from: $0) } ?? "")
                     .font(.system(size: 9.5, design: .monospaced))
                     .tracking(0.6)
                     .foregroundStyle(.secondary)
             }
-            .opacity(weather?.sunset == nil ? 0 : 1)
+            .opacity(trailingTime == nil ? 0 : 1)
         }
         .frame(height: 44)
     }

@@ -103,4 +103,8 @@ struct DayWeather: Hashable {
     let code: WeatherCode
     let sunrise: Date?
     let sunset: Date?
+    /// Civil dawn/dusk (sun 6° below horizon) — the everyday "twilight" times
+    /// surfaced in the Day view alongside or in place of sunrise/sunset.
+    let dawn: Date?
+    let dusk: Date?
 }
