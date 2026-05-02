@@ -99,7 +99,7 @@ enum TimeFormat: String, CaseIterable, Identifiable {
 /// Day-view paper card. Civil dawn/dusk (sun 6° below the horizon) is the
 /// "everyday twilight" most people mean by Morgen-/Abenddämmerung.
 enum SunTimeMode: String, CaseIterable, Identifiable {
-    case sunriseSunset, dawnDusk, both
+    case sunriseSunset, dawnDusk
 
     static let defaultsKey = "sunTimeMode"
 
@@ -109,7 +109,6 @@ enum SunTimeMode: String, CaseIterable, Identifiable {
         switch self {
         case .sunriseSunset: "Sunrise / sunset"
         case .dawnDusk:      "Dawn / dusk"
-        case .both:          "Both"
         }
     }
 }
