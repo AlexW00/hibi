@@ -35,9 +35,14 @@ struct EventCard: View {
                 .fill(event.tint)
                 .frame(width: 4, height: 14)
             VStack(alignment: .leading, spacing: 1) {
-                Text(event.title)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(.primary)
+                HStack(spacing: 5) {
+                    Text(event.title)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.primary)
+                    if event.isRecurring {
+                        RecurringGlyph()
+                    }
+                }
                 Text("ALL DAY")
                     .font(.system(size: 10, weight: .semibold))
                     .tracking(1.1)
@@ -64,11 +69,16 @@ struct EventCard: View {
                 .frame(width: 4)
                 .padding(.vertical, 2)
             VStack(alignment: .leading, spacing: 2) {
-                Text(event.title)
-                    .font(.system(size: 13.5, weight: .medium))
-                    .tracking(-0.15)
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
+                HStack(spacing: 5) {
+                    Text(event.title)
+                        .font(.system(size: 13.5, weight: .medium))
+                        .tracking(-0.15)
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                    if event.isRecurring {
+                        RecurringGlyph()
+                    }
+                }
                 HStack(spacing: 8) {
                     Text(verbatim: timeRange)
                         .font(.system(size: 10.5, design: .monospaced))

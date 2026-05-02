@@ -368,7 +368,8 @@ final class EventStore {
             title: ek.title ?? "",
             tint: tint,
             location: ek.location?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
-            allDay: ek.isAllDay
+            allDay: ek.isAllDay,
+            isRecurring: ek.hasRecurrenceRules
         )
     }
 }

@@ -61,10 +61,15 @@ struct DayEventRow: View {
 
     private var titleBlock: some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text(event.title)
-                .font(.system(size: 13.5, weight: .medium))
-                .tracking(-0.15)
-                .foregroundStyle(.primary)
+            HStack(spacing: 5) {
+                Text(event.title)
+                    .font(.system(size: 13.5, weight: .medium))
+                    .tracking(-0.15)
+                    .foregroundStyle(.primary)
+                if event.isRecurring {
+                    RecurringGlyph()
+                }
+            }
             if let loc = event.location {
                 Text(loc)
                     .font(.system(size: 11))
