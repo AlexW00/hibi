@@ -14,10 +14,9 @@ struct MonthView: View {
         let cells: [Int?] = Array(repeating: nil, count: firstWeekday)
             + (1...totalDays).map { Optional($0) }
         let padded = cells + Array(repeating: nil, count: (7 - cells.count % 7) % 7)
-        let weekCount = padded.count / 7
 
         VStack(alignment: .leading, spacing: 0) {
-            header(weekCount: weekCount)
+            header(totalDays: totalDays)
             weekdayHeader
             grid(cells: padded)
         }
@@ -27,8 +26,14 @@ struct MonthView: View {
         }
     }
 
-    private func header(weekCount: Int) -> some View {
-        VStack(alignment: .leading, spacing: -4) {
+    private func header(totalDays: Int) -> some View {
+        // ISO calendar-week range spanned by this month. Wraps year boundaries
+        // naturally (e.g. December may end in KW 1 of the next ISO week-year).
+        let firstKW = SampleData.isoWeek(year: year, month: month, day: 1)
+        let lastKW = SampleData.isoWeek(year: year, month: month, day: totalDays)
+        let kwLabel = firstKW == lastKW ? "KW \(firstKW)" : "KW \(firstKW)–\(lastKW)"
+
+        return VStack(alignment: .leading, spacing: -4) {
             Text(String(year))
                 .font(.appSerif(size: 15, italic: true, simple: useSimpleFont))
                 .tracking(0.4)
@@ -39,7 +44,7 @@ struct MonthView: View {
                     .tracking(-1.5)
                     .foregroundStyle(.primary)
                 Spacer()
-                Text("Wk \(weekCount)")
+                Text(verbatim: kwLabel)
                     .font(.system(size: 11))
                     .tracking(1.5)
                     .foregroundStyle(.secondary)
