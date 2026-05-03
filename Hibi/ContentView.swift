@@ -16,6 +16,7 @@ struct ContentView: View {
     @State private var weatherStore = WeatherStore()
     @State private var editorMode: EventEditorSheet.Mode?
     @State private var showOnboarding = false
+    @State private var needsOnboarding = false
     /// Latched by SettingsView — when Settings dismisses with this set we
     /// present the onboarding sheet. Can't show two sheets at once, so we
     /// chain via `onDismiss`.
@@ -121,7 +122,11 @@ struct ContentView: View {
         }
         .environment(eventStore)
         .environment(weatherStore)
-        .whatsNewSheet()
+        .whatsNewSheet(onDismiss: {
+            if needsOnboarding {
+                showOnboarding = true
+            }
+        })
         .sheet(isPresented: $showSettings, onDismiss: {
             if reopenOnboardingAfterSettings {
                 reopenOnboardingAfterSettings = false
@@ -158,10 +163,16 @@ struct ContentView: View {
                 // Show onboarding when calendar isn't granted yet (fresh install),
                 // OR when calendar is granted but reminders haven't been asked
                 // (upgrade from a version without reminder support).
-                if !eventStore.hasCalendarAccess {
-                    showOnboarding = true
-                } else if !eventStore.hasReminderAccess && !eventStore.reminderAccessDenied {
-                    showOnboarding = true
+                let shouldOnboard = !eventStore.hasCalendarAccess
+                    || (!eventStore.hasReminderAccess && !eventStore.reminderAccessDenied)
+                if shouldOnboard {
+                    let whatsNewWillPresent = !UserDefaultsWhatsNewVersionStore()
+                        .hasPresented(WhatsNewContent.version)
+                    needsOnboarding = true
+                    if !whatsNewWillPresent {
+                        showOnboarding = true
+                    }
+                    // else: onboarding shows after WhatsNew dismisses (via onDismiss)
                 }
             }
         }
