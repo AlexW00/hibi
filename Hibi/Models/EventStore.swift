@@ -337,23 +337,15 @@ final class EventStore {
             let dueDay = calendar.startOfDay(for: dueDate)
             let isOverdue = dueDay < today && !ek.isCompleted
 
-            if isOverdue {
-                // Show on every day from due date (or month start) through today (or month end)
-                let rangeStart = max(dueDay, monthStart)
-                let rangeEnd = min(calendar.date(byAdding: .day, value: 1, to: today) ?? today, monthEnd)
-                var cursor = rangeStart
-                while cursor < rangeEnd {
-                    let day = calendar.component(.day, from: cursor)
-                    grouped[day, default: []].append(
-                        makeCalendarReminder(from: ek, day: day, dueDate: dueDate, isOverdue: true)
-                    )
-                    guard let next = calendar.date(byAdding: .day, value: 1, to: cursor) else { break }
-                    cursor = next
-                }
-            } else if dueDay >= monthStart && dueDay < monthEnd {
+            if dueDay >= monthStart && dueDay < monthEnd {
                 let day = calendar.component(.day, from: dueDay)
                 grouped[day, default: []].append(
-                    makeCalendarReminder(from: ek, day: day, dueDate: dueDate, isOverdue: false)
+                    makeCalendarReminder(from: ek, day: day, dueDate: dueDate, isOverdue: isOverdue)
+                )
+            } else if isOverdue && isCurrentMonth && dueDay < monthStart {
+                // Overdue from a previous month: show on today only
+                grouped[todayDay, default: []].append(
+                    makeCalendarReminder(from: ek, day: todayDay, dueDate: dueDate, isOverdue: true)
                 )
             }
         }
