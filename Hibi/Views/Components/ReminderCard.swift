@@ -16,6 +16,7 @@ struct ReminderCard: View {
                 Image(systemName: reminder.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(reminder.tint.mix(with: .black, by: 0.1))
+                    .contentTransition(.symbolEffect(.replace))
             }
             .buttonStyle(.plain)
 
@@ -30,18 +31,21 @@ struct ReminderCard: View {
                         RecurringGlyph()
                     }
                 }
-                HStack(spacing: 6) {
-                    if reminder.hasTime, let due = reminder.dueDate {
-                        Text(verbatim: timeFormat.string(from: due))
-                            .font(.system(size: 10.5, design: .monospaced))
-                            .tracking(0.2)
-                            .foregroundStyle(.secondary)
+                if !reminder.isCompleted {
+                    HStack(spacing: 6) {
+                        if reminder.hasTime, let due = reminder.dueDate {
+                            Text(verbatim: timeFormat.string(from: due))
+                                .font(.system(size: 10.5, design: .monospaced))
+                                .tracking(0.2)
+                                .foregroundStyle(.secondary)
+                        }
+                        if reminder.isOverdue {
+                            Text("Overdue")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundStyle(.red.opacity(0.8))
+                        }
                     }
-                    if reminder.isOverdue {
-                        Text("Overdue")
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(.red.opacity(0.8))
-                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
             }
             Spacer(minLength: 0)
@@ -57,5 +61,7 @@ struct ReminderCard: View {
                 .strokeBorder(reminder.tint.opacity(0.35), lineWidth: 0.5)
         )
         .opacity(reminder.isCompleted ? 0.6 : 1)
+        .animation(.easeInOut(duration: 0.3), value: reminder.isCompleted)
+        .sensoryFeedback(reminder.isCompleted ? .success : .selection, trigger: reminder.isCompleted)
     }
 }
