@@ -49,17 +49,6 @@ struct CalendarSelectionView: View {
                         }
                     }
                 }
-                if !eventStore.hasReminderAccess && !eventStore.reminderAccessDenied {
-                    Section {
-                        Button {
-                            Task { await eventStore.requestReminderAccess() }
-                        } label: {
-                            Label("Show Reminders", systemImage: "checklist")
-                        }
-                    } footer: {
-                        Text("Grant access to display your reminders alongside events.")
-                    }
-                }
             }
             .listStyle(.insetGrouped)
         }

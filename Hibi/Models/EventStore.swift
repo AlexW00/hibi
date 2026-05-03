@@ -128,10 +128,6 @@ final class EventStore {
             // events(matching:) see the newly granted data without a restart.
             ekStore.reset()
             reloadAll()
-            // Also request reminder access if not yet determined
-            if EKEventStore.authorizationStatus(for: .reminder) == .notDetermined {
-                await requestReminderAccess()
-            }
         }
     }
 
@@ -165,10 +161,6 @@ final class EventStore {
         if hasReminderAccess {
             if !wasReminderAuthorized { ekStore.reset() }
             reloadAllReminders()
-        }
-        // Prompt for reminder access if calendar was already granted but reminders not yet asked
-        if hasCalendarAccess && EKEventStore.authorizationStatus(for: .reminder) == .notDetermined {
-            Task { await requestReminderAccess() }
         }
     }
 

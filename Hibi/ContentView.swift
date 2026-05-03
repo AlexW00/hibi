@@ -154,14 +154,15 @@ struct ContentView: View {
         .task {
             eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
             weatherStore.refresh()
-            // Auto-present only when a REQUIRED permission is missing.
-            // Location is optional — users enable it later from Settings.
-            if !eventStore.isDemoMode, !eventStore.hasCalendarAccess {
-                showOnboarding = true
-            }
-            // Request reminder access when calendar is already granted
-            if eventStore.hasCalendarAccess && !eventStore.hasReminderAccess && !eventStore.reminderAccessDenied {
-                await eventStore.requestReminderAccess()
+            if !eventStore.isDemoMode {
+                // Show onboarding when calendar isn't granted yet (fresh install),
+                // OR when calendar is granted but reminders haven't been asked
+                // (upgrade from a version without reminder support).
+                if !eventStore.hasCalendarAccess {
+                    showOnboarding = true
+                } else if !eventStore.hasReminderAccess && !eventStore.reminderAccessDenied {
+                    showOnboarding = true
+                }
             }
         }
         .onChange(of: displayedYear) { _, _ in
@@ -220,6 +221,18 @@ struct ContentView: View {
                 isGranted: { eventStore.hasCalendarAccess },
                 isDenied: { eventStore.calendarAccessDenied },
                 request: { await eventStore.requestAccess() },
+                openSettings: { eventStore.openCalendarSettings() }
+            ),
+            PermissionOnboardingItem(
+                id: "reminders",
+                icon: "checklist",
+                tint: Color(.displayP3, red: 0.55, green: 0.72, blue: 0.42, opacity: 1),
+                title: "Reminders",
+                description: "Display your reminders alongside calendar events.",
+                isRequired: false,
+                isGranted: { eventStore.hasReminderAccess },
+                isDenied: { eventStore.reminderAccessDenied },
+                request: { await eventStore.requestReminderAccess() },
                 openSettings: { eventStore.openCalendarSettings() }
             ),
             PermissionOnboardingItem(
