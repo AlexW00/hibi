@@ -54,7 +54,7 @@ struct ReminderRow: View {
                     RecurringGlyph()
                 }
             }
-            if !reminder.isCompleted {
+            if reminder.hasTime || reminder.isOverdue {
                 HStack(spacing: 6) {
                     if reminder.hasTime, let due = reminder.dueDate {
                         Text(verbatim: timeFormat.string(from: due))
@@ -67,7 +67,7 @@ struct ReminderRow: View {
                             .foregroundStyle(.red.opacity(0.8))
                     }
                 }
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .opacity(reminder.isCompleted ? 0 : 1)
             }
         }
         .padding(.horizontal, 12)
