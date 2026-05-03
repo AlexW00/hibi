@@ -10,6 +10,10 @@ struct ReminderCard: View {
         TimeFormat(rawValue: timeFormatRaw) ?? .system
     }
 
+    private var hasSubtitle: Bool {
+        reminder.hasTime || reminder.isOverdue
+    }
+
     var body: some View {
         HStack(spacing: 10) {
             Button(action: onToggle) {
@@ -20,38 +24,53 @@ struct ReminderCard: View {
             }
             .buttonStyle(.plain)
 
-            VStack(alignment: .leading, spacing: 1) {
+            ZStack(alignment: .leading) {
+                // Completed: title only, vertically centered
                 HStack(spacing: 5) {
                     Text(reminder.title)
                         .font(.system(size: 13, weight: .medium))
-                        .strikethrough(reminder.isCompleted)
-                        .foregroundStyle(reminder.isCompleted ? .secondary : .primary)
+                        .strikethrough(true)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                     if reminder.isRecurring {
                         RecurringGlyph()
                     }
                 }
-                if reminder.hasTime || reminder.isOverdue {
-                    HStack(spacing: 6) {
-                        if reminder.hasTime, let due = reminder.dueDate {
-                            Text(verbatim: timeFormat.string(from: due))
-                                .font(.system(size: 10.5, design: .monospaced))
-                                .tracking(0.2)
-                                .foregroundStyle(.secondary)
-                        }
-                        if reminder.isOverdue {
-                            Text("Overdue")
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundStyle(.red.opacity(0.8))
+                .opacity(reminder.isCompleted ? 1 : 0)
+
+                // Uncompleted: title + subtitle stacked
+                VStack(alignment: .leading, spacing: 1) {
+                    HStack(spacing: 5) {
+                        Text(reminder.title)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                        if reminder.isRecurring {
+                            RecurringGlyph()
                         }
                     }
-                    .opacity(reminder.isCompleted ? 0 : 1)
+                    if hasSubtitle {
+                        HStack(spacing: 6) {
+                            if reminder.hasTime, let due = reminder.dueDate {
+                                Text(verbatim: timeFormat.string(from: due))
+                                    .font(.system(size: 10.5, design: .monospaced))
+                                    .tracking(0.2)
+                                    .foregroundStyle(.secondary)
+                            }
+                            if reminder.isOverdue {
+                                Text("Overdue")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(.red.opacity(0.8))
+                            }
+                        }
+                    }
                 }
+                .opacity(reminder.isCompleted ? 0 : 1)
             }
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .frame(height: 44)
         .background(
             reminder.tint.opacity(reminder.isCompleted ? 0.38 : 0.10)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
