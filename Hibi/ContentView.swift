@@ -159,6 +159,10 @@ struct ContentView: View {
             if !eventStore.isDemoMode, !eventStore.hasCalendarAccess {
                 showOnboarding = true
             }
+            // Request reminder access when calendar is already granted
+            if eventStore.hasCalendarAccess && !eventStore.hasReminderAccess && !eventStore.reminderAccessDenied {
+                await eventStore.requestReminderAccess()
+            }
         }
         .onChange(of: displayedYear) { _, _ in
             eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
