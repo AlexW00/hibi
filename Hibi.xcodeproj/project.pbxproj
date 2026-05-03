@@ -290,6 +290,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Hibi would like to access your Calendar so it can display your events.";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Hibi would like to access your Calendar so it can display your events.";
+				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "Hibi would like to access your Reminders so it can display them alongside your events.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Hibi uses your location to show local weather and sunrise/sunset on each day.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hibi uses your location to show local weather and sunrise/sunset on each day.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -335,6 +336,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Hibi would like to access your Calendar so it can display your events.";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Hibi would like to access your Calendar so it can display your events.";
+				INFOPLIST_KEY_NSRemindersFullAccessUsageDescription = "Hibi would like to access your Reminders so it can display them alongside your events.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Hibi uses your location to show local weather and sunrise/sunset on each day.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Hibi uses your location to show local weather and sunrise/sunset on each day.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

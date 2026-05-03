@@ -289,6 +289,78 @@
         }
       }
     },
+    "NSRemindersFullAccessUsageDescription": {
+      "comment": "Shown by iOS when the app requests full Reminders access.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi möchte auf deine Erinnerungen zugreifen, um sie neben deinen Terminen anzuzeigen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi would like to access your Reminders so it can display them alongside your events."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibiがイベントと一緒にリマインダーを表示するために、リマインダーへのアクセスを求めています。"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi 想取用你的提醒事項，以便與事件一起顯示。"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi 想取用你的提醒事項，以便與事件一起顯示。"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi 想访问你的提醒事项，以便与事件一起显示。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi가 이벤트와 함께 미리 알림을 표시하기 위해 미리 알림 접근 권한을 요청합니다."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi ingin mengakses Peringatan anda supaya ia boleh memaparkannya bersama acara anda."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi quiere acceder a tus recordatorios para mostrarlos junto a tus eventos."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Hibi gostaria de acessar seus Lembretes para exibi-los junto aos seus eventos."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi vorrebbe accedere ai tuoi promemoria per mostrarli insieme ai tuoi eventi."
+          }
+        }
+      }
+    },
     "NSLocationAlwaysAndWhenInUseUsageDescription": {
       "comment": "Privacy - Location Always and When In Use Usage Description",
       "extractionState": "extracted_with_value",

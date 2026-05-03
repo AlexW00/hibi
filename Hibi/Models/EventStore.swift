@@ -11,11 +11,15 @@ final class EventStore {
     let ekStore = EKEventStore()
     private(set) var hasCalendarAccess: Bool
     private(set) var calendarAccessDenied: Bool
+    private(set) var hasReminderAccess: Bool
+    private(set) var reminderAccessDenied: Bool
     /// Debug demo mode: fixture data only, persisted. Release UI toggle is `#if DEBUG` only.
     private(set) var isDemoMode: Bool
     private(set) var eventsByMonth: [MonthKey: [Int: [CalendarEvent]]] = [:]
+    private(set) var remindersByMonth: [MonthKey: [Int: [CalendarReminder]]] = [:]
     private(set) var hiddenCalendarIDs: Set<String>
     private var loadedMonths: Set<MonthKey> = []
+    private var loadedReminderMonths: Set<MonthKey> = []
     @ObservationIgnored nonisolated(unsafe) private var observerToken: NSObjectProtocol?
 
     private static let hiddenIDsDefaultsKey = "hiddenCalendarIDs"
@@ -36,6 +40,9 @@ final class EventStore {
         let permission = Permission.calendar(access: .full)
         self.hasCalendarAccess = permission.authorized
         self.calendarAccessDenied = permission.denied
+        let reminderStatus = EKEventStore.authorizationStatus(for: .reminder)
+        self.hasReminderAccess = reminderStatus == .fullAccess
+        self.reminderAccessDenied = reminderStatus == .denied
         #if DEBUG
         self.isDemoMode = UserDefaults.standard.bool(forKey: Self.demoModeDefaultsKey)
         #else
@@ -63,6 +70,9 @@ final class EventStore {
         let permission = Permission.calendar(access: .full)
         hasCalendarAccess = permission.authorized
         calendarAccessDenied = permission.denied
+        let reminderStatus = EKEventStore.authorizationStatus(for: .reminder)
+        hasReminderAccess = reminderStatus == .fullAccess
+        reminderAccessDenied = reminderStatus == .denied
     }
 
     func setDemoMode(_ enabled: Bool) {
@@ -121,14 +131,36 @@ final class EventStore {
         }
     }
 
+    func requestReminderAccess() async {
+        let granted: Bool
+        do {
+            granted = try await ekStore.requestFullAccessToReminders()
+        } catch {
+            refreshAccessStatus()
+            return
+        }
+        hasReminderAccess = granted
+        reminderAccessDenied = !granted
+            && EKEventStore.authorizationStatus(for: .reminder) == .denied
+        if granted {
+            ekStore.reset()
+            reloadAllReminders()
+        }
+    }
+
     /// Re-check the system permission on the next run loop tick. Call after the app
     /// returns to the foreground — users may have flipped the toggle in Settings.
     func refreshAccessFromScenePhase() {
         let wasAuthorized = hasCalendarAccess
+        let wasReminderAuthorized = hasReminderAccess
         refreshAccessStatus()
         if hasCalendarAccess {
             if !wasAuthorized { ekStore.reset() }
             reloadAll()
+        }
+        if hasReminderAccess {
+            if !wasReminderAuthorized { ekStore.reset() }
+            reloadAllReminders()
         }
     }
 
@@ -144,6 +176,12 @@ final class EventStore {
         guard !isDemoMode else { return [] }
         guard hasCalendarAccess else { return [] }
         return ekStore.calendars(for: .event)
+    }
+
+    func allReminderLists() -> [EKCalendar] {
+        guard !isDemoMode else { return [] }
+        guard hasReminderAccess else { return [] }
+        return ekStore.calendars(for: .reminder)
     }
 
     func isHidden(_ calendar: EKCalendar) -> Bool {
@@ -163,6 +201,7 @@ final class EventStore {
         }
         UserDefaults.standard.set(Array(hiddenCalendarIDs), forKey: Self.hiddenIDsDefaultsKey)
         reloadAll()
+        reloadAllReminders()
     }
 
     // MARK: - Loading
@@ -170,8 +209,12 @@ final class EventStore {
     func ensureLoaded(year: Int, month: Int) {
         guard !isDemoMode else { return }
         let key = MonthKey(year: year, month: month)
-        guard !loadedMonths.contains(key) else { return }
-        reload(year: year, month: month)
+        if !loadedMonths.contains(key) {
+            reload(year: year, month: month)
+        }
+        if hasReminderAccess && !loadedReminderMonths.contains(key) {
+            Task { await reloadReminders(year: year, month: month) }
+        }
     }
 
     func reload(year: Int, month: Int) {
@@ -231,6 +274,134 @@ final class EventStore {
         for key in loadedMonths {
             reload(year: key.year, month: key.month)
         }
+        reloadAllReminders()
+    }
+
+    // MARK: - Reminder Loading
+
+    func ensureRemindersLoaded(year: Int, month: Int) {
+        guard !isDemoMode else { return }
+        let key = MonthKey(year: year, month: month)
+        guard !loadedReminderMonths.contains(key) else { return }
+        Task { await reloadReminders(year: year, month: month) }
+    }
+
+    func reloadReminders(year: Int, month: Int) async {
+        guard !isDemoMode else { return }
+        guard hasReminderAccess else { return }
+        let key = MonthKey(year: year, month: month)
+
+        var comps = DateComponents(year: year, month: month, day: 1)
+        guard let monthStart = calendar.date(from: comps) else { return }
+        comps.month = month + 1
+        guard let monthEnd = calendar.date(from: comps) else { return }
+
+        let visibleLists = ekStore.calendars(for: .reminder).filter {
+            !hiddenCalendarIDs.contains($0.calendarIdentifier)
+        }
+        if visibleLists.isEmpty {
+            remindersByMonth[key] = [:]
+            loadedReminderMonths.insert(key)
+            return
+        }
+
+        let incompletePredicate = ekStore.predicateForIncompleteReminders(
+            withDueDateStarting: nil,
+            ending: monthEnd,
+            calendars: visibleLists
+        )
+        let completedPredicate = ekStore.predicateForCompletedReminders(
+            withCompletionDateStarting: monthStart,
+            ending: monthEnd,
+            calendars: visibleLists
+        )
+
+        async let incompleteResult = fetchReminders(matching: incompletePredicate)
+        async let completedResult = fetchReminders(matching: completedPredicate)
+
+        let incomplete = (try? await incompleteResult) ?? []
+        let completed = (try? await completedResult) ?? []
+
+        let today = calendar.startOfDay(for: Date())
+        let todayDay = calendar.component(.day, from: today)
+        let todayMonth = calendar.component(.month, from: today)
+        let todayYear = calendar.component(.year, from: today)
+        let isCurrentMonth = (year == todayYear && month == todayMonth)
+
+        var grouped: [Int: [CalendarReminder]] = [:]
+
+        for ek in incomplete {
+            guard let dueComps = ek.dueDateComponents,
+                  let dueDate = calendar.date(from: dueComps) else { continue }
+
+            let dueDay = calendar.startOfDay(for: dueDate)
+            let isOverdue = dueDay < today && !ek.isCompleted
+
+            if isOverdue {
+                // Show on every day from due date (or month start) through today (or month end)
+                let rangeStart = max(dueDay, monthStart)
+                let rangeEnd = min(calendar.date(byAdding: .day, value: 1, to: today) ?? today, monthEnd)
+                var cursor = rangeStart
+                while cursor < rangeEnd {
+                    let day = calendar.component(.day, from: cursor)
+                    grouped[day, default: []].append(
+                        makeCalendarReminder(from: ek, day: day, dueDate: dueDate, isOverdue: true)
+                    )
+                    guard let next = calendar.date(byAdding: .day, value: 1, to: cursor) else { break }
+                    cursor = next
+                }
+            } else if dueDay >= monthStart && dueDay < monthEnd {
+                let day = calendar.component(.day, from: dueDay)
+                grouped[day, default: []].append(
+                    makeCalendarReminder(from: ek, day: day, dueDate: dueDate, isOverdue: false)
+                )
+            }
+        }
+
+        for ek in completed {
+            guard let dueComps = ek.dueDateComponents,
+                  let dueDate = calendar.date(from: dueComps) else { continue }
+
+            let dueDay = calendar.startOfDay(for: dueDate)
+            guard dueDay >= monthStart && dueDay < monthEnd else { continue }
+
+            let day = calendar.component(.day, from: dueDay)
+            grouped[day, default: []].append(
+                makeCalendarReminder(from: ek, day: day, dueDate: dueDate, isOverdue: false)
+            )
+        }
+
+        // Sort: incomplete first, then by due date
+        for d in grouped.keys {
+            grouped[d]?.sort { lhs, rhs in
+                if lhs.isCompleted != rhs.isCompleted { return !lhs.isCompleted }
+                return (lhs.dueDate ?? .distantPast) < (rhs.dueDate ?? .distantPast)
+            }
+        }
+
+        remindersByMonth[key] = grouped
+        loadedReminderMonths.insert(key)
+    }
+
+    private func reloadAllReminders() {
+        guard !isDemoMode else { return }
+        guard hasReminderAccess else { return }
+        let months = loadedReminderMonths.union(loadedMonths)
+        for key in months {
+            Task { await reloadReminders(year: key.year, month: key.month) }
+        }
+    }
+
+    private func fetchReminders(matching predicate: NSPredicate) async throws -> [EKReminder] {
+        try await withCheckedThrowingContinuation { continuation in
+            ekStore.fetchReminders(matching: predicate) { reminders in
+                if let reminders {
+                    continuation.resume(returning: reminders)
+                } else {
+                    continuation.resume(returning: [])
+                }
+            }
+        }
     }
 
     // MARK: - Queries
@@ -247,6 +418,30 @@ final class EventStore {
         guard !isDemoMode else { return nil }
         guard let identifier = event.eventIdentifier else { return nil }
         return ekStore.event(withIdentifier: identifier)
+    }
+
+    func reminders(year: Int, month: Int, day: Int) -> [CalendarReminder] {
+        remindersByMonth[MonthKey(year: year, month: month)]?[day] ?? []
+    }
+
+    func hasReminders(year: Int, month: Int) -> Bool {
+        !(remindersByMonth[MonthKey(year: year, month: month)]?.isEmpty ?? true)
+    }
+
+    func hasReminders(year: Int, month: Int, day: Int) -> Bool {
+        !(remindersByMonth[MonthKey(year: year, month: month)]?[day]?.isEmpty ?? true)
+    }
+
+    func toggleReminderCompletion(_ reminder: CalendarReminder) {
+        guard !isDemoMode else { return }
+        guard hasReminderAccess else { return }
+        guard let ekReminder = ekStore.calendarItem(withIdentifier: reminder.reminderIdentifier) as? EKReminder else { return }
+        ekReminder.isCompleted = !ekReminder.isCompleted
+        do {
+            try ekStore.save(ekReminder, commit: true)
+        } catch {
+            // EKEventStoreChanged won't fire on failure; no action needed.
+        }
     }
 
     // MARK: - Mutations (drag & drop)
@@ -369,6 +564,26 @@ final class EventStore {
             tint: tint,
             location: ek.location?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
             allDay: ek.isAllDay,
+            isRecurring: ek.hasRecurrenceRules
+        )
+    }
+
+    private func makeCalendarReminder(from ek: EKReminder, day: Int, dueDate: Date, isOverdue: Bool) -> CalendarReminder {
+        let tint = Color.pastelized(cgColor: ek.calendar?.cgColor)
+        let hasTime: Bool = {
+            guard let comps = ek.dueDateComponents else { return false }
+            return comps.hour != nil && comps.hour != NSDateComponentUndefined
+        }()
+        return CalendarReminder(
+            id: "\(ek.calendarItemIdentifier)-\(day)",
+            reminderIdentifier: ek.calendarItemIdentifier,
+            day: day,
+            dueDate: dueDate,
+            hasTime: hasTime,
+            title: ek.title ?? "",
+            tint: tint,
+            isCompleted: ek.isCompleted,
+            isOverdue: isOverdue,
             isRecurring: ek.hasRecurrenceRules
         )
     }

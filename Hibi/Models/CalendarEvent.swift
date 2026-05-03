@@ -94,6 +94,19 @@ extension CalendarEvent {
     }
 }
 
+struct CalendarReminder: Identifiable, Hashable {
+    let id: String
+    let reminderIdentifier: String
+    let day: Int
+    let dueDate: Date?
+    let hasTime: Bool
+    let title: String
+    let tint: Color
+    let isCompleted: Bool
+    let isOverdue: Bool
+    let isRecurring: Bool
+}
+
 struct DayWeather: Hashable {
     /// Stored in Celsius with full decimal precision. Views convert + round
     /// at display time so switching the temperature unit doesn't accumulate

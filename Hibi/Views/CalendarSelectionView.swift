@@ -23,8 +23,9 @@ struct CalendarSelectionView: View {
 
     @ViewBuilder
     private var content: some View {
-        let groups = grouped(eventStore.allCalendars())
-        if groups.isEmpty {
+        let calendarGroups = grouped(eventStore.allCalendars())
+        let reminderGroups = grouped(eventStore.allReminderLists())
+        if calendarGroups.isEmpty && reminderGroups.isEmpty {
             ContentUnavailableView(
                 "No calendars",
                 systemImage: "calendar",
@@ -32,11 +33,31 @@ struct CalendarSelectionView: View {
             )
         } else {
             List {
-                ForEach(groups, id: \.title) { group in
+                ForEach(calendarGroups, id: \.title) { group in
                     Section(group.title) {
                         ForEach(group.calendars, id: \.calendarIdentifier) { cal in
                             CalendarRow(calendar: cal)
                         }
+                    }
+                }
+                if !reminderGroups.isEmpty {
+                    ForEach(reminderGroups, id: \.title) { group in
+                        Section("Reminders — \(group.title)") {
+                            ForEach(group.calendars, id: \.calendarIdentifier) { cal in
+                                CalendarRow(calendar: cal)
+                            }
+                        }
+                    }
+                }
+                if !eventStore.hasReminderAccess && !eventStore.reminderAccessDenied {
+                    Section {
+                        Button {
+                            Task { await eventStore.requestReminderAccess() }
+                        } label: {
+                            Label("Show Reminders", systemImage: "checklist")
+                        }
+                    } footer: {
+                        Text("Grant access to display your reminders alongside events.")
                     }
                 }
             }
