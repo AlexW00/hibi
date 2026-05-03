@@ -1,6 +1,7 @@
 import EventKit
 import SwiftUI
 import WhatsNewKit
+import WidgetKit
 
 struct SettingsView: View {
     /// Called by the "Review permissions" button. ContentView latches this and
@@ -143,6 +144,14 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showWhatsNew) {
                 WhatsNewView(whatsNew: WhatsNewContent.latest)
+            }
+            .onChange(of: useSimpleFont) { _, newValue in
+                SharedDefaults.suite.set(newValue, forKey: SharedDefaults.useSimpleFontKey)
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+            .onChange(of: timeFormatRaw) { _, newValue in
+                SharedDefaults.suite.set(newValue, forKey: SharedDefaults.timeFormatKey)
+                WidgetCenter.shared.reloadAllTimelines()
             }
         }
     }

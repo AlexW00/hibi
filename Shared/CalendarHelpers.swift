@@ -1,20 +1,15 @@
 import Foundation
-import SwiftUI
 
-enum SampleData {
+enum CalendarHelpers {
     static var todayYear: Int { todayComponents.year }
     static var todayMonth: Int { todayComponents.month }
     static var todayDay: Int { todayComponents.day }
-
-    static let demoAnchorYear = 2026
-    static let demoAnchorMonth = 4
-    static let demoAnchorDay = 18
 
     private static var todayComponents: (year: Int, month: Int, day: Int) {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = .current
         let c = cal.dateComponents([.year, .month, .day], from: Date())
-        return (c.year ?? demoAnchorYear, c.month ?? demoAnchorMonth, c.day ?? demoAnchorDay)
+        return (c.year ?? 2026, c.month ?? 1, c.day ?? 1)
     }
 
     static func firstWeekday(year: Int, month: Int) -> Int {
@@ -52,12 +47,14 @@ enum SampleData {
         let t = todayComponents
         return year == t.year && month == t.month && day == t.day
     }
-
-    static func isDemoAnchor(year: Int, month: Int, day: Int) -> Bool {
-        year == demoAnchorYear && month == demoAnchorMonth && day == demoAnchorDay
-    }
 }
 
-enum AppColor {
-    static let accent: Color = .primary
+enum MonthNames {
+    static var full: [String]  { Calendar.autoupdatingCurrent.standaloneMonthSymbols }
+    static var short: [String] { Calendar.autoupdatingCurrent.shortStandaloneMonthSymbols }
+}
+
+enum DayNames {
+    static var full: [String]  { Calendar.autoupdatingCurrent.standaloneWeekdaySymbols }
+    static var short: [String] { Calendar.autoupdatingCurrent.veryShortStandaloneWeekdaySymbols }
 }

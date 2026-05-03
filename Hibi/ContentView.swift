@@ -182,6 +182,19 @@ struct ContentView: View {
         }
         .preferredColorScheme(colorScheme)
         .tint(.primary)
+        .onOpenURL { url in
+            guard url.scheme == "hibi", url.host() == "day" else { return }
+            let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            let items = components?.queryItems ?? []
+            guard let y = items.first(where: { $0.name == "year" })?.value.flatMap(Int.init),
+                  let m = items.first(where: { $0.name == "month" })?.value.flatMap(Int.init),
+                  let d = items.first(where: { $0.name == "day" })?.value.flatMap(Int.init)
+            else { return }
+            displayedYear = y
+            displayedMonth = m
+            selectedDay = d
+            selection = .day
+        }
     }
 
     private func openEditor(for event: CalendarEvent) {

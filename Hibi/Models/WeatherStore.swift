@@ -118,7 +118,10 @@ final class WeatherStore: NSObject {
     }
 
     private func apply(weather: Weather?, placeName: String?, location: CLLocation) {
-        if let placeName { self.locationName = placeName }
+        if let placeName {
+            self.locationName = placeName
+            SharedDefaults.suite.set(placeName, forKey: SharedDefaults.locationNameKey)
+        }
         lastFetchLocation = location
         lastFetchAt = Date()
 
@@ -139,6 +142,27 @@ final class WeatherStore: NSObject {
             )
         }
         self.weatherByDay = byDay
+        writeTodayWeatherToWidget()
+    }
+
+    private func writeTodayWeatherToWidget() {
+        let y = SampleData.todayYear
+        let m = SampleData.todayMonth
+        let d = SampleData.todayDay
+        guard let today = weatherByDay[DayKey(year: y, month: m, day: d)] else { return }
+        let shared = SharedWeatherData(
+            high: today.high,
+            low: today.low,
+            weatherCode: today.code.rawValue,
+            sunrise: today.sunrise,
+            sunset: today.sunset,
+            year: y,
+            month: m,
+            day: d
+        )
+        if let data = try? JSONEncoder().encode(shared) {
+            SharedDefaults.suite.set(data, forKey: SharedDefaults.todayWeatherKey)
+        }
     }
 
     // MARK: - Mapping

@@ -15,6 +15,11 @@
       "source": "avdlee/swift-concurrency-agent-skill",
       "sourceType": "github",
       "computedHash": "05ef28a2e0eb4eacd6a958cf07c1f5bd5d600e147c844b26dde42a9bdd2f633d"
+    },
+    "widgetkit": {
+      "source": "dpearson2699/swift-ios-skills",
+      "sourceType": "github",
+      "computedHash": "bb71a5a7185f556430f13e693cbc0a684bc179cb38b6ae63173fd511ecfbbd88"
     }
   }
 }

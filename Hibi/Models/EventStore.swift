@@ -4,6 +4,7 @@ import Foundation
 import Observation
 import PermissionsKit
 import SwiftUI
+import WidgetKit
 
 @MainActor
 @Observable
@@ -44,6 +45,7 @@ final class EventStore {
         self.hiddenCalendarIDs = Set(
             UserDefaults.standard.stringArray(forKey: Self.hiddenIDsDefaultsKey) ?? []
         )
+        Self.migrateToAppGroup()
         if isDemoMode {
             applyDemoFixtures()
         }
@@ -57,6 +59,19 @@ final class EventStore {
                 self?.reloadAll()
             }
         }
+    }
+
+    private static func migrateToAppGroup() {
+        let standard = UserDefaults.standard
+        let migrationKey = "didMigrateToAppGroup"
+        guard !standard.bool(forKey: migrationKey) else { return }
+        let suite = SharedDefaults.suite
+        if let ids = standard.stringArray(forKey: hiddenIDsDefaultsKey) {
+            suite.set(ids, forKey: SharedDefaults.hiddenCalendarIDsKey)
+        }
+        suite.set(standard.bool(forKey: "useSimpleFont"), forKey: SharedDefaults.useSimpleFontKey)
+        suite.set(standard.string(forKey: "timeFormat"), forKey: SharedDefaults.timeFormatKey)
+        standard.set(true, forKey: migrationKey)
     }
 
     private func refreshAccessStatus() {
@@ -114,10 +129,9 @@ final class EventStore {
         calendarAccessDenied = !granted
             && EKEventStore.authorizationStatus(for: .event) == .denied
         if granted {
-            // Flush any cached unauthorized state so calendars(for:) /
-            // events(matching:) see the newly granted data without a restart.
             ekStore.reset()
             reloadAll()
+            WidgetCenter.shared.reloadAllTimelines()
         }
     }
 
@@ -161,8 +175,11 @@ final class EventStore {
         } else {
             hiddenCalendarIDs.remove(id)
         }
-        UserDefaults.standard.set(Array(hiddenCalendarIDs), forKey: Self.hiddenIDsDefaultsKey)
+        let ids = Array(hiddenCalendarIDs)
+        UserDefaults.standard.set(ids, forKey: Self.hiddenIDsDefaultsKey)
+        SharedDefaults.suite.set(ids, forKey: SharedDefaults.hiddenCalendarIDsKey)
         reloadAll()
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     // MARK: - Loading
@@ -231,6 +248,7 @@ final class EventStore {
         for key in loadedMonths {
             reload(year: key.year, month: key.month)
         }
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     // MARK: - Queries

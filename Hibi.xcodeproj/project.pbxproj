@@ -10,14 +10,51 @@
 		4B0450C42F94C6EF009EA06E /* WhatsNewKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0450C32F94C6EF009EA06E /* WhatsNewKit */; };
 		4B0451032F94C6EF009EA06E /* CalendarPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0451012F94C6EF009EA06E /* CalendarPermission */; };
 		4B0451042F94C6EF009EA06E /* LocationPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0451022F94C6EF009EA06E /* LocationPermission */; };
+		4B04520D2FA64000009EA06E /* HibiWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4B0452012FA64000009EA06E /* HibiWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4B04520A2FA64000009EA06E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4B802FC52F8F5453008F00F4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4B0452002FA64000009EA06E;
+			remoteInfo = HibiWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4B04520C2FA64000009EA06E /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				4B04520D2FA64000009EA06E /* HibiWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		4B0451052F96B000009EA06E /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		4B0452012FA64000009EA06E /* HibiWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HibiWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4B0452402FA64000009EA06E /* HibiWidgetsInfo.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = HibiWidgetsInfo.plist; sourceTree = "<group>"; };
 		4B802FCD2F8F5453008F00F4 /* Hibi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hibi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		4B0452202FA64000009EA06E /* HibiWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = HibiWidgets;
+			sourceTree = "<group>";
+		};
+		4B0452282FA64000009EA06E /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		4B802FCF2F8F5453008F00F4 /* Hibi */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Hibi;
@@ -26,6 +63,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4B0452032FA64000009EA06E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4B802FCA2F8F5453008F00F4 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -43,7 +87,10 @@
 			isa = PBXGroup;
 			children = (
 				4B0451052F96B000009EA06E /* Config.xcconfig */,
+				4B0452402FA64000009EA06E /* HibiWidgetsInfo.plist */,
 				4B802FCF2F8F5453008F00F4 /* Hibi */,
+				4B0452282FA64000009EA06E /* Shared */,
+				4B0452202FA64000009EA06E /* HibiWidgets */,
 				4B802FCE2F8F5453008F00F4 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				4B802FCD2F8F5453008F00F4 /* Hibi.app */,
+				4B0452012FA64000009EA06E /* HibiWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -59,6 +107,27 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		4B0452002FA64000009EA06E /* HibiWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4B0452082FA64000009EA06E /* Build configuration list for PBXNativeTarget "HibiWidgets" */;
+			buildPhases = (
+				4B0452022FA64000009EA06E /* Sources */,
+				4B0452032FA64000009EA06E /* Frameworks */,
+				4B0452042FA64000009EA06E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				4B0452202FA64000009EA06E /* HibiWidgets */,
+				4B0452282FA64000009EA06E /* Shared */,
+			);
+			name = HibiWidgets;
+			productName = HibiWidgets;
+			productReference = 4B0452012FA64000009EA06E /* HibiWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		4B802FCC2F8F5453008F00F4 /* Hibi */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4B802FD82F8F5454008F00F4 /* Build configuration list for PBXNativeTarget "Hibi" */;
@@ -66,12 +135,15 @@
 				4B802FC92F8F5453008F00F4 /* Sources */,
 				4B802FCA2F8F5453008F00F4 /* Frameworks */,
 				4B802FCB2F8F5453008F00F4 /* Resources */,
+				4B04520C2FA64000009EA06E /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				4B04520B2FA64000009EA06E /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
+				4B0452282FA64000009EA06E /* Shared */,
 				4B802FCF2F8F5453008F00F4 /* Hibi */,
 			);
 			name = Hibi;
@@ -94,6 +166,9 @@
 				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2640;
 				TargetAttributes = {
+					4B0452002FA64000009EA06E = {
+						CreatedOnToolsVersion = 26.4;
+					};
 					4B802FCC2F8F5453008F00F4 = {
 						CreatedOnToolsVersion = 26.4;
 					};
@@ -128,11 +203,19 @@
 			projectRoot = "";
 			targets = (
 				4B802FCC2F8F5453008F00F4 /* Hibi */,
+				4B0452002FA64000009EA06E /* HibiWidgets */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		4B0452042FA64000009EA06E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4B802FCB2F8F5453008F00F4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -143,6 +226,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		4B0452022FA64000009EA06E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4B802FC92F8F5453008F00F4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -152,7 +242,83 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		4B04520B2FA64000009EA06E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4B0452002FA64000009EA06E /* HibiWidgets */;
+			targetProxy = 4B04520A2FA64000009EA06E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		4B0452052FA64000009EA06E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = HibiWidgets/HibiWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 17;
+
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HibiWidgetsInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Hibi Widgets";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Hibi widgets display your upcoming events.";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Hibi widgets display your upcoming events.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.7;
+				PRODUCT_BUNDLE_IDENTIFIER = com.weichart.hibi.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		4B0452062FA64000009EA06E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = HibiWidgets/HibiWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 17;
+
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HibiWidgetsInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Hibi Widgets";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Hibi widgets display your upcoming events.";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = "Hibi widgets display your upcoming events.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.7;
+				PRODUCT_BUNDLE_IDENTIFIER = com.weichart.hibi.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 		4B802FD62F8F5454008F00F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 4B0451052F96B000009EA06E /* Config.xcconfig */;
@@ -283,6 +449,7 @@
 				CODE_SIGN_ENTITLEMENTS = Hibi/Hibi.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 17;
+
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Hibi;
@@ -328,6 +495,7 @@
 				CODE_SIGN_ENTITLEMENTS = Hibi/Hibi.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 17;
+
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Hibi;
@@ -367,6 +535,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4B0452082FA64000009EA06E /* Build configuration list for PBXNativeTarget "HibiWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4B0452052FA64000009EA06E /* Debug */,
+				4B0452062FA64000009EA06E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		4B802FC82F8F5453008F00F4 /* Build configuration list for PBXProject "Hibi" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
