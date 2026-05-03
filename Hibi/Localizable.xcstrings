@@ -6645,6 +6645,9 @@
           }
         }
       }
+    },
+    "Your reminders now appear alongside calendar events. Tap the checkbox to mark them complete — right from Hibi." : {
+
     }
   },
   "version" : "1.0"
