@@ -648,10 +648,10 @@ private struct PageContent: View {
                     }
                 }
             // Month name is already localized via the MonthNames accessor;
-            // separator + year are locale-invariant. `verbatim:` skips the
-            // LocalizedStringKey lookup so we don't pollute the catalog with a
-            // generic "%@ · %@" key.
-            Text(verbatim: "\(MonthNames.full[month - 1]) · \(String(year))")
+            // separator + year + ISO week marker are locale-invariant.
+            // `verbatim:` skips the LocalizedStringKey lookup so we don't
+            // pollute the catalog with a generic "%@ · %@ · KW %d" key.
+            Text(verbatim: "\(MonthNames.full[month - 1]) · \(String(year)) · KW \(SampleData.isoWeek(year: year, month: month, day: day))")
                 .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
                 .foregroundStyle(.secondary)
                 .padding(.top, 2)
