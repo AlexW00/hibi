@@ -4547,7 +4547,76 @@
       }
     },
     "Polished month grid" : {
-
+      "comment" : "What's New 1.8 — month-grid padding fix feature title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufgeräumte Monatsansicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Polished month grid"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vista de mes más cuidada"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vista del mese più curata"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "より見やすい月表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "더 깔끔해진 월 보기"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paparan bulan lebih kemas"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visual do mês mais caprichado"
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月视图更精致"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月檢視更精緻"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月檢視更精緻"
+          }
+        }
+      }
     },
     "Prefer swipe-up to go back? Invert the Day-view tear direction in Settings." : {
       "comment" : "What's New 1.1 — invert-swipe-direction feature subtitle.",
@@ -4841,10 +4910,148 @@
 
     },
     "Recurring calendar events now show a small repeat icon, so you can tell them apart at a glance." : {
-
+      "comment" : "What's New 1.8 — recurring-event indicator feature subtitle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiederkehrende Kalenderereignisse zeigen jetzt ein kleines Wiederholungssymbol, damit du sie auf einen Blick erkennst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recurring calendar events now show a small repeat icon, so you can tell them apart at a glance."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los eventos del calendario que se repiten ahora muestran un pequeño icono de repetición, para distinguirlos de un vistazo."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gli eventi del calendario ricorrenti ora mostrano una piccola icona di ripetizione, così puoi distinguerli a colpo d'occhio."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "繰り返し予定に小さな繰り返しマークが付くようになり、ひと目で見分けられます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "반복되는 캘린더 이벤트에 작은 반복 아이콘이 표시되어 한눈에 구분할 수 있습니다."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acara kalendar berulang kini menunjukkan ikon ulang kecil, jadi anda boleh mengenalinya sekali pandang."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eventos recorrentes do calendário agora exibem um pequeno ícone de repetição, para você identificá-los num piscar de olhos."
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重复的日历事件现在会带一个小小的重复图标，让你一眼就能认出来。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重複的日曆事件現在會帶一個小小的重複圖示，讓你一眼就能認出來。"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重複的日曆事件現在會帶一個小小的重複圖示，讓你一眼就能認出來。"
+          }
+        }
+      }
     },
     "Recurring events" : {
-
+      "comment" : "What's New 1.8 — recurring-event indicator feature title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiederkehrende Ereignisse"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recurring events"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eventos recurrentes"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eventi ricorrenti"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "繰り返しイベント"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "반복 이벤트"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acara berulang"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eventos recorrentes"
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重复事件"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重複事件"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重複事件"
+          }
+        }
+      }
     },
     "Release" : {
       "comment" : "Settings section header above the What's New button and Version row.",
@@ -5864,7 +6071,76 @@
       }
     },
     "The today indicator no longer clips into the row below — the month grid has proper breathing room now." : {
-
+      "comment" : "What's New 1.8 — month-grid padding fix feature subtitle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Heute-Markierung ragt nicht mehr in die nächste Zeile — die Monatsansicht hat endlich Platz zum Atmen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The today indicator no longer clips into the row below — the month grid has proper breathing room now."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El indicador de hoy ya no se solapa con la fila inferior: la vista de mes tiene espacio para respirar."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'indicatore di oggi non sconfina più sulla riga sotto: la vista del mese ora respira meglio."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「今日」のインジケーターが下の行に重ならなくなり、月表示にゆとりができました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "'오늘' 표시가 더 이상 아래 줄과 겹치지 않으며, 월 보기에 여유 공간이 생겼습니다."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Penunjuk hari ini tidak lagi terhimpit ke baris bawah — paparan bulan kini lebih lapang."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O indicador de hoje não invade mais a linha de baixo — a vista do mês agora respira melhor."
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「今天」指示圆圈不再与下一行重叠——月视图终于有了合适的留白。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「今天」指示圓圈不再與下一列重疊——月檢視終於有了恰到好處的留白。"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「今天」指示圓圈不再與下一列重疊——月檢視終於有了恰到好處的留白。"
+          }
+        }
+      }
     },
     "Theme" : {
       "comment" : "Picker label in Settings for choosing the theme (System/Light/Dark).",
@@ -6659,7 +6935,76 @@
       }
     },
     "Your reminders now appear alongside calendar events. Tap the checkbox to mark them complete — right from Hibi." : {
-
+      "comment" : "What's New 1.8 — reminders feature subtitle.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Erinnerungen erscheinen jetzt neben Kalenderereignissen. Tippe auf das Kästchen, um sie direkt aus Hibi zu erledigen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your reminders now appear alongside calendar events. Tap the checkbox to mark them complete — right from Hibi."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus recordatorios ahora aparecen junto a los eventos del calendario. Toca la casilla para marcarlos como completados, directamente desde Hibi."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I tuoi promemoria ora appaiono accanto agli eventi del calendario. Tocca la casella per segnarli come completati — direttamente da Hibi."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リマインダーがカレンダーイベントと並んで表示されるようになりました。チェックボックスをタップすれば、Hibi から直接完了にできます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "미리 알림이 캘린더 이벤트와 함께 표시됩니다. 체크박스를 탭하면 Hibi에서 바로 완료 처리할 수 있습니다."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peringatan anda kini muncul bersebelahan acara kalendar. Ketik kotak semak untuk menandakannya selesai — terus dari Hibi."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus lembretes agora aparecem junto aos eventos do calendário. Toque na caixa para marcá-los como concluídos — direto do Hibi."
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的提醒事项现在会与日历事件一起显示。点击复选框即可在 Hibi 中直接完成。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的提醒事項現在會與日曆事件一同顯示。輕點勾選框即可在 Hibi 中直接完成。"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的提醒事項現在會與日曆事件一同顯示。輕點勾選框即可在 Hibi 中直接完成。"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
