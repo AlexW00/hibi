@@ -20,6 +20,16 @@ enum WhatsNewContent {
                     title: .init(String(localized: "Reminders")),
                     subtitle: .init(String(localized: "Your reminders now appear alongside calendar events. Tap the checkbox to mark them complete — right from Hibi."))
                 ),
+                WhatsNew.Feature(
+                    image: .init(systemName: "arrow.triangle.2.circlepath"),
+                    title: .init(String(localized: "Recurring events")),
+                    subtitle: .init(String(localized: "Recurring calendar events now show a small repeat icon, so you can tell them apart at a glance."))
+                ),
+                WhatsNew.Feature(
+                    image: .init(systemName: "calendar"),
+                    title: .init(String(localized: "Polished month grid")),
+                    subtitle: .init(String(localized: "The today indicator no longer clips into the row below — the month grid has proper breathing room now."))
+                ),
             ],
             primaryAction: WhatsNew.PrimaryAction(
                 title: .init(String(localized: "Continue")),

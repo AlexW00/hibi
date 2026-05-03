@@ -4546,6 +4546,9 @@
         }
       }
     },
+    "Polished month grid" : {
+
+    },
     "Prefer swipe-up to go back? Invert the Day-view tear direction in Settings." : {
       "comment" : "What's New 1.1 — invert-swipe-direction feature subtitle.",
       "extractionState" : "manual",
@@ -4835,6 +4838,12 @@
       }
     },
     "Recurring" : {
+
+    },
+    "Recurring calendar events now show a small repeat icon, so you can tell them apart at a glance." : {
+
+    },
+    "Recurring events" : {
 
     },
     "Release" : {
@@ -5853,6 +5862,9 @@
           }
         }
       }
+    },
+    "The today indicator no longer clips into the row below — the month grid has proper breathing room now." : {
+
     },
     "Theme" : {
       "comment" : "Picker label in Settings for choosing the theme (System/Light/Dark).",
