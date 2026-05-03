@@ -238,6 +238,7 @@ private struct StreamDayRow: View {
 
     var body: some View {
         let events = eventStore.events(year: year, month: month, day: day)
+        let reminders = eventStore.reminders(year: year, month: month, day: day)
         let wx = weatherStore.weather(year: year, month: month, day: day)
         let weekday = SampleData.weekday(year: year, month: month, day: day)
         let isToday = SampleData.isToday(year: year, month: month, day: day)
@@ -257,7 +258,7 @@ private struct StreamDayRow: View {
             .buttonStyle(.plain)
 
             VStack(spacing: 6) {
-                if events.isEmpty {
+                if events.isEmpty && reminders.isEmpty {
                     Text("nothing planned")
                         .font(.system(size: 13))
                         .italic()
@@ -266,8 +267,12 @@ private struct StreamDayRow: View {
                         .padding(.horizontal, 4)
                         .padding(.vertical, 10)
                 } else {
-                    // Tick once a minute so the fill advances with the day.
                     TimelineView(.periodic(from: .now, by: 60)) { ctx in
+                        ForEach(reminders) { reminder in
+                            ReminderCard(reminder: reminder) {
+                                eventStore.toggleReminderCompletion(reminder)
+                            }
+                        }
                         ForEach(events) { event in
                             eventButton(event: event, now: ctx.date)
                         }
@@ -281,7 +286,7 @@ private struct StreamDayRow: View {
             weatherCell(wx: wx)
                 .frame(width: 42)
         }
-        .frame(minHeight: events.isEmpty ? 92 : nil)
+        .frame(minHeight: (events.isEmpty && reminders.isEmpty) ? 92 : nil)
         .overlay(alignment: .top) {
             if isWeekStartOrMonthStart {
                 Rectangle()

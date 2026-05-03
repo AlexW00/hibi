@@ -63,12 +63,17 @@ struct SettingsView: View {
                     }
                 }
 
-                Section("Calendars") {
+                Section("Calendars & Reminders") {
                     NavigationLink {
                         CalendarSelectionView()
                     } label: {
                         LabeledContent("Calendars") {
                             Text(calendarSummary)
+                        }
+                    }
+                    if eventStore.hasReminderAccess {
+                        LabeledContent("Reminder Lists") {
+                            Text(reminderSummary)
                         }
                     }
                 }
@@ -158,6 +163,12 @@ struct SettingsView: View {
         if eventStore.isDemoMode { return "Demo" }
         guard eventStore.hasCalendarAccess else { return "Not connected" }
         let all = eventStore.allCalendars()
+        let visible = all.filter { !eventStore.isHidden($0) }.count
+        return "\(visible) / \(all.count)"
+    }
+
+    private var reminderSummary: LocalizedStringResource {
+        let all = eventStore.allReminderLists()
         let visible = all.filter { !eventStore.isHidden($0) }.count
         return "\(visible) / \(all.count)"
     }

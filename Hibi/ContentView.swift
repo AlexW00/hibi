@@ -16,6 +16,7 @@ struct ContentView: View {
     @State private var weatherStore = WeatherStore()
     @State private var editorMode: EventEditorSheet.Mode?
     @State private var showOnboarding = false
+    @State private var needsOnboarding = false
     /// Latched by SettingsView — when Settings dismisses with this set we
     /// present the onboarding sheet. Can't show two sheets at once, so we
     /// chain via `onDismiss`.
@@ -121,7 +122,11 @@ struct ContentView: View {
         }
         .environment(eventStore)
         .environment(weatherStore)
-        .whatsNewSheet()
+        .whatsNewSheet(onDismiss: {
+            if needsOnboarding {
+                showOnboarding = true
+            }
+        })
         .sheet(isPresented: $showSettings, onDismiss: {
             if reopenOnboardingAfterSettings {
                 reopenOnboardingAfterSettings = false
@@ -154,10 +159,21 @@ struct ContentView: View {
         .task {
             eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
             weatherStore.refresh()
-            // Auto-present only when a REQUIRED permission is missing.
-            // Location is optional — users enable it later from Settings.
-            if !eventStore.isDemoMode, !eventStore.hasCalendarAccess {
-                showOnboarding = true
+            if !eventStore.isDemoMode {
+                // Show onboarding when calendar isn't granted yet (fresh install),
+                // OR when calendar is granted but reminders haven't been asked
+                // (upgrade from a version without reminder support).
+                let shouldOnboard = !eventStore.hasCalendarAccess
+                    || (!eventStore.hasReminderAccess && !eventStore.reminderAccessDenied)
+                if shouldOnboard {
+                    let whatsNewWillPresent = !UserDefaultsWhatsNewVersionStore()
+                        .hasPresented(WhatsNewContent.version)
+                    needsOnboarding = true
+                    if !whatsNewWillPresent {
+                        showOnboarding = true
+                    }
+                    // else: onboarding shows after WhatsNew dismisses (via onDismiss)
+                }
             }
         }
         .onChange(of: displayedYear) { _, _ in
@@ -216,6 +232,18 @@ struct ContentView: View {
                 isGranted: { eventStore.hasCalendarAccess },
                 isDenied: { eventStore.calendarAccessDenied },
                 request: { await eventStore.requestAccess() },
+                openSettings: { eventStore.openCalendarSettings() }
+            ),
+            PermissionOnboardingItem(
+                id: "reminders",
+                icon: "checklist",
+                tint: Color(.displayP3, red: 0.55, green: 0.72, blue: 0.42, opacity: 1),
+                title: "Reminders",
+                description: "Display your reminders alongside calendar events.",
+                isRequired: false,
+                isGranted: { eventStore.hasReminderAccess },
+                isDenied: { eventStore.reminderAccessDenied },
+                request: { await eventStore.requestReminderAccess() },
                 openSettings: { eventStore.openCalendarSettings() }
             ),
             PermissionOnboardingItem(

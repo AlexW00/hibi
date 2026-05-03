@@ -100,7 +100,13 @@ private struct DayCell: View {
 
     var body: some View {
         let events = eventStore.events(year: year, month: month, day: day)
+        let reminders = eventStore.reminders(year: year, month: month, day: day)
+            .filter { !$0.isCompleted }
         let isToday = SampleData.isToday(year: year, month: month, day: day)
+        let dots: [(id: String, tint: Color)] =
+            reminders.prefix(2).map { (id: $0.id, tint: $0.tint) }
+            + events.prefix(4 - min(reminders.count, 2)).map { (id: $0.id, tint: $0.tint) }
+        let totalCount = events.count + reminders.count
 
         ZStack(alignment: .top) {
             VStack(spacing: 4) {
@@ -118,14 +124,14 @@ private struct DayCell: View {
                     }
 
                 HStack(spacing: 2.5) {
-                    ForEach(events.prefix(4)) { e in
+                    ForEach(dots, id: \.id) { dot in
                         Circle()
-                            .fill(e.tint)
+                            .fill(dot.tint)
                             .frame(width: 4, height: 4)
                             .opacity(0.9)
                     }
-                    if events.count > 4 {
-                        Text(verbatim: "+\(events.count - 4)")
+                    if totalCount > 4 {
+                        Text(verbatim: "+\(totalCount - dots.count)")
                             .font(.system(size: 8.5))
                             .foregroundStyle(.secondary)
                     }

@@ -348,21 +348,26 @@ struct DayView: View {
     private var scheduleEvents: some View {
         let sd = scheduleDate
         let events = eventStore.events(year: sd.year, month: sd.month, day: sd.day)
+        let reminders = eventStore.reminders(year: sd.year, month: sd.month, day: sd.day)
         return Group {
             if !eventStore.showsCalendarContent {
                 CalendarAccessPrompt(isDenied: eventStore.calendarAccessDenied) {
                     Task { await eventStore.requestAccess() }
                 }
-            } else if events.isEmpty {
+            } else if events.isEmpty && reminders.isEmpty {
                 Text("An open day.")
                     .font(.appSerif(size: 20, italic: true, simple: useSimpleFont))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 40)
             } else {
-                // Tick once a minute so the progress fill advances with the day.
                 TimelineView(.periodic(from: .now, by: 60)) { ctx in
                     VStack(spacing: 6) {
+                        ForEach(reminders) { r in
+                            ReminderRow(reminder: r) {
+                                eventStore.toggleReminderCompletion(r)
+                            }
+                        }
                         ForEach(events) { e in
                             Button {
                                 onTapEvent(e)
