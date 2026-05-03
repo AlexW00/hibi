@@ -53,14 +53,13 @@ struct ReminderCard: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(
-            reminder.tint.opacity(reminder.isCompleted ? 0.06 : 0.38)
+            reminder.tint.opacity(reminder.isCompleted ? 0.38 : 0.10)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14)
                 .strokeBorder(reminder.tint.opacity(0.35), lineWidth: 0.5)
         )
-        .opacity(reminder.isCompleted ? 0.6 : 1)
         .animation(.easeInOut(duration: 0.3), value: reminder.isCompleted)
         .sensoryFeedback(reminder.isCompleted ? .success : .selection, trigger: reminder.isCompleted)
     }

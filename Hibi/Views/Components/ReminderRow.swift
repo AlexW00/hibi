@@ -20,13 +20,12 @@ struct ReminderRow: View {
             Spacer(minLength: 0)
         }
         .frame(minHeight: 48)
-        .background(reminder.tint.opacity(reminder.isCompleted ? 0.06 : 0.38))
+        .background(reminder.tint.opacity(reminder.isCompleted ? 0.38 : 0.10))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(reminder.tint.opacity(0.35), lineWidth: 0.5)
         )
-        .opacity(reminder.isCompleted ? 0.6 : 1)
         .animation(.easeInOut(duration: 0.3), value: reminder.isCompleted)
         .sensoryFeedback(reminder.isCompleted ? .success : .selection, trigger: reminder.isCompleted)
     }
