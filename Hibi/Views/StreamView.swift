@@ -19,7 +19,9 @@ struct DraggedEvent: Codable, Transferable {
 struct StreamView: View {
     @Binding var displayedYear: Int
     @Binding var displayedMonth: Int
+    @Binding var selectedDay: Int
     let scrollToNowToken: Int
+    let tabSwitchToken: Int
     let onPickDay: (Int, Int, Int) -> Void
     let onTapEvent: (CalendarEvent) -> Void
 
@@ -30,20 +32,29 @@ struct StreamView: View {
     init(
         displayedYear: Binding<Int>,
         displayedMonth: Binding<Int>,
+        selectedDay: Binding<Int>,
         scrollToNowToken: Int,
+        tabSwitchToken: Int,
         onPickDay: @escaping (Int, Int, Int) -> Void,
         onTapEvent: @escaping (CalendarEvent) -> Void
     ) {
         self._displayedYear = displayedYear
         self._displayedMonth = displayedMonth
+        self._selectedDay = selectedDay
         self.scrollToNowToken = scrollToNowToken
+        self.tabSwitchToken = tabSwitchToken
         self.onPickDay = onPickDay
         self.onTapEvent = onTapEvent
 
         let y = displayedYear.wrappedValue
         let m = displayedMonth.wrappedValue
-        let isTodayMonth = y == SampleData.todayYear && m == SampleData.todayMonth
-        let seedDay = isTodayMonth ? SampleData.todayDay : 15
+        // Clamp the selected day in case the displayed month has fewer days
+        // (e.g. selectedDay=31 from March, displayedMonth scrolled to April
+        // by Month tab).
+        let seedDay = min(
+            max(1, selectedDay.wrappedValue),
+            SampleData.daysInMonth(year: y, month: m)
+        )
         let seed = DayKey(year: y, month: m, day: seedDay)
         _window = State(initialValue: StreamWindow(center: seed))
         var initial = ScrollPosition(idType: Int.self)
@@ -94,8 +105,10 @@ struct StreamView: View {
             window.visibleDayID = newID
             let y = newID / 10_000
             let m = (newID / 100) % 100
+            let d = newID % 100
             if y != displayedYear { displayedYear = y }
             if m != displayedMonth { displayedMonth = m }
+            if d != selectedDay { selectedDay = d }
         }
         .onChange(of: scrollToNowToken) { _, _ in
             let today = DayKey(
@@ -107,6 +120,19 @@ struct StreamView: View {
             withAnimation(.snappy(duration: 0.35)) {
                 position.scrollTo(id: today.id)
             }
+        }
+        .onChange(of: tabSwitchToken) { _, _ in
+            // Sync to whichever day the previous tab was showing. Clamp the
+            // day in case it was set on a longer month than the one we're
+            // landing in. Snap (no animation) — the scroll happens behind
+            // the tab transition.
+            let safeDay = min(
+                max(1, selectedDay),
+                SampleData.daysInMonth(year: displayedYear, month: displayedMonth)
+            )
+            let target = DayKey(year: displayedYear, month: displayedMonth, day: safeDay)
+            window.recenter(on: target)
+            position.scrollTo(id: target.id)
         }
     }
 }

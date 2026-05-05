@@ -8,6 +8,11 @@ enum CalendarTab: Hashable {
 struct ContentView: View {
     @State private var selection: CalendarTab = .day
     @State private var scrollToNowToken: Int = 0
+    /// Bumped whenever the user changes tabs. List-based tabs (Month, Week)
+    /// observe this and recenter their scroll position on the shared
+    /// displayed date so switching tabs lands near where the previous tab
+    /// was looking, instead of wherever each tab was last left.
+    @State private var tabSwitchToken: Int = 0
     @State private var showSettings = false
     @State private var displayedYear = SampleData.todayYear
     @State private var displayedMonth = SampleData.todayMonth
@@ -31,6 +36,8 @@ struct ContentView: View {
             set: { newValue in
                 if newValue == selection {
                     returnToNow()
+                } else {
+                    tabSwitchToken &+= 1
                 }
                 selection = newValue
             }
@@ -54,6 +61,7 @@ struct ContentView: View {
                         displayedYear: $displayedYear,
                         displayedMonth: $displayedMonth,
                         scrollToNowToken: scrollToNowToken,
+                        tabSwitchToken: tabSwitchToken,
                         onPickDay: { year, month, day in
                             displayedYear = year
                             displayedMonth = month
@@ -67,7 +75,9 @@ struct ContentView: View {
                     StreamView(
                         displayedYear: $displayedYear,
                         displayedMonth: $displayedMonth,
+                        selectedDay: $selectedDay,
                         scrollToNowToken: scrollToNowToken,
+                        tabSwitchToken: tabSwitchToken,
                         onPickDay: { year, month, day in
                             displayedYear = year
                             displayedMonth = month
