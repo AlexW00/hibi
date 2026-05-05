@@ -678,7 +678,7 @@ private struct PageContent: View {
                             .foregroundStyle(.secondary)
                     }
                     .foregroundStyle(.primary)
-                    Text(locationName ?? "")
+                    MarqueeText(text: locationName ?? "")
                         .font(.system(size: 9.5))
                         .tracking(1.4)
                         .foregroundStyle(.secondary)
@@ -705,5 +705,109 @@ private struct AppleWeatherAttribution: View {
                 .foregroundStyle(.secondary)
         }
         .accessibilityLabel(Text("Apple Weather"))
+    }
+}
+
+// MARK: - Marquee Text
+
+/// Single-line text that scrolls horizontally like a news ticker when it
+/// doesn't fit the available width. Renders statically when it fits.
+/// Picks up font / foregroundStyle / tracking from the environment, so the
+/// caller styles it like any other `Text`.
+private struct MarqueeText: View {
+    let text: String
+    var pixelsPerSecond: CGFloat = 18
+    var fadeWidth: CGFloat = 14
+    var gap: CGFloat = 36
+    var leadingPause: Double = 1.2
+
+    @State private var textWidth: CGFloat = 0
+    @State private var containerWidth: CGFloat = 0
+    @State private var animOffset: CGFloat = 0
+    @State private var animationToken: Int = 0
+
+    private var overflows: Bool {
+        textWidth > 0 && containerWidth > 0 && textWidth > containerWidth + 0.5
+    }
+
+    var body: some View {
+        // The shell is a horizontally flexible single-line Text: it gives the
+        // parent a stable line height and never pushes wider than what the
+        // layout offers (so siblings keep their space). It's hidden when the
+        // ticker is on; otherwise it's the static rendering.
+        Text(verbatim: text)
+            .lineLimit(1)
+            .fixedSize(horizontal: false, vertical: true)
+            .opacity(overflows ? 0 : 1)
+            .overlay(alignment: .leading) { tickerOverlay }
+            .background(alignment: .leading) { textWidthMeasurer }
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+                guard abs(width - containerWidth) > 0.5 else { return }
+                containerWidth = width
+                restart()
+            }
+            .mask { maskShape }
+    }
+
+    @ViewBuilder
+    private var tickerOverlay: some View {
+        if overflows {
+            HStack(spacing: gap) {
+                Text(verbatim: text).lineLimit(1).fixedSize()
+                Text(verbatim: text).lineLimit(1).fixedSize()
+            }
+            .offset(x: animOffset)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var textWidthMeasurer: some View {
+        Text(verbatim: text)
+            .lineLimit(1)
+            .fixedSize()
+            .hidden()
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+                guard abs(width - textWidth) > 0.5 else { return }
+                textWidth = width
+                restart()
+            }
+    }
+
+    @ViewBuilder
+    private var maskShape: some View {
+        if overflows {
+            HStack(spacing: 0) {
+                LinearGradient(
+                    colors: [.clear, .black],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: fadeWidth)
+                Rectangle().fill(.black)
+                LinearGradient(
+                    colors: [.black, .clear],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: fadeWidth)
+            }
+        } else {
+            Rectangle().fill(.black)
+        }
+    }
+
+    private func restart() {
+        animationToken += 1
+        let token = animationToken
+        animOffset = 0
+        guard overflows else { return }
+        let cycle = textWidth + gap
+        let duration = max(4, Double(cycle / pixelsPerSecond))
+        DispatchQueue.main.asyncAfter(deadline: .now() + leadingPause) {
+            guard token == animationToken else { return }
+            withAnimation(.linear(duration: duration).repeatForever(autoreverses: false)) {
+                animOffset = -cycle
+            }
+        }
     }
 }
