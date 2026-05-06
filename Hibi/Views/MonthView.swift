@@ -150,6 +150,7 @@ struct MonthsScrollView: View {
     @Binding var displayedYear: Int
     @Binding var displayedMonth: Int
     let scrollToNowToken: Int
+    let tabSwitchToken: Int
     var onPickDay: (Int, Int, Int) -> Void
 
     @State private var window: CalendarWindow
@@ -159,18 +160,19 @@ struct MonthsScrollView: View {
         displayedYear: Binding<Int>,
         displayedMonth: Binding<Int>,
         scrollToNowToken: Int,
+        tabSwitchToken: Int,
         onPickDay: @escaping (Int, Int, Int) -> Void
     ) {
         self._displayedYear = displayedYear
         self._displayedMonth = displayedMonth
         self.scrollToNowToken = scrollToNowToken
+        self.tabSwitchToken = tabSwitchToken
         self.onPickDay = onPickDay
-        // Seed on today, not the binding: the binding can drift when the Week
-        // view has been scrolled before the Month tab is first opened, which
-        // otherwise lands Month on whatever month Week was showing.
+        // Seed from the shared displayed date so opening Month after another
+        // tab scrolled lands close to where the user was looking.
         let seed = MonthKey(
-            year: SampleData.todayYear,
-            month: SampleData.todayMonth
+            year: displayedYear.wrappedValue,
+            month: displayedMonth.wrappedValue
         )
         _window = State(initialValue: CalendarWindow(center: seed))
         var initial = ScrollPosition(idType: Int.self)
@@ -221,6 +223,14 @@ struct MonthsScrollView: View {
             withAnimation(.snappy(duration: 0.35)) {
                 position.scrollTo(id: today.id)
             }
+        }
+        .onChange(of: tabSwitchToken) { _, _ in
+            // When the user switches into this tab, sync to the month the
+            // previous tab was showing. Snap (no animation) — the scroll
+            // happens behind the tab transition.
+            let target = MonthKey(year: displayedYear, month: displayedMonth)
+            window.recenter(on: target)
+            position.scrollTo(id: target.id)
         }
     }
 }

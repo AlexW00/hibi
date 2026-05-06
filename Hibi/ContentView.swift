@@ -8,6 +8,17 @@ enum CalendarTab: Hashable {
 struct ContentView: View {
     @State private var selection: CalendarTab = .day
     @State private var scrollToNowToken: Int = 0
+    /// Bumped whenever the user changes tabs. List-based tabs (Month, Week)
+    /// observe this and recenter their scroll position on the shared
+    /// displayed date so switching tabs lands near where the previous tab
+    /// was looking, instead of wherever each tab was last left.
+    @State private var tabSwitchToken: Int = 0
+    /// (year, month) captured when the user enters the Month tab. On exit,
+    /// if the user scrolled Month to a different month, we anchor the
+    /// destination on day 1 (Month has no notion of a single "current day").
+    /// If they left Month on the same month they entered, selectedDay is
+    /// preserved so Day → Month → Day round-trips don't lose the day.
+    @State private var monthEntry: (year: Int, month: Int)?
     @State private var showSettings = false
     @State private var displayedYear = SampleData.todayYear
     @State private var displayedMonth = SampleData.todayMonth
@@ -31,6 +42,22 @@ struct ContentView: View {
             set: { newValue in
                 if newValue == selection {
                     returnToNow()
+                } else {
+                    // Leaving Month: only anchor the destination on day 1 if
+                    // the user actually scrolled Month to a different month.
+                    // Otherwise they were just visiting and we preserve
+                    // selectedDay so Day → Month → Day stays on the same day.
+                    if selection == .month, let entry = monthEntry,
+                       entry.year != displayedYear || entry.month != displayedMonth {
+                        selectedDay = 1
+                    }
+                    if selection == .month {
+                        monthEntry = nil
+                    }
+                    if newValue == .month {
+                        monthEntry = (displayedYear, displayedMonth)
+                    }
+                    tabSwitchToken &+= 1
                 }
                 selection = newValue
             }
@@ -54,6 +81,7 @@ struct ContentView: View {
                         displayedYear: $displayedYear,
                         displayedMonth: $displayedMonth,
                         scrollToNowToken: scrollToNowToken,
+                        tabSwitchToken: tabSwitchToken,
                         onPickDay: { year, month, day in
                             displayedYear = year
                             displayedMonth = month
@@ -67,7 +95,9 @@ struct ContentView: View {
                     StreamView(
                         displayedYear: $displayedYear,
                         displayedMonth: $displayedMonth,
+                        selectedDay: $selectedDay,
                         scrollToNowToken: scrollToNowToken,
+                        tabSwitchToken: tabSwitchToken,
                         onPickDay: { year, month, day in
                             displayedYear = year
                             displayedMonth = month
