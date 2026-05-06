@@ -9,7 +9,7 @@ import SwiftUI
 /// caller styles it like any other `Text`.
 struct MarqueeText: View {
     let text: String
-    var pixelsPerSecond: CGFloat = 18
+    var pixelsPerSecond: CGFloat = 10
     var fadeWidth: CGFloat = 14
     var gap: CGFloat = 36
     var leadingPause: Double = 1.2
