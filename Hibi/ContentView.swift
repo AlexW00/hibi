@@ -37,6 +37,14 @@ struct ContentView: View {
                 if newValue == selection {
                     returnToNow()
                 } else {
+                    // Leaving the Month tab: anchor the destination on day 1
+                    // of the displayed month, since Month has no concept of
+                    // a single "current day" — landing on whatever
+                    // selectedDay happened to hold (often mid-month) is
+                    // arbitrary.
+                    if selection == .month {
+                        selectedDay = 1
+                    }
                     tabSwitchToken &+= 1
                 }
                 selection = newValue

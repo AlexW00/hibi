@@ -58,7 +58,7 @@ struct StreamView: View {
         let seed = DayKey(year: y, month: m, day: seedDay)
         _window = State(initialValue: StreamWindow(center: seed))
         var initial = ScrollPosition(idType: Int.self)
-        initial.scrollTo(id: seed.id, anchor: .center)
+        initial.scrollTo(id: seed.id, anchor: .top)
         _position = State(initialValue: initial)
     }
 
@@ -91,7 +91,7 @@ struct StreamView: View {
             .padding(.top, 4)
             .padding(.bottom, 160)
         }
-        .scrollPosition($position, anchor: .center)
+        .scrollPosition($position, anchor: .top)
         .scrollTargetBehavior(.viewAligned)
         .sensoryFeedback(.selection, trigger: position.viewID(type: Int.self))
         .onScrollPhaseChange { _, newPhase in
