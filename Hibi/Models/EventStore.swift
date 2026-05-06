@@ -409,6 +409,30 @@ final class EventStore {
     func ekEvent(matching event: CalendarEvent) -> EKEvent? {
         guard !isDemoMode else { return nil }
         guard let identifier = event.eventIdentifier else { return nil }
+
+        // For recurring events, `event(withIdentifier:)` returns the first
+        // occurrence (the series "master"). Handing that to
+        // EKEventEditViewController makes the "Delete This Event Only" action
+        // remove the past master rather than the occurrence the user tapped,
+        // so the visible occurrence persists. Re-query the day's occurrences
+        // and pick the one whose start matches the tapped instance.
+        if event.isRecurring, let occurrenceStart = event.startDate {
+            let dayStart = calendar.startOfDay(for: occurrenceStart)
+            if let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) {
+                let predicate = ekStore.predicateForEvents(
+                    withStart: dayStart, end: dayEnd, calendars: nil
+                )
+                let matches = ekStore.events(matching: predicate)
+                    .filter { $0.eventIdentifier == identifier }
+                if let exact = matches.min(by: {
+                    abs($0.startDate.timeIntervalSince(occurrenceStart))
+                        < abs($1.startDate.timeIntervalSince(occurrenceStart))
+                }) {
+                    return exact
+                }
+            }
+        }
+
         return ekStore.event(withIdentifier: identifier)
     }
 
