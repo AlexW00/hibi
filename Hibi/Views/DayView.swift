@@ -678,7 +678,7 @@ private struct PageContent: View {
                             .foregroundStyle(.secondary)
                     }
                     .foregroundStyle(.primary)
-                    Text(locationName ?? "")
+                    MarqueeText(text: locationName ?? "")
                         .font(.system(size: 9.5))
                         .tracking(1.4)
                         .foregroundStyle(.secondary)

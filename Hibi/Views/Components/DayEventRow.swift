@@ -70,8 +70,8 @@ struct DayEventRow: View {
                     RecurringGlyph()
                 }
             }
-            if let loc = event.location {
-                Text(loc)
+            if let loc = event.location, !loc.isEmpty {
+                MarqueeText(text: loc)
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
             }

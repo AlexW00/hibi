@@ -79,20 +79,14 @@ struct EventCard: View {
                         RecurringGlyph()
                     }
                 }
-                HStack(spacing: 8) {
-                    Text(verbatim: timeRange)
-                        .font(.system(size: 10.5, design: .monospaced))
-                        .tracking(0.2)
+                Text(verbatim: timeRange)
+                    .font(.system(size: 10.5, design: .monospaced))
+                    .tracking(0.2)
+                    .foregroundStyle(.secondary)
+                if let loc = event.location, !loc.isEmpty {
+                    MarqueeText(text: loc)
+                        .font(.system(size: 10.5))
                         .foregroundStyle(.secondary)
-                    if let loc = event.location {
-                        Text(verbatim: "·")
-                            .foregroundStyle(.secondary)
-                            .opacity(0.4)
-                        Text(loc)
-                            .font(.system(size: 10.5))
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
                 }
             }
             Spacer(minLength: 0)
