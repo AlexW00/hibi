@@ -5,14 +5,44 @@ import WhatsNewKit
 ///
 /// Version string must match `CFBundleShortVersionString` so
 /// `UserDefaultsWhatsNewVersionStore` correctly records the presentation.
-/// We currently ship `MARKETING_VERSION = 1.8`.
+/// We currently ship `MARKETING_VERSION = 1.9`.
 enum WhatsNewContent {
-    static let version: WhatsNew.Version = "1.8"
+    static let version: WhatsNew.Version = "1.9"
 
     /// Built on access so `String(localized:)` resolves against the user's current locale.
     static var latest: WhatsNew {
         WhatsNew(
             version: version,
+            title: .init(stringLiteral: String(localized: "What's New in Hibi")),
+            features: [
+                WhatsNew.Feature(
+                    image: .init(systemName: "repeat"),
+                    title: .init(String(localized: "Recurring event fixes")),
+                    subtitle: .init(String(localized: "Deleting a single occurrence of a recurring event now removes just that one, not the entire series."))
+                ),
+                WhatsNew.Feature(
+                    image: .init(systemName: "arrow.left.arrow.right"),
+                    title: .init(String(localized: "Seamless tab switching")),
+                    subtitle: .init(String(localized: "Switching between Month, Week, and Day now picks up right where you left off."))
+                ),
+                WhatsNew.Feature(
+                    image: .init(systemName: "mappin"),
+                    title: .init(String(localized: "Scrolling location names")),
+                    subtitle: .init(String(localized: "Long venue names now scroll smoothly instead of being cut off."))
+                ),
+            ],
+            primaryAction: WhatsNew.PrimaryAction(
+                title: .init(String(localized: "Continue")),
+                backgroundColor: .primary,
+                foregroundColor: Color(uiColor: .systemBackground),
+                hapticFeedback: .selection
+            )
+        )
+    }
+
+    static var v1_8: WhatsNew {
+        WhatsNew(
+            version: "1.8",
             title: .init(stringLiteral: String(localized: "What's New in Hibi")),
             features: [
                 WhatsNew.Feature(
@@ -152,5 +182,5 @@ enum WhatsNewContent {
         )
     }
 
-    static var collection: WhatsNewCollection { [latest, v1_7, v1_5, v1_4, v1_3, v1_2] }
+    static var collection: WhatsNewCollection { [latest, v1_8, v1_7, v1_5, v1_4, v1_3, v1_2] }
 }
