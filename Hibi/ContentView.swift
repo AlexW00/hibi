@@ -13,6 +13,12 @@ struct ContentView: View {
     /// displayed date so switching tabs lands near where the previous tab
     /// was looking, instead of wherever each tab was last left.
     @State private var tabSwitchToken: Int = 0
+    /// (year, month) captured when the user enters the Month tab. On exit,
+    /// if the user scrolled Month to a different month, we anchor the
+    /// destination on day 1 (Month has no notion of a single "current day").
+    /// If they left Month on the same month they entered, selectedDay is
+    /// preserved so Day → Month → Day round-trips don't lose the day.
+    @State private var monthEntry: (year: Int, month: Int)?
     @State private var showSettings = false
     @State private var displayedYear = SampleData.todayYear
     @State private var displayedMonth = SampleData.todayMonth
@@ -37,13 +43,19 @@ struct ContentView: View {
                 if newValue == selection {
                     returnToNow()
                 } else {
-                    // Leaving the Month tab: anchor the destination on day 1
-                    // of the displayed month, since Month has no concept of
-                    // a single "current day" — landing on whatever
-                    // selectedDay happened to hold (often mid-month) is
-                    // arbitrary.
-                    if selection == .month {
+                    // Leaving Month: only anchor the destination on day 1 if
+                    // the user actually scrolled Month to a different month.
+                    // Otherwise they were just visiting and we preserve
+                    // selectedDay so Day → Month → Day stays on the same day.
+                    if selection == .month, let entry = monthEntry,
+                       entry.year != displayedYear || entry.month != displayedMonth {
                         selectedDay = 1
+                    }
+                    if selection == .month {
+                        monthEntry = nil
+                    }
+                    if newValue == .month {
+                        monthEntry = (displayedYear, displayedMonth)
                     }
                     tabSwitchToken &+= 1
                 }
