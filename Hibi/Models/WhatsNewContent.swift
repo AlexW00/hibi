@@ -16,6 +16,11 @@ enum WhatsNewContent {
             title: .init(stringLiteral: String(localized: "What's New in Hibi")),
             features: [
                 WhatsNew.Feature(
+                    image: .init(systemName: "bolt.badge.checkmark"),
+                    title: .init(String(localized: "New events sync instantly")),
+                    subtitle: .init(String(localized: "Events you create now appear on the calendar right away — no more waiting for an app restart to see them."))
+                ),
+                WhatsNew.Feature(
                     image: .init(systemName: "repeat"),
                     title: .init(String(localized: "Recurring event fixes")),
                     subtitle: .init(String(localized: "Deleting a single occurrence of a recurring event now removes just that one, not the entire series."))
