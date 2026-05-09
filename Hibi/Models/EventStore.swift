@@ -60,8 +60,16 @@ final class EventStore {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor [weak self] in
-                self?.refreshAccessStatus()
-                self?.reloadAll()
+                guard let self else { return }
+                self.refreshAccessStatus()
+                // Force EKEventStore to drop its in-memory snapshot so the
+                // next events(matching:) sees the data committed by this
+                // notification. Without this, saving a new event via
+                // EKEventEditViewController could yield a stale (or briefly
+                // empty) read — the new event wouldn't appear, and existing
+                // ones could vanish from the cache until app relaunch.
+                self.ekStore.reset()
+                self.reloadAll()
             }
         }
     }
