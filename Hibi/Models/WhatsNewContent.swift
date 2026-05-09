@@ -16,16 +16,6 @@ enum WhatsNewContent {
             title: .init(stringLiteral: String(localized: "What's New in Hibi")),
             features: [
                 WhatsNew.Feature(
-                    image: .init(systemName: "bolt.badge.checkmark"),
-                    title: .init(String(localized: "New events sync instantly")),
-                    subtitle: .init(String(localized: "Events you create now appear on the calendar right away — no more waiting for an app restart to see them."))
-                ),
-                WhatsNew.Feature(
-                    image: .init(systemName: "repeat"),
-                    title: .init(String(localized: "Recurring event fixes")),
-                    subtitle: .init(String(localized: "Deleting a single occurrence of a recurring event now removes just that one, not the entire series."))
-                ),
-                WhatsNew.Feature(
                     image: .init(systemName: "arrow.left.arrow.right"),
                     title: .init(String(localized: "Seamless tab switching")),
                     subtitle: .init(String(localized: "Switching between Month, Week, and Day now picks up right where you left off."))
@@ -34,6 +24,16 @@ enum WhatsNewContent {
                     image: .init(systemName: "mappin"),
                     title: .init(String(localized: "Scrolling location names")),
                     subtitle: .init(String(localized: "Long venue names now scroll smoothly instead of being cut off."))
+                ),
+                WhatsNew.Feature(
+                    image: .init(systemName: "repeat"),
+                    title: .init(String(localized: "Recurring event fixes")),
+                    subtitle: .init(String(localized: "Deleting a single occurrence of a recurring event now removes just that one, not the entire series."))
+                ),
+                WhatsNew.Feature(
+                    image: .init(systemName: "arrow.clockwise"),
+                    title: .init(String(localized: "Event sync fix")),
+                    subtitle: .init(String(localized: "Events you create now appear on the calendar right away — no more waiting for an app restart to see them."))
                 ),
             ],
             primaryAction: WhatsNew.PrimaryAction(
