@@ -27,6 +27,7 @@ struct DayView: View {
     @State private var tearCommitCount: Int = 0
     @State private var incomingCardY: CGFloat = -400   // off-screen above for backward tear
     @State private var scheduleSlideY: CGFloat = 0     // slide-up offset for schedule fade-in
+    @State private var isCollapsed: Bool = false
 
     // MARK: - Layout constants
 
@@ -34,6 +35,9 @@ struct DayView: View {
     private let narrowStep: CGFloat = 14      // pts narrower per side per depth level
     private let tearThreshold: CGFloat = 80
     private let offScreen: CGFloat = 700
+    private let expandedStackHeight: CGFloat = 380
+    private let collapsedStackHeight: CGFloat = 150
+    private let collapseTriggerOffset: CGFloat = 30
 
     // Progressive paper tints — white → off-white → beige (depth cue).
     private let card1Fill = PaperTints.card1
@@ -59,6 +63,16 @@ struct DayView: View {
             .scrollIndicators(.hidden)
             .scrollBounceBehavior(.basedOnSize)
             .mask(scrollFadeMask)
+            .onScrollGeometryChange(for: CGFloat.self) { geo in
+                geo.contentOffset.y
+            } action: { _, newOffset in
+                let target = newOffset > collapseTriggerOffset
+                if target != isCollapsed && (target || newOffset <= 0) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                        isCollapsed = target
+                    }
+                }
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea(.container, edges: .bottom)
@@ -108,8 +122,9 @@ struct DayView: View {
             .tracking(1.2)
             .foregroundStyle(.secondary.opacity(0.6))
             .frame(maxWidth: .infinity)
-            .frame(height: 36)
-            .opacity(tearHintOpacity)
+            .frame(height: isCollapsed ? 0 : 36)
+            .opacity(isCollapsed ? 0 : tearHintOpacity)
+            .clipped()
             .animation(.easeOut(duration: 0.32), value: isTearing)
     }
 
@@ -138,7 +153,7 @@ struct DayView: View {
 
     private var tearStack: some View {
         GeometryReader { geo in
-            let maxH: CGFloat = min(geo.size.height, 380)
+            let maxH: CGFloat = min(geo.size.height, expandedStackHeight)
             let width = geo.size.width
             let goingForward = tearDirection == 1
 
@@ -260,7 +275,7 @@ struct DayView: View {
             .opacity(max(0, 1 - abs(incomingCardY) / 400))
             .allowsHitTesting(false)
         }
-        .frame(height: 380)
+        .frame(height: isCollapsed ? collapsedStackHeight : expandedStackHeight)
     }
 
     // MARK: - Paper card builder
@@ -308,7 +323,8 @@ struct DayView: View {
                     isToday: isToday,
                     weather: weather,
                     locationName: weatherStore.locationName,
-                    preview: chromeAmount < 1
+                    preview: chromeAmount < 1,
+                    collapsed: isCollapsed
                 )
                 .allowsHitTesting(false)
             }
@@ -572,6 +588,7 @@ private struct PageContent: View {
     let weather: DayWeather?
     let locationName: String?
     let preview: Bool
+    let collapsed: Bool
 
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
@@ -586,6 +603,15 @@ private struct PageContent: View {
     }
 
     var body: some View {
+        ZStack {
+            fullLayout
+                .opacity(collapsed ? 0 : 1)
+            compactLayout
+                .opacity(collapsed ? 1 : 0)
+        }
+    }
+
+    private var fullLayout: some View {
         VStack(spacing: 0) {
             topRow
             Spacer(minLength: 0)
@@ -596,6 +622,36 @@ private struct PageContent: View {
         .padding(.horizontal, 22)
         .padding(.top, 34)
         .padding(.bottom, 20)
+    }
+
+    private var compactLayout: some View {
+        VStack(spacing: 0) {
+            Spacer(minLength: 0)
+            Text(DayNames.full[SampleData.weekday(year: year, month: month, day: day)])
+                .font(.appSerif(size: 14, italic: true, simple: useSimpleFont))
+                .foregroundStyle(.primary)
+            Text(verbatim: "\(day)")
+                .font(.appSerif(size: 44, simple: useSimpleFont))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+                .contentTransition(.numericText(value: Double(day)))
+                .overlay(alignment: .bottom) {
+                    if isToday {
+                        Rectangle()
+                            .fill(.primary)
+                            .frame(width: 36, height: 1)
+                            .offset(y: -2)
+                    }
+                }
+            Text(verbatim: "\(MonthNames.full[month - 1]) · \(String(year))")
+                .font(.appSerif(size: 11, italic: true, simple: useSimpleFont))
+                .foregroundStyle(.secondary)
+                .padding(.top, 1)
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.top, 22)
+        .padding(.bottom, 14)
     }
 
     private var topRow: some View {
