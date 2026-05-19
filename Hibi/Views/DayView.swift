@@ -87,6 +87,13 @@ struct DayView: View {
             .scrollIndicators(.hidden)
             .scrollBounceBehavior(.basedOnSize)
             .mask(scrollFadeMask)
+            // VStack reflow (driven by `tearStack` / `pullToTearHint` shrinking
+            // during a separator drag) gives the ScrollView a new implicit
+            // frame on every drag frame. Without `geometryGroup()`, the rows
+            // inside interpret those frame changes independently and visibly
+            // flicker. Placed at the outermost level so it sits immediately
+            // before the dynamic frame the VStack imposes.
+            .geometryGroup()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea(.container, edges: .bottom)
@@ -138,6 +145,8 @@ struct DayView: View {
             .tracking(1.2)
             .foregroundStyle(.secondary.opacity(0.6))
             .frame(maxWidth: .infinity)
+            // See note on `tearStack` — same jitter mitigation.
+            .geometryGroup()
             .frame(height: pullToTearHintExpandedHeight * (1 - collapseProgress))
             .opacity(tearHintOpacity)
             .animation(.easeOut(duration: 0.32), value: isTearing)
@@ -290,6 +299,12 @@ struct DayView: View {
             .opacity(max(0, 1 - abs(incomingCardY) / 400))
             .allowsHitTesting(false)
         }
+        // Without this, the card overlays (binding holes, perforation, page
+        // content) interpret the parent frame's animating height independently
+        // per frame and visibly jitter during slow drags. `geometryGroup()`
+        // (iOS 17+) makes the frame change resolve atomically before being
+        // propagated to children.
+        .geometryGroup()
         .frame(height: tearStackExpandedHeight - (tearStackExpandedHeight - tearStackCollapsedHeight) * collapseProgress)
     }
 
@@ -359,10 +374,12 @@ struct DayView: View {
             )
             // The collapse-time extra inset is folded in here (per-card) rather
             // than applied as an outer padding on `tearStack`. Applying it
-            // outside changes the GeometryReader's width on every drag frame,
-            // which cascades layout into every card and causes visible jitter
-            // during slow drags. Keeping the GeometryReader width stable and
-            // narrowing the cards individually is much smoother.
+            // outside would change the GeometryReader's width on every drag
+            // frame and cascade layout into every card. `geometryGroup()` then
+            // makes the resulting per-card width change resolve atomically so
+            // the overlays (page content, binding holes, perforation) don't
+            // interpret the changing parent geometry independently per frame.
+            .geometryGroup()
             .padding(.horizontal, horizontalInset + extraHorizontalPaddingWhenCollapsed * collapseProgress)
             .padding(.bottom, bottomPeek)
     }
