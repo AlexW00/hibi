@@ -72,7 +72,7 @@ struct DayView: View {
         VStack(spacing: 0) {
             masthead
             tearStack
-                .padding(.horizontal, 16 + extraHorizontalPaddingWhenCollapsed * collapseProgress)
+                .padding(.horizontal, 16)
                 .padding(.bottom, 4)
                 .sensoryFeedback(.impact(weight: .medium), trigger: tearCommitCount)
             pullToTearHint
@@ -357,7 +357,13 @@ struct DayView: View {
                 color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.08 * shadowAmount),
                 radius: 4, x: 0, y: 2
             )
-            .padding(.horizontal, horizontalInset)
+            // The collapse-time extra inset is folded in here (per-card) rather
+            // than applied as an outer padding on `tearStack`. Applying it
+            // outside changes the GeometryReader's width on every drag frame,
+            // which cascades layout into every card and causes visible jitter
+            // during slow drags. Keeping the GeometryReader width stable and
+            // narrowing the cards individually is much smoother.
+            .padding(.horizontal, horizontalInset + extraHorizontalPaddingWhenCollapsed * collapseProgress)
             .padding(.bottom, bottomPeek)
     }
 
@@ -386,7 +392,16 @@ struct DayView: View {
         DragGesture(minimumDistance: 2)
             .onChanged { g in
                 guard !isTearing else { return }
-                separatorDragDelta = g.translation.height
+                // Explicitly run the live drag update without any animation —
+                // otherwise a stray implicit animation (from a parent
+                // `.animation(...)` modifier elsewhere in the view tree) can
+                // interpolate between drag frames and produce visible flicker
+                // during slow drags.
+                var tx = Transaction()
+                tx.disablesAnimations = true
+                withTransaction(tx) {
+                    separatorDragDelta = g.translation.height
+                }
             }
             .onEnded { _ in
                 let snapToCollapsed = collapseProgress >= 0.5
