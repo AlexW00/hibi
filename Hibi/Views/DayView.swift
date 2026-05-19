@@ -27,8 +27,11 @@ struct DayView: View {
     @State private var tearCommitCount: Int = 0
     @State private var incomingCardY: CGFloat = -400   // off-screen above for backward tear
     @State private var scheduleSlideY: CGFloat = 0     // slide-up offset for schedule fade-in
-    @State private var scrollOffset: CGFloat = 0
-    @State private var scheduleScrollPosition = ScrollPosition(edge: .top)
+    /// Snapped baseline — 1.0 = expanded, `minPaperScale` = collapsed.
+    @State private var paperScale: CGFloat = 1.0
+    /// Live drag offset from the schedule divider, added to `paperScale` to
+    /// compute `currentScale`. Zeroed (animated) on release.
+    @State private var dragDelta: CGFloat = 0
 
     // MARK: - Layout constants
 
@@ -37,19 +40,26 @@ struct DayView: View {
     private let tearThreshold: CGFloat = 80
     private let offScreen: CGFloat = 700
     private let expandedStackHeight: CGFloat = 380
-    private let collapsedStackHeight: CGFloat = 150
-    private let expandedStackHInset: CGFloat = 16
-    private let collapsedStackHInset: CGFloat = 60
-    /// Scroll distance that drives the calendar from expanded (0) to fully
-    /// collapsed (1). Snap-on-release picks whichever endpoint is closer.
-    private let transitionDistance: CGFloat = 60
+    private let minPaperScale: CGFloat = 0.55
+    /// Drag distance (pts) that moves the paper through its full scale range.
+    private let dragRange: CGFloat = 220
 
-    /// 0 = expanded, 1 = fully collapsed. Derived live from scroll offset so
-    /// UI tracks the finger 1:1 during drag with no animation, then animates
-    /// on snap because `scheduleScrollPosition.scrollTo(y:)` is wrapped in
-    /// `withAnimation` on release.
-    private var collapseProgress: CGFloat {
-        min(max(scrollOffset / transitionDistance, 0), 1)
+    /// Live scale of the paper stack — `paperScale` plus the drag delta,
+    /// clamped to [minPaperScale, 1]. Applied as a `.scaleEffect` so the
+    /// same elements render at the same internal sizes and just shrink
+    /// visually — aspect ratio is locked by construction.
+    private var currentScale: CGFloat {
+        let factor = (1 - minPaperScale) / dragRange
+        let raw = paperScale + dragDelta * factor
+        return min(max(raw, minPaperScale), 1)
+    }
+
+    /// Opacity for corner-anchored content (sunrise/sunset/weather/Apple
+    /// Weather attribution). Fades linearly from 1 at full scale to 0 at
+    /// `minPaperScale`. Central content (weekday, numeral, month line)
+    /// stays opaque throughout.
+    private var cornerOpacity: Double {
+        Double(max(0, (currentScale - minPaperScale) / (1 - minPaperScale)))
     }
 
     // Progressive paper tints — white → off-white → beige (depth cue).
@@ -61,7 +71,9 @@ struct DayView: View {
         VStack(spacing: 0) {
             masthead
             tearStack
-                .padding(.horizontal, expandedStackHInset + (collapsedStackHInset - expandedStackHInset) * collapseProgress)
+                .padding(.horizontal, 16)
+                .scaleEffect(currentScale, anchor: .top)
+                .frame(height: expandedStackHeight * currentScale)
                 .padding(.bottom, 4)
                 .sensoryFeedback(.impact(weight: .medium), trigger: tearCommitCount)
             pullToTearHint
@@ -76,24 +88,6 @@ struct DayView: View {
             .scrollIndicators(.hidden)
             .scrollBounceBehavior(.basedOnSize)
             .mask(scrollFadeMask)
-            .scrollPosition($scheduleScrollPosition)
-            .onScrollGeometryChange(for: CGFloat.self) { geo in
-                geo.contentOffset.y
-            } action: { _, newOffset in
-                scrollOffset = newOffset
-            }
-            .onScrollPhaseChange { oldPhase, newPhase in
-                // Snap only when the user lifts their finger after an active
-                // drag. During tracking, scrollOffset → collapseProgress drives
-                // the UI directly with no animation.
-                guard oldPhase == .tracking, newPhase != .tracking else { return }
-                let progress = collapseProgress
-                guard progress > 0, progress < 1 else { return }
-                let target: CGFloat = progress >= 0.5 ? transitionDistance : 0
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
-                    scheduleScrollPosition.scrollTo(y: target)
-                }
-            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea(.container, edges: .bottom)
@@ -143,8 +137,8 @@ struct DayView: View {
             .tracking(1.2)
             .foregroundStyle(.secondary.opacity(0.6))
             .frame(maxWidth: .infinity)
-            .frame(height: 36 * (1 - collapseProgress))
-            .opacity((1 - Double(collapseProgress)) * tearHintOpacity)
+            .frame(height: 36 * CGFloat(cornerOpacity))
+            .opacity(cornerOpacity * tearHintOpacity)
             .clipped()
             .animation(.easeOut(duration: 0.32), value: isTearing)
     }
@@ -296,7 +290,7 @@ struct DayView: View {
             .opacity(max(0, 1 - abs(incomingCardY) / 400))
             .allowsHitTesting(false)
         }
-        .frame(height: expandedStackHeight + (collapsedStackHeight - expandedStackHeight) * collapseProgress)
+        .frame(height: expandedStackHeight)
     }
 
     // MARK: - Paper card builder
@@ -345,7 +339,7 @@ struct DayView: View {
                     weather: weather,
                     locationName: weatherStore.locationName,
                     preview: chromeAmount < 1,
-                    collapseProgress: Double(collapseProgress)
+                    cornerOpacity: cornerOpacity
                 )
                 .allowsHitTesting(false)
             }
@@ -370,16 +364,36 @@ struct DayView: View {
     // MARK: - Schedule
 
     private var scheduleHeader: some View {
-        HStack(spacing: 10) {
-            Rectangle().fill(.quaternary).frame(height: 0.5)
-            Text("Schedule")
-                .font(.system(size: 10, weight: .semibold))
-                .tracking(2.2)
-                .foregroundStyle(.secondary)
-            Rectangle().fill(.quaternary).frame(height: 0.5)
+        VStack(spacing: 8) {
+            Capsule()
+                .fill(.tertiary)
+                .frame(width: 36, height: 4)
+            HStack(spacing: 10) {
+                Rectangle().fill(.quaternary).frame(height: 0.5)
+                Text("Schedule")
+                    .font(.system(size: 10, weight: .semibold))
+                    .tracking(2.2)
+                    .foregroundStyle(.secondary)
+                Rectangle().fill(.quaternary).frame(height: 0.5)
+            }
         }
         .padding(.bottom, 10)
-        .padding(.top, 4)
+        .padding(.top, 8)
+        .contentShape(Rectangle())
+        .gesture(
+            DragGesture()
+                .onChanged { g in
+                    dragDelta = g.translation.height
+                }
+                .onEnded { _ in
+                    let midpoint: CGFloat = (1 + minPaperScale) / 2
+                    let target: CGFloat = currentScale >= midpoint ? 1.0 : minPaperScale
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        paperScale = target
+                        dragDelta = 0
+                    }
+                }
+        )
     }
 
     private var scheduleEvents: some View {
@@ -609,7 +623,11 @@ private struct PageContent: View {
     let weather: DayWeather?
     let locationName: String?
     let preview: Bool
-    let collapseProgress: Double
+    /// 1 at full expanded, 0 at fully collapsed. Drives the fade for
+    /// corner-anchored content (sunrise/sunset/weather pill/Apple Weather).
+    /// Central content (weekday, numeral, month line) keeps the same
+    /// identity throughout — only the parent's `.scaleEffect` shrinks them.
+    let cornerOpacity: Double
 
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
@@ -625,86 +643,93 @@ private struct PageContent: View {
 
     var body: some View {
         ZStack {
-            fullLayout
-                .opacity(1 - collapseProgress)
-            compactLayout
-                .opacity(collapseProgress)
-        }
-    }
-
-    private var fullLayout: some View {
-        VStack(spacing: 0) {
-            topRow
-            Spacer(minLength: 0)
+            // Center: numeral + month line. Stays at full opacity; the
+            // parent `.scaleEffect` shrinks it visually when collapsed.
             numeralBlock
-            Spacer(minLength: 0)
-            bottomRow
-        }
-        .padding(.horizontal, 22)
-        .padding(.top, 34)
-        .padding(.bottom, 20)
-    }
 
-    private var compactLayout: some View {
-        VStack(spacing: 0) {
-            Spacer(minLength: 0)
-            Text(DayNames.full[SampleData.weekday(year: year, month: month, day: day)])
-                .font(.appSerif(size: 14, italic: true, simple: useSimpleFont))
-                .foregroundStyle(.primary)
-            Text(verbatim: "\(day)")
-                .font(.appSerif(size: 44, simple: useSimpleFont))
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-                .contentTransition(.numericText(value: Double(day)))
-                .overlay(alignment: .bottom) {
-                    if isToday {
-                        Rectangle()
-                            .fill(.primary)
-                            .frame(width: 36, height: 1)
-                            .offset(y: -2)
-                    }
-                }
-            Text(verbatim: "\(MonthNames.full[month - 1]) · \(String(year))")
-                .font(.appSerif(size: 11, italic: true, simple: useSimpleFont))
-                .foregroundStyle(.secondary)
-                .padding(.top, 1)
-            Spacer(minLength: 0)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.top, 22)
-        .padding(.bottom, 14)
-    }
-
-    private var topRow: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 2) {
-                Image(systemName: "sunrise")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
-                Text(weather?.sunrise.map { timeFormat.string(from: $0) } ?? "")
-                    .font(.system(size: 9.5, design: .monospaced))
-                    .tracking(0.6)
-                    .foregroundStyle(.secondary)
-            }
-            .opacity(weather?.sunrise == nil ? 0 : 1)
-            Spacer()
+            // Top-center: weekday name.
             Text(DayNames.full[SampleData.weekday(year: year, month: month, day: day)])
                 .font(.appSerif(size: 19, italic: true, simple: useSimpleFont))
                 .foregroundStyle(.primary)
-                .padding(.top, 2)
-            Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Image(systemName: "sunset")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
-                Text(weather?.sunset.map { timeFormat.string(from: $0) } ?? "")
-                    .font(.system(size: 9.5, design: .monospaced))
-                    .tracking(0.6)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding(.top, 36)
+
+            // Top-leading: sunrise. Anchored via overlay alignment so the
+            // position is stable regardless of how the paper resizes.
+            sunriseBlock
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .padding(.top, 34)
+                .padding(.leading, 22)
+                .opacity(cornerOpacity * (weather?.sunrise == nil ? 0 : 1))
+
+            // Top-trailing: sunset.
+            sunsetBlock
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .padding(.top, 34)
+                .padding(.trailing, 22)
+                .opacity(cornerOpacity * (weather?.sunset == nil ? 0 : 1))
+
+            // Bottom-leading: weather pill (icon + temps + location).
+            weatherPill
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                .padding(.bottom, 20)
+                .padding(.leading, 22)
+                .opacity(cornerOpacity * (weather == nil ? 0 : 1))
+
+            // Bottom-trailing: Apple Weather attribution (legally required
+            // whenever weather data is displayed).
+            AppleWeatherAttribution()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                .padding(.bottom, 20)
+                .padding(.trailing, 22)
+                .opacity(cornerOpacity * (weather == nil ? 0 : 1))
+        }
+    }
+
+    private var sunriseBlock: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Image(systemName: "sunrise")
+                .font(.system(size: 16))
+                .foregroundStyle(.secondary)
+            Text(weather?.sunrise.map { timeFormat.string(from: $0) } ?? "")
+                .font(.system(size: 9.5, design: .monospaced))
+                .tracking(0.6)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var sunsetBlock: some View {
+        VStack(alignment: .trailing, spacing: 2) {
+            Image(systemName: "sunset")
+                .font(.system(size: 16))
+                .foregroundStyle(.secondary)
+            Text(weather?.sunset.map { timeFormat.string(from: $0) } ?? "")
+                .font(.system(size: 9.5, design: .monospaced))
+                .tracking(0.6)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var weatherPill: some View {
+        HStack(spacing: 8) {
+            WeatherIcon(code: weather?.code ?? .sun, size: 22)
+                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 0) {
+                    Text(verbatim: "\(temperatureUnit.display(celsius: weather?.high ?? 0))°")
+                        .font(.system(size: 15, weight: .medium))
+                        .tracking(-0.3)
+                    Text(verbatim: " / \(temperatureUnit.display(celsius: weather?.low ?? 0))°")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.secondary)
+                }
+                .foregroundStyle(.primary)
+                MarqueeText(text: locationName ?? "")
+                    .font(.system(size: 9.5))
+                    .tracking(1.4)
                     .foregroundStyle(.secondary)
             }
-            .opacity(weather?.sunset == nil ? 0 : 1)
         }
-        .frame(height: 44)
     }
 
     private var numeralBlock: some View {
@@ -735,38 +760,6 @@ private struct PageContent: View {
                 .frame(height: 18)
         }
         .frame(maxWidth: .infinity)
-    }
-
-    private var bottomRow: some View {
-        // Always render the row at a fixed height — fade the weather pill to
-        // opacity 0 on days without weather so the paper's vertical rhythm
-        // doesn't change between days.
-        HStack(alignment: .bottom) {
-            HStack(spacing: 8) {
-                WeatherIcon(code: weather?.code ?? .sun, size: 22)
-                    .foregroundStyle(.secondary)
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack(spacing: 0) {
-                        Text(verbatim: "\(temperatureUnit.display(celsius: weather?.high ?? 0))°")
-                            .font(.system(size: 15, weight: .medium))
-                            .tracking(-0.3)
-                        Text(verbatim: " / \(temperatureUnit.display(celsius: weather?.low ?? 0))°")
-                            .font(.system(size: 15))
-                            .foregroundStyle(.secondary)
-                    }
-                    .foregroundStyle(.primary)
-                    MarqueeText(text: locationName ?? "")
-                        .font(.system(size: 9.5))
-                        .tracking(1.4)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .opacity(weather == nil ? 0 : 1)
-            Spacer()
-            AppleWeatherAttribution()
-                .opacity(weather == nil ? 0 : 1)
-        }
-        .frame(height: 56)
     }
 }
 
