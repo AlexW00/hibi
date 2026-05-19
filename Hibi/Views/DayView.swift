@@ -28,12 +28,44 @@ struct DayView: View {
     @State private var incomingCardY: CGFloat = -400   // off-screen above for backward tear
     @State private var scheduleSlideY: CGFloat = 0     // slide-up offset for schedule fade-in
 
+    // Schedule separator drag — pull the "Schedule" handle up to shrink the
+    // paper stack and give the events list more room. Two snap positions.
+    @State private var scheduleCompact: Bool = false
+    @State private var separatorDragY: CGFloat = 0
+
     // MARK: - Layout constants
 
     private let peekAmount: CGFloat = 10      // pts each card behind peeks below the one in front
     private let narrowStep: CGFloat = 14      // pts narrower per side per depth level
     private let tearThreshold: CGFloat = 80
     private let offScreen: CGFloat = 700
+
+    // Schedule-compact layout. Compact heights are chosen so the 180pt numeral
+    // stays at full size in compact mode (the user explicitly wants the day
+    // number to remain unscaled). The horizontal inset preserves a card-like
+    // aspect ratio as the paper shrinks.
+    private let expandedStackHeight: CGFloat = 380
+    private let compactStackHeight: CGFloat = 260
+    private let compactHorizontalInsetMax: CGFloat = 35
+
+    /// 0 = paper stack at full size, 1 = paper stack compacted up.
+    /// Driven by `scheduleCompact` (snap target) plus the live `separatorDragY`
+    /// during a drag. Everything visual derives from this one value — keeps the
+    /// drag smooth and avoids competing animations.
+    private var compactness: Double {
+        let base: Double = scheduleCompact ? 1 : 0
+        let range = Double(expandedStackHeight - compactStackHeight)
+        let delta = range > 0 ? -Double(separatorDragY) / range : 0
+        return min(1, max(0, base + delta))
+    }
+
+    private var stackHeight: CGFloat {
+        expandedStackHeight - CGFloat(compactness) * (expandedStackHeight - compactStackHeight)
+    }
+
+    private var compactHorizontalInset: CGFloat {
+        compactHorizontalInsetMax * CGFloat(compactness)
+    }
 
     // Progressive paper tints — white → off-white → beige (depth cue).
     private let card1Fill = PaperTints.card1
@@ -44,7 +76,7 @@ struct DayView: View {
         VStack(spacing: 0) {
             masthead
             tearStack
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 16 + compactHorizontalInset)
                 .padding(.bottom, 4)
                 .sensoryFeedback(.impact(weight: .medium), trigger: tearCommitCount)
             pullToTearHint
@@ -95,9 +127,12 @@ struct DayView: View {
     }
 
     /// "Pull to tear" hint — fades out as the paper is pulled, back in after tear settles.
+    /// Also fades to nothing as the schedule compacts (tearing still works in
+    /// compact mode but the hint would crowd the smaller paper).
     private var tearHintOpacity: Double {
         if isTearing { return 0 }
-        return 1 - min(Double(abs(dragY)) / tearThreshold, 1)
+        let dragFade = 1 - min(Double(abs(dragY)) / tearThreshold, 1)
+        return dragFade * (1 - compactness)
     }
 
     private var pullToTearHint: some View {
@@ -108,8 +143,9 @@ struct DayView: View {
             .tracking(1.2)
             .foregroundStyle(.secondary.opacity(0.6))
             .frame(maxWidth: .infinity)
-            .frame(height: 36)
+            .frame(height: 36 * (1 - compactness))
             .opacity(tearHintOpacity)
+            .clipped()
             .animation(.easeOut(duration: 0.32), value: isTearing)
     }
 
@@ -138,7 +174,7 @@ struct DayView: View {
 
     private var tearStack: some View {
         GeometryReader { geo in
-            let maxH: CGFloat = min(geo.size.height, 380)
+            let maxH: CGFloat = geo.size.height
             let width = geo.size.width
             let goingForward = tearDirection == 1
 
@@ -260,7 +296,7 @@ struct DayView: View {
             .opacity(max(0, 1 - abs(incomingCardY) / 400))
             .allowsHitTesting(false)
         }
-        .frame(height: 380)
+        .frame(height: stackHeight)
     }
 
     // MARK: - Paper card builder
@@ -308,7 +344,8 @@ struct DayView: View {
                     isToday: isToday,
                     weather: weather,
                     locationName: weatherStore.locationName,
-                    preview: chromeAmount < 1
+                    preview: chromeAmount < 1,
+                    compactness: compactness
                 )
                 .allowsHitTesting(false)
             }
@@ -341,8 +378,38 @@ struct DayView: View {
                 .foregroundStyle(.secondary)
             Rectangle().fill(.quaternary).frame(height: 0.5)
         }
-        .padding(.bottom, 10)
-        .padding(.top, 4)
+        .padding(.vertical, 14)
+        .contentShape(Rectangle())
+        .gesture(separatorDrag)
+    }
+
+    /// Drag the "Schedule" handle to shrink or restore the paper stack. The
+    /// drag follows the finger; on release, snaps to either the expanded or
+    /// compact position (predictedEndTranslation gives velocity-aware snap so
+    /// a quick flick commits even with a short drag).
+    private var separatorDrag: some Gesture {
+        DragGesture(minimumDistance: 4)
+            .onChanged { g in
+                guard !isTearing else { return }
+                separatorDragY = g.translation.height
+            }
+            .onEnded { g in
+                guard !isTearing else {
+                    separatorDragY = 0
+                    return
+                }
+                let range = Double(expandedStackHeight - compactStackHeight)
+                let base: Double = scheduleCompact ? 1 : 0
+                let dragDelta = range > 0 ? -Double(g.translation.height) / range : 0
+                let predictedDelta = range > 0 ? -Double(g.predictedEndTranslation.height) / range : 0
+                let projected = base + predictedDelta
+                let immediate = base + dragDelta
+                let snap = projected > 0.5 || immediate > 0.5
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.86)) {
+                    scheduleCompact = snap
+                    separatorDragY = 0
+                }
+            }
     }
 
     private var scheduleEvents: some View {
@@ -572,6 +639,10 @@ private struct PageContent: View {
     let weather: DayWeather?
     let locationName: String?
     let preview: Bool
+    /// 0 = full page (all corner widgets visible), 1 = compact (only the
+    /// numeral block — corner rows fade out and collapse). The numeral itself
+    /// never scales, so the day stays readable as the paper shrinks.
+    var compactness: Double = 0
 
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
@@ -585,6 +656,13 @@ private struct PageContent: View {
         TemperatureUnit(rawValue: temperatureUnitRaw) ?? .system
     }
 
+    private var cornerOpacity: Double { 1 - compactness }
+
+    /// Top-row reserves enough height for the centered weekday italic at
+    /// every compactness level — the sunrise/sunset columns above and below
+    /// the weekday baseline are what we lose when collapsing.
+    private var topRowHeight: CGFloat { 44 - 18 * CGFloat(compactness) }
+
     var body: some View {
         VStack(spacing: 0) {
             topRow
@@ -592,10 +670,13 @@ private struct PageContent: View {
             numeralBlock
             Spacer(minLength: 0)
             bottomRow
+                .frame(height: 56 * cornerOpacity, alignment: .bottom)
+                .opacity(cornerOpacity)
+                .clipped()
         }
         .padding(.horizontal, 22)
-        .padding(.top, 34)
-        .padding(.bottom, 20)
+        .padding(.top, 34 - 20 * CGFloat(compactness))
+        .padding(.bottom, 20 * cornerOpacity)
     }
 
     private var topRow: some View {
@@ -609,7 +690,7 @@ private struct PageContent: View {
                     .tracking(0.6)
                     .foregroundStyle(.secondary)
             }
-            .opacity(weather?.sunrise == nil ? 0 : 1)
+            .opacity(weather?.sunrise == nil ? 0 : cornerOpacity)
             Spacer()
             Text(DayNames.full[SampleData.weekday(year: year, month: month, day: day)])
                 .font(.appSerif(size: 19, italic: true, simple: useSimpleFont))
@@ -625,9 +706,10 @@ private struct PageContent: View {
                     .tracking(0.6)
                     .foregroundStyle(.secondary)
             }
-            .opacity(weather?.sunset == nil ? 0 : 1)
+            .opacity(weather?.sunset == nil ? 0 : cornerOpacity)
         }
-        .frame(height: 44)
+        .frame(height: topRowHeight, alignment: .top)
+        .clipped()
     }
 
     private var numeralBlock: some View {
