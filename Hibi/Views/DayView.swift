@@ -27,7 +27,8 @@ struct DayView: View {
     @State private var tearCommitCount: Int = 0
     @State private var incomingCardY: CGFloat = -400   // off-screen above for backward tear
     @State private var scheduleSlideY: CGFloat = 0     // slide-up offset for schedule fade-in
-    @State private var isCollapsed: Bool = false
+    @State private var scrollOffset: CGFloat = 0
+    @State private var scheduleScrollPosition = ScrollPosition(edge: .top)
 
     // MARK: - Layout constants
 
@@ -37,7 +38,19 @@ struct DayView: View {
     private let offScreen: CGFloat = 700
     private let expandedStackHeight: CGFloat = 380
     private let collapsedStackHeight: CGFloat = 150
-    private let collapseTriggerOffset: CGFloat = 30
+    private let expandedStackHInset: CGFloat = 16
+    private let collapsedStackHInset: CGFloat = 60
+    /// Scroll distance that drives the calendar from expanded (0) to fully
+    /// collapsed (1). Snap-on-release picks whichever endpoint is closer.
+    private let transitionDistance: CGFloat = 60
+
+    /// 0 = expanded, 1 = fully collapsed. Derived live from scroll offset so
+    /// UI tracks the finger 1:1 during drag with no animation, then animates
+    /// on snap because `scheduleScrollPosition.scrollTo(y:)` is wrapped in
+    /// `withAnimation` on release.
+    private var collapseProgress: CGFloat {
+        min(max(scrollOffset / transitionDistance, 0), 1)
+    }
 
     // Progressive paper tints — white → off-white → beige (depth cue).
     private let card1Fill = PaperTints.card1
@@ -48,7 +61,7 @@ struct DayView: View {
         VStack(spacing: 0) {
             masthead
             tearStack
-                .padding(.horizontal, 16)
+                .padding(.horizontal, expandedStackHInset + (collapsedStackHInset - expandedStackHInset) * collapseProgress)
                 .padding(.bottom, 4)
                 .sensoryFeedback(.impact(weight: .medium), trigger: tearCommitCount)
             pullToTearHint
@@ -63,14 +76,22 @@ struct DayView: View {
             .scrollIndicators(.hidden)
             .scrollBounceBehavior(.basedOnSize)
             .mask(scrollFadeMask)
+            .scrollPosition($scheduleScrollPosition)
             .onScrollGeometryChange(for: CGFloat.self) { geo in
                 geo.contentOffset.y
             } action: { _, newOffset in
-                let target = newOffset > collapseTriggerOffset
-                if target != isCollapsed && (target || newOffset <= 0) {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
-                        isCollapsed = target
-                    }
+                scrollOffset = newOffset
+            }
+            .onScrollPhaseChange { oldPhase, newPhase in
+                // Snap only when the user lifts their finger after an active
+                // drag. During tracking, scrollOffset → collapseProgress drives
+                // the UI directly with no animation.
+                guard oldPhase == .tracking, newPhase != .tracking else { return }
+                let progress = collapseProgress
+                guard progress > 0, progress < 1 else { return }
+                let target: CGFloat = progress >= 0.5 ? transitionDistance : 0
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                    scheduleScrollPosition.scrollTo(y: target)
                 }
             }
         }
@@ -122,8 +143,8 @@ struct DayView: View {
             .tracking(1.2)
             .foregroundStyle(.secondary.opacity(0.6))
             .frame(maxWidth: .infinity)
-            .frame(height: isCollapsed ? 0 : 36)
-            .opacity(isCollapsed ? 0 : tearHintOpacity)
+            .frame(height: 36 * (1 - collapseProgress))
+            .opacity((1 - Double(collapseProgress)) * tearHintOpacity)
             .clipped()
             .animation(.easeOut(duration: 0.32), value: isTearing)
     }
@@ -275,7 +296,7 @@ struct DayView: View {
             .opacity(max(0, 1 - abs(incomingCardY) / 400))
             .allowsHitTesting(false)
         }
-        .frame(height: isCollapsed ? collapsedStackHeight : expandedStackHeight)
+        .frame(height: expandedStackHeight + (collapsedStackHeight - expandedStackHeight) * collapseProgress)
     }
 
     // MARK: - Paper card builder
@@ -324,7 +345,7 @@ struct DayView: View {
                     weather: weather,
                     locationName: weatherStore.locationName,
                     preview: chromeAmount < 1,
-                    collapsed: isCollapsed
+                    collapseProgress: Double(collapseProgress)
                 )
                 .allowsHitTesting(false)
             }
@@ -588,7 +609,7 @@ private struct PageContent: View {
     let weather: DayWeather?
     let locationName: String?
     let preview: Bool
-    let collapsed: Bool
+    let collapseProgress: Double
 
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
@@ -605,9 +626,9 @@ private struct PageContent: View {
     var body: some View {
         ZStack {
             fullLayout
-                .opacity(collapsed ? 0 : 1)
+                .opacity(1 - collapseProgress)
             compactLayout
-                .opacity(collapsed ? 1 : 0)
+                .opacity(collapseProgress)
         }
     }
 
