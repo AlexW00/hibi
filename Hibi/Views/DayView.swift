@@ -28,12 +28,41 @@ struct DayView: View {
     @State private var incomingCardY: CGFloat = -400   // off-screen above for backward tear
     @State private var scheduleSlideY: CGFloat = 0     // slide-up offset for schedule fade-in
 
+    // MARK: - Schedule separator drag
+    //
+    // Single source of truth for the draggable Schedule separator. All visual
+    // responses (paper height, aspect-ratio inset, chrome fade, hint collapse)
+    // derive deterministically from `scheduleProgress` so they animate in
+    // lockstep inside one transaction — that's what keeps a slow drag flicker-
+    // free. During drag the gesture writes scheduleProgress directly (no
+    // withAnimation); on release a single withAnimation(.spring) drives the
+    // magnetic snap.
+
+    /// 0 = paper stack at full size (default); 1 = collapsed, events list expanded.
+    @State private var scheduleProgress: CGFloat = 0
+    /// Progress at the moment the current drag began. Translation is applied
+    /// relative to this so the separator tracks the finger 1:1.
+    @State private var scheduleDragBaseProgress: CGFloat = 0
+    /// True while a finger is on the separator.
+    @State private var isDraggingSchedule: Bool = false
+    /// Tick for haptic on snap.
+    @State private var scheduleSnapCount: Int = 0
+
     // MARK: - Layout constants
 
     private let peekAmount: CGFloat = 10      // pts each card behind peeks below the one in front
     private let narrowStep: CGFloat = 14      // pts narrower per side per depth level
     private let tearThreshold: CGFloat = 80
     private let offScreen: CGFloat = 700
+
+    // Schedule-collapse geometry. The paper stack and the "Pull to tear" hint
+    // shrink toward `…Collapsed` values as scheduleProgress → 1. Drag range is
+    // tuned to match the total visual displacement so the finger and the
+    // separator move at roughly 1:1.
+    private let paperHeightExpanded: CGFloat = 380
+    private let paperHeightCollapsed: CGFloat = 150
+    private let hintHeightExpanded: CGFloat = 36
+    private let scheduleDragRange: CGFloat = 260
 
     // Progressive paper tints — white → off-white → beige (depth cue).
     private let card1Fill = PaperTints.card1
@@ -100,6 +129,39 @@ struct DayView: View {
         return 1 - min(Double(abs(dragY)) / tearThreshold, 1)
     }
 
+    // MARK: - Schedule-collapse derived values
+
+    /// Dynamic paper stack height. Interpolates expanded → collapsed.
+    private var paperHeight: CGFloat {
+        paperHeightExpanded + (paperHeightCollapsed - paperHeightExpanded) * scheduleProgress
+    }
+
+    /// Dynamic height for the "Pull to tear" hint row. Collapses to 0 as the
+    /// stack collapses so the schedule header moves up rather than just fading.
+    private var hintHeight: CGFloat {
+        hintHeightExpanded * (1 - scheduleProgress)
+    }
+
+    /// 0…1 fade for paper-card chrome that should disappear when collapsed:
+    /// sunrise/sunset, weather pill, Apple Weather attribution, and the
+    /// month/year sub-text. The big day number, weekday, and today underline
+    /// remain at full opacity. A slight overshoot (1.25) makes chrome reach
+    /// fully invisible well before the snap completes, which reads cleaner
+    /// than a linear fade.
+    private var chromeFadeOpacity: Double {
+        Double(max(0, 1 - scheduleProgress * 1.25))
+    }
+
+    /// Horizontal inset (per side) added to each paper card to keep its
+    /// aspect ratio constant as the stack height shrinks. Computed from the
+    /// container width inside the tearStack's GeometryReader.
+    private func paperShrinkInset(containerWidth: CGFloat) -> CGFloat {
+        guard scheduleProgress > 0 else { return 0 }
+        let scale = paperHeight / paperHeightExpanded
+        let amount = containerWidth * (1 - scale) / 2
+        return max(0, amount)
+    }
+
     private var pullToTearHint: some View {
         Text(invertDaySwipe
              ? "Pull to tear · ↑ Prev · ↓ Next"
@@ -108,8 +170,9 @@ struct DayView: View {
             .tracking(1.2)
             .foregroundStyle(.secondary.opacity(0.6))
             .frame(maxWidth: .infinity)
-            .frame(height: 36)
-            .opacity(tearHintOpacity)
+            .frame(height: hintHeight, alignment: .center)
+            .opacity(tearHintOpacity * chromeFadeOpacity)
+            .clipped()
             .animation(.easeOut(duration: 0.32), value: isTearing)
     }
 
@@ -138,9 +201,13 @@ struct DayView: View {
 
     private var tearStack: some View {
         GeometryReader { geo in
-            let maxH: CGFloat = min(geo.size.height, 380)
+            let maxH: CGFloat = min(geo.size.height, paperHeightExpanded)
             let width = geo.size.width
             let goingForward = tearDirection == 1
+            // Per-card inset that preserves the paper's aspect ratio as the
+            // stack shrinks vertically. Computed once per geometry change so
+            // every card in the stack moves in unison.
+            let aspectInset = paperShrinkInset(containerWidth: width)
 
             ZStack(alignment: .top) {
                 // --- Deepest placeholder (forward tear only) ---
@@ -151,7 +218,7 @@ struct DayView: View {
                     baseFill: card3Fill,
                     overlayFill: card3Fill,
                     overlayOpacity: 0,
-                    horizontalInset: narrowStep * 2,
+                    horizontalInset: aspectInset + narrowStep * 2,
                     bottomPeek: 0,
                     shadowAmount: 0,
                     chromeAmount: 0
@@ -166,9 +233,9 @@ struct DayView: View {
                     baseFill: card3Fill,
                     overlayFill: card2Fill,
                     overlayOpacity: goingForward ? cardShiftAmount : 0,
-                    horizontalInset: goingForward
+                    horizontalInset: aspectInset + (goingForward
                         ? narrowStep * (2 - cardShiftAmount)
-                        : narrowStep * 2,
+                        : narrowStep * 2),
                     bottomPeek: goingForward ? peekAmount * cardShiftAmount : 0,
                     shadowAmount: 0,
                     chromeAmount: 0
@@ -183,9 +250,9 @@ struct DayView: View {
                     baseFill: card2Fill,
                     overlayFill: goingForward ? card1Fill : card3Fill,
                     overlayOpacity: cardShiftAmount,
-                    horizontalInset: goingForward
+                    horizontalInset: aspectInset + (goingForward
                         ? narrowStep * (1 - cardShiftAmount)
-                        : narrowStep * (1 + cardShiftAmount),
+                        : narrowStep * (1 + cardShiftAmount)),
                     bottomPeek: goingForward
                         ? peekAmount * (1 + cardShiftAmount)
                         : peekAmount * (1 - cardShiftAmount),
@@ -202,7 +269,7 @@ struct DayView: View {
                     baseFill: card1Fill,
                     overlayFill: goingForward ? card1Fill : card2Fill,
                     overlayOpacity: goingForward ? 0 : cardShiftAmount,
-                    horizontalInset: goingForward ? 0 : narrowStep * cardShiftAmount,
+                    horizontalInset: aspectInset + (goingForward ? 0 : narrowStep * cardShiftAmount),
                     bottomPeek: goingForward
                         ? peekAmount * 2
                         : peekAmount * (2 - cardShiftAmount),
@@ -247,7 +314,7 @@ struct DayView: View {
                 baseFill: card1Fill,
                 overlayFill: card1Fill,
                 overlayOpacity: 0,
-                horizontalInset: 0,
+                horizontalInset: aspectInset,
                 bottomPeek: peekAmount * 2,
                 shadowAmount: 1,
                 chromeAmount: 1
@@ -260,7 +327,7 @@ struct DayView: View {
             .opacity(max(0, 1 - abs(incomingCardY) / 400))
             .allowsHitTesting(false)
         }
-        .frame(height: 380)
+        .frame(height: paperHeight)
     }
 
     // MARK: - Paper card builder
@@ -308,7 +375,8 @@ struct DayView: View {
                     isToday: isToday,
                     weather: weather,
                     locationName: weatherStore.locationName,
-                    preview: chromeAmount < 1
+                    preview: chromeAmount < 1,
+                    chromeFade: Double(1 - scheduleProgress)
                 )
                 .allowsHitTesting(false)
             }
@@ -341,8 +409,51 @@ struct DayView: View {
                 .foregroundStyle(.secondary)
             Rectangle().fill(.quaternary).frame(height: 0.5)
         }
-        .padding(.bottom, 10)
-        .padding(.top, 4)
+        .padding(.vertical, 12)              // generous vertical hit area
+        .contentShape(Rectangle())           // entire row receives the drag
+        .gesture(scheduleDragGesture)
+        .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: scheduleSnapCount)
+    }
+
+    /// Vertical drag on the schedule separator. Drives `scheduleProgress`
+    /// directly during the drag (no animation, follows the finger), then on
+    /// release snaps to whichever end (0 or 1) the user is closer to inside
+    /// a single spring animation. We use velocity to bias the snap target —
+    /// a quick flick commits even from below the halfway point, matching
+    /// iOS sheet behavior.
+    private var scheduleDragGesture: some Gesture {
+        // .global so translation tracks the finger in screen space — the
+        // separator's own layout position shifts up as scheduleProgress
+        // grows, which would skew .local translation and cause feedback.
+        DragGesture(minimumDistance: 4, coordinateSpace: .global)
+            .onChanged { value in
+                if !isDraggingSchedule {
+                    scheduleDragBaseProgress = scheduleProgress
+                    isDraggingSchedule = true
+                }
+                // Up-translation is negative; up increases progress (collapses).
+                let delta = -value.translation.height / scheduleDragRange
+                let raw = scheduleDragBaseProgress + delta
+                let clamped = max(0, min(1, raw))
+                if clamped != scheduleProgress {
+                    scheduleProgress = clamped
+                }
+            }
+            .onEnded { value in
+                isDraggingSchedule = false
+                // Predict where the gesture would land if momentum continued —
+                // the same heuristic UISheetPresentationController uses.
+                let predicted = value.predictedEndTranslation.height
+                let predictedDelta = -predicted / scheduleDragRange
+                let projected = scheduleDragBaseProgress + predictedDelta
+                let target: CGFloat = projected >= 0.5 ? 1 : 0
+                if target != scheduleProgress {
+                    scheduleSnapCount &+= 1
+                }
+                withAnimation(.spring(response: 0.38, dampingFraction: 0.86)) {
+                    scheduleProgress = target
+                }
+            }
     }
 
     private var scheduleEvents: some View {
@@ -572,6 +683,13 @@ private struct PageContent: View {
     let weather: DayWeather?
     let locationName: String?
     let preview: Bool
+    /// 1.0 = paper expanded (full corner widgets); 0.0 = collapsed via the
+    /// schedule separator drag. Multiplies the opacity of the sunrise/sunset
+    /// widgets, weather pill, Apple Weather attribution, and month/year
+    /// sub-text — and collapses their reserved height so the central numeral
+    /// block keeps its breathing room as the card shrinks. The weekday, day
+    /// number, and today underline are not faded.
+    var chromeFade: Double = 1.0
 
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
@@ -594,8 +712,8 @@ private struct PageContent: View {
             bottomRow
         }
         .padding(.horizontal, 22)
-        .padding(.top, 34)
-        .padding(.bottom, 20)
+        .padding(.top, 34 * chromeFade + 12 * (1 - chromeFade))
+        .padding(.bottom, 20 * chromeFade + 8 * (1 - chromeFade))
     }
 
     private var topRow: some View {
@@ -609,7 +727,7 @@ private struct PageContent: View {
                     .tracking(0.6)
                     .foregroundStyle(.secondary)
             }
-            .opacity(weather?.sunrise == nil ? 0 : 1)
+            .opacity(weather?.sunrise == nil ? 0 : chromeFade)
             Spacer()
             Text(DayNames.full[SampleData.weekday(year: year, month: month, day: day)])
                 .font(.appSerif(size: 19, italic: true, simple: useSimpleFont))
@@ -625,9 +743,13 @@ private struct PageContent: View {
                     .tracking(0.6)
                     .foregroundStyle(.secondary)
             }
-            .opacity(weather?.sunset == nil ? 0 : 1)
+            .opacity(weather?.sunset == nil ? 0 : chromeFade)
         }
-        .frame(height: 44)
+        // Don't collapse all the way to 0 — the weekday text in the center
+        // is a "stays" element per the schedule-collapse spec. Floor at the
+        // weekday's own intrinsic height so it remains visible.
+        .frame(height: 44 * chromeFade + 24 * (1 - chromeFade))
+        .clipped()
     }
 
     private var numeralBlock: some View {
@@ -655,7 +777,9 @@ private struct PageContent: View {
                 .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
                 .foregroundStyle(.secondary)
                 .padding(.top, 2)
-                .frame(height: 18)
+                .frame(height: 18 * chromeFade)
+                .opacity(chromeFade)
+                .clipped()
         }
         .frame(maxWidth: .infinity)
     }
@@ -689,7 +813,9 @@ private struct PageContent: View {
             AppleWeatherAttribution()
                 .opacity(weather == nil ? 0 : 1)
         }
-        .frame(height: 56)
+        .frame(height: 56 * chromeFade)
+        .opacity(chromeFade)
+        .clipped()
     }
 }
 
