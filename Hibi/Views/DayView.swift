@@ -28,12 +28,40 @@ struct DayView: View {
     @State private var incomingCardY: CGFloat = -400   // off-screen above for backward tear
     @State private var scheduleSlideY: CGFloat = 0     // slide-up offset for schedule fade-in
 
+    // Schedule-separator drawer: drag the "Schedule" divider to shrink the
+    // paper stack and give the events list more room. Two snap positions —
+    // expanded (calendar full size) and collapsed (calendar minimal).
+    @State private var separatorExpanded: Bool = false      // true = events expanded, calendar collapsed
+    @State private var separatorDragDelta: CGFloat = 0      // live drag offset on the separator
+
     // MARK: - Layout constants
 
     private let peekAmount: CGFloat = 10      // pts each card behind peeks below the one in front
     private let narrowStep: CGFloat = 14      // pts narrower per side per depth level
     private let tearThreshold: CGFloat = 80
     private let offScreen: CGFloat = 700
+
+    // Schedule-separator constants. The collapsed height is sized to fit the
+    // numeral block at its natural size (≈198pt) once the top/bottom rows
+    // shrink — so the day number and weekday text never scale down.
+    private let tearStackExpandedHeight: CGFloat = 380
+    private let tearStackCollapsedHeight: CGFloat = 290
+    private let extraHorizontalPaddingWhenCollapsed: CGFloat = 18
+    private let pullToTearHintExpandedHeight: CGFloat = 36
+    /// Total upward travel the separator gets: tear-stack shrink + hint shrink.
+    private var maxSeparatorTravel: CGFloat {
+        (tearStackExpandedHeight - tearStackCollapsedHeight) + pullToTearHintExpandedHeight
+    }
+
+    /// 0 = paper fully expanded (default), 1 = paper collapsed to minimum.
+    /// Drives every aspect of the drawer animation (frame height, padding,
+    /// chrome fade, hint fade). Combines the snapped base state with the
+    /// live drag delta and clamps to [0, 1].
+    private var collapseProgress: CGFloat {
+        let base: CGFloat = separatorExpanded ? 1 : 0
+        let live: CGFloat = base - separatorDragDelta / maxSeparatorTravel
+        return max(0, min(1, live))
+    }
 
     // Progressive paper tints — white → off-white → beige (depth cue).
     private let card1Fill = PaperTints.card1
@@ -44,7 +72,7 @@ struct DayView: View {
         VStack(spacing: 0) {
             masthead
             tearStack
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 16 + extraHorizontalPaddingWhenCollapsed * collapseProgress)
                 .padding(.bottom, 4)
                 .sensoryFeedback(.impact(weight: .medium), trigger: tearCommitCount)
             pullToTearHint
@@ -95,9 +123,11 @@ struct DayView: View {
     }
 
     /// "Pull to tear" hint — fades out as the paper is pulled, back in after tear settles.
+    /// Also fades and collapses to zero height as the schedule separator is dragged up.
     private var tearHintOpacity: Double {
         if isTearing { return 0 }
-        return 1 - min(Double(abs(dragY)) / tearThreshold, 1)
+        let dragFade = 1 - min(Double(abs(dragY)) / tearThreshold, 1)
+        return dragFade * Double(1 - collapseProgress)
     }
 
     private var pullToTearHint: some View {
@@ -108,7 +138,7 @@ struct DayView: View {
             .tracking(1.2)
             .foregroundStyle(.secondary.opacity(0.6))
             .frame(maxWidth: .infinity)
-            .frame(height: 36)
+            .frame(height: pullToTearHintExpandedHeight * (1 - collapseProgress))
             .opacity(tearHintOpacity)
             .animation(.easeOut(duration: 0.32), value: isTearing)
     }
@@ -260,7 +290,7 @@ struct DayView: View {
             .opacity(max(0, 1 - abs(incomingCardY) / 400))
             .allowsHitTesting(false)
         }
-        .frame(height: 380)
+        .frame(height: tearStackExpandedHeight - (tearStackExpandedHeight - tearStackCollapsedHeight) * collapseProgress)
     }
 
     // MARK: - Paper card builder
@@ -308,7 +338,8 @@ struct DayView: View {
                     isToday: isToday,
                     weather: weather,
                     locationName: weatherStore.locationName,
-                    preview: chromeAmount < 1
+                    preview: chromeAmount < 1,
+                    chromeOpacity: Double(1 - collapseProgress)
                 )
                 .allowsHitTesting(false)
             }
@@ -341,8 +372,29 @@ struct DayView: View {
                 .foregroundStyle(.secondary)
             Rectangle().fill(.quaternary).frame(height: 0.5)
         }
-        .padding(.bottom, 10)
-        .padding(.top, 4)
+        // Slightly generous vertical padding so the divider is comfortable
+        // to grab as a drawer handle.
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
+        .gesture(separatorDrag)
+        .sensoryFeedback(.selection, trigger: separatorExpanded)
+    }
+
+    /// Drawer-style drag on the "Schedule" divider. Follows the finger live,
+    /// then snaps magnetically to the nearer of expanded / collapsed on release.
+    private var separatorDrag: some Gesture {
+        DragGesture(minimumDistance: 2)
+            .onChanged { g in
+                guard !isTearing else { return }
+                separatorDragDelta = g.translation.height
+            }
+            .onEnded { _ in
+                let snapToCollapsed = collapseProgress >= 0.5
+                withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) {
+                    separatorExpanded = snapToCollapsed
+                    separatorDragDelta = 0
+                }
+            }
     }
 
     private var scheduleEvents: some View {
@@ -572,6 +624,11 @@ private struct PageContent: View {
     let weather: DayWeather?
     let locationName: String?
     let preview: Bool
+    /// 1 = corner widgets fully visible at their full row heights.
+    /// 0 = sunrise/sunset/weather/Apple-Weather are invisible and the
+    /// top/bottom rows shrink to give the numeral + weekday more room.
+    /// Driven by the schedule-separator drawer in `DayView`.
+    var chromeOpacity: Double = 1
 
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
@@ -599,7 +656,10 @@ private struct PageContent: View {
     }
 
     private var topRow: some View {
-        HStack(alignment: .top) {
+        // Shrinks to just enough for the weekday text when chrome is fully
+        // faded, so the numeral block keeps its full size as the card shrinks.
+        let rowHeight: CGFloat = 30 + 14 * CGFloat(chromeOpacity)  // 30 → 44
+        return HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 2) {
                 Image(systemName: "sunrise")
                     .font(.system(size: 16))
@@ -609,7 +669,7 @@ private struct PageContent: View {
                     .tracking(0.6)
                     .foregroundStyle(.secondary)
             }
-            .opacity(weather?.sunrise == nil ? 0 : 1)
+            .opacity(weather?.sunrise == nil ? 0 : chromeOpacity)
             Spacer()
             Text(DayNames.full[SampleData.weekday(year: year, month: month, day: day)])
                 .font(.appSerif(size: 19, italic: true, simple: useSimpleFont))
@@ -625,9 +685,9 @@ private struct PageContent: View {
                     .tracking(0.6)
                     .foregroundStyle(.secondary)
             }
-            .opacity(weather?.sunset == nil ? 0 : 1)
+            .opacity(weather?.sunset == nil ? 0 : chromeOpacity)
         }
-        .frame(height: 44)
+        .frame(height: rowHeight)
     }
 
     private var numeralBlock: some View {
@@ -663,7 +723,8 @@ private struct PageContent: View {
     private var bottomRow: some View {
         // Always render the row at a fixed height — fade the weather pill to
         // opacity 0 on days without weather so the paper's vertical rhythm
-        // doesn't change between days.
+        // doesn't change between days. The whole row also collapses to zero
+        // height as the schedule separator drawer is dragged up.
         HStack(alignment: .bottom) {
             HStack(spacing: 8) {
                 WeatherIcon(code: weather?.code ?? .sun, size: 22)
@@ -684,12 +745,13 @@ private struct PageContent: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .opacity(weather == nil ? 0 : 1)
+            .opacity(weather == nil ? 0 : chromeOpacity)
             Spacer()
             AppleWeatherAttribution()
-                .opacity(weather == nil ? 0 : 1)
+                .opacity(weather == nil ? 0 : chromeOpacity)
         }
-        .frame(height: 56)
+        .frame(height: 56 * CGFloat(chromeOpacity))
+        .clipped()
     }
 }
 
