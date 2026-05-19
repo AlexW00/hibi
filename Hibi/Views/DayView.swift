@@ -63,6 +63,14 @@ struct DayView: View {
         return max(0, min(1, live))
     }
 
+    /// Linear-interpolate from `from` to `to` by `collapseProgress`, then
+    /// round to whole pixels. The rounding kills sub-pixel jitter — text
+    /// inside the events ScrollView would otherwise shift by fractional
+    /// pixels every drag frame and visibly shimmer.
+    private func collapsed(from: CGFloat, to: CGFloat) -> CGFloat {
+        (from + (to - from) * collapseProgress).rounded()
+    }
+
     // Progressive paper tints — white → off-white → beige (depth cue).
     private let card1Fill = PaperTints.card1
     private let card2Fill = PaperTints.card2
@@ -86,6 +94,14 @@ struct DayView: View {
             }
             .scrollIndicators(.hidden)
             .scrollBounceBehavior(.basedOnSize)
+            // Force the events into a single composited layer *before* the
+            // mask applies. Without this, each event row is its own layer
+            // that shifts position by fractional pixels as the VStack reflows
+            // during the drag and re-rasterises text every frame. Combined
+            // with `geometryGroup()` (layout batching) this fixes both the
+            // text shimmer inside the rows and the gradient-edge crawl at
+            // the mask's fade boundary.
+            .compositingGroup()
             .mask(scrollFadeMask)
             // VStack reflow (driven by `tearStack` / `pullToTearHint` shrinking
             // during a separator drag) gives the ScrollView a new implicit
@@ -147,7 +163,7 @@ struct DayView: View {
             .frame(maxWidth: .infinity)
             // See note on `tearStack` — same jitter mitigation.
             .geometryGroup()
-            .frame(height: pullToTearHintExpandedHeight * (1 - collapseProgress))
+            .frame(height: collapsed(from: pullToTearHintExpandedHeight, to: 0))
             .opacity(tearHintOpacity)
             .animation(.easeOut(duration: 0.32), value: isTearing)
     }
@@ -305,7 +321,7 @@ struct DayView: View {
         // (iOS 17+) makes the frame change resolve atomically before being
         // propagated to children.
         .geometryGroup()
-        .frame(height: tearStackExpandedHeight - (tearStackExpandedHeight - tearStackCollapsedHeight) * collapseProgress)
+        .frame(height: collapsed(from: tearStackExpandedHeight, to: tearStackCollapsedHeight))
     }
 
     // MARK: - Paper card builder
@@ -364,6 +380,14 @@ struct DayView: View {
             .clipShape(shape)
 
         return card
+            // Force the card + its three overlays (binding holes, page content,
+            // perforation edge) to flatten into a *single* composited layer
+            // before shadows, padding, or animations apply. Without this each
+            // overlay is its own CALayer and they re-rasterise independently
+            // as the card frame animates per drag frame — visible as flicker.
+            // `geometryGroup()` (below) batches *layout*; `compositingGroup()`
+            // batches *compositing*. We want both.
+            .compositingGroup()
             .shadow(
                 color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18 * shadowAmount),
                 radius: 22, x: 0, y: 18
@@ -380,7 +404,7 @@ struct DayView: View {
             // the overlays (page content, binding holes, perforation) don't
             // interpret the changing parent geometry independently per frame.
             .geometryGroup()
-            .padding(.horizontal, horizontalInset + extraHorizontalPaddingWhenCollapsed * collapseProgress)
+            .padding(.horizontal, horizontalInset + collapsed(from: 0, to: extraHorizontalPaddingWhenCollapsed))
             .padding(.bottom, bottomPeek)
     }
 
@@ -690,7 +714,10 @@ private struct PageContent: View {
     private var topRow: some View {
         // Shrinks to just enough for the weekday text when chrome is fully
         // faded, so the numeral block keeps its full size as the card shrinks.
-        let rowHeight: CGFloat = 30 + 14 * CGFloat(chromeOpacity)  // 30 → 44
+        // Rounded to whole pixels so the weekday text — and the numeral block
+        // pushed below it via the inner VStack's Spacers — don't shift by
+        // fractional pixels each drag frame and shimmer.
+        let rowHeight: CGFloat = (30 + 14 * CGFloat(chromeOpacity)).rounded()  // 30 → 44
         return HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 2) {
                 Image(systemName: "sunrise")
@@ -782,8 +809,11 @@ private struct PageContent: View {
             AppleWeatherAttribution()
                 .opacity(weather == nil ? 0 : chromeOpacity)
         }
-        .frame(height: 56 * CGFloat(chromeOpacity))
-        .clipped()
+        // Rounded height + no `.clipped()`. `.clipped()` over an animating
+        // frame re-rasterises its composited layer every drag frame and was
+        // a primary flicker source; with the row already faded to opacity 0
+        // before its height reaches 0 there's nothing to clip anyway.
+        .frame(height: (56 * CGFloat(chromeOpacity)).rounded())
     }
 }
 
