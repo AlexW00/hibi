@@ -41,22 +41,27 @@ struct DayView: View {
     private let tearThreshold: CGFloat = 80
     private let offScreen: CGFloat = 700
 
-    // Schedule-separator constants. The collapsed height is sized to fit the
-    // numeral block at its natural size (≈198pt) once the top/bottom rows
-    // shrink — so the day number and weekday text never scale down.
-    private let tearStackExpandedHeight: CGFloat = 380
-    private let tearStackCollapsedHeight: CGFloat = 290
-    private let extraHorizontalPaddingWhenCollapsed: CGFloat = 18
-    private let pullToTearHintExpandedHeight: CGFloat = 36
-    /// Total upward travel the separator gets: tear-stack shrink + hint shrink.
-    private var maxSeparatorTravel: CGFloat {
-        (tearStackExpandedHeight - tearStackCollapsedHeight) + pullToTearHintExpandedHeight
-    }
+    // Schedule-separator constants.
+    //
+    // The drawer is implemented as a single outer `.offset` on the schedule
+    // header + ScrollView group (with an opaque app-background behind it),
+    // rather than by shrinking the paper card. Animating `frame(height:)`,
+    // `padding`, or `clipped()` extents over a drag re-rasterises clipped
+    // layers every frame and produces visible flicker — `geometryGroup()`
+    // only batches *layout*, not compositor passes. With only `.opacity` +
+    // a single outer `.offset` driven by the drag, nothing inside the paper
+    // stack needs to re-layout or re-rasterise during the drag.
+    private let tearStackHeight: CGFloat = 380
+    private let pullToTearHintHeight: CGFloat = 36
+    /// How far the schedule header + events group slides upward when fully
+    /// collapsed. Tuned so the visible-effective paper height matches what
+    /// the previous shrink-the-card implementation produced.
+    private let maxSeparatorTravel: CGFloat = 126
 
-    /// 0 = paper fully expanded (default), 1 = paper collapsed to minimum.
-    /// Drives every aspect of the drawer animation (frame height, padding,
-    /// chrome fade, hint fade). Combines the snapped base state with the
-    /// live drag delta and clamps to [0, 1].
+    /// 0 = paper fully expanded (default), 1 = events group fully raised.
+    /// Drives the corner-widget opacities and the events group's `.offset`.
+    /// Combines the snapped base state with the live drag delta and
+    /// clamps to [0, 1].
     private var collapseProgress: CGFloat {
         let base: CGFloat = separatorExpanded ? 1 : 0
         let live: CGFloat = base - separatorDragDelta / maxSeparatorTravel
@@ -76,6 +81,19 @@ struct DayView: View {
                 .padding(.bottom, 4)
                 .sensoryFeedback(.impact(weight: .medium), trigger: tearCommitCount)
             pullToTearHint
+            eventsDrawer
+                .offset(y: -collapseProgress * maxSeparatorTravel)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .ignoresSafeArea(.container, edges: .bottom)
+        .sensoryFeedback(.selection, trigger: scrollToNowToken)
+    }
+
+    /// Schedule header + events ScrollView, backed by the app gradient so it
+    /// covers the bottom of the paper stack as it slides up. Driven entirely
+    /// by `.offset` — no descendant ever changes its frame during a drag.
+    private var eventsDrawer: some View {
+        VStack(spacing: 0) {
             scheduleHeader
                 .padding(.horizontal, 20)
             ScrollView {
@@ -87,17 +105,8 @@ struct DayView: View {
             .scrollIndicators(.hidden)
             .scrollBounceBehavior(.basedOnSize)
             .mask(scrollFadeMask)
-            // VStack reflow (driven by `tearStack` / `pullToTearHint` shrinking
-            // during a separator drag) gives the ScrollView a new implicit
-            // frame on every drag frame. Without `geometryGroup()`, the rows
-            // inside interpret those frame changes independently and visibly
-            // flicker. Placed at the outermost level so it sits immediately
-            // before the dynamic frame the VStack imposes.
-            .geometryGroup()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .ignoresSafeArea(.container, edges: .bottom)
-        .sensoryFeedback(.selection, trigger: scrollToNowToken)
+        .background(AppBackgroundGradient().ignoresSafeArea())
     }
 
     private var scrollFadeMask: some View {
@@ -129,8 +138,10 @@ struct DayView: View {
         return 1 - progress * (1 - minOpacity)
     }
 
-    /// "Pull to tear" hint — fades out as the paper is pulled, back in after tear settles.
-    /// Also fades and collapses to zero height as the schedule separator is dragged up.
+    /// "Pull to tear" hint — fades out as the paper is pulled, back in after
+    /// tear settles. Also fades to 0 as the schedule separator drawer rises
+    /// over it (the row keeps its fixed height; the events drawer's opaque
+    /// background simply covers it).
     private var tearHintOpacity: Double {
         if isTearing { return 0 }
         let dragFade = 1 - min(Double(abs(dragY)) / tearThreshold, 1)
@@ -138,6 +149,9 @@ struct DayView: View {
     }
 
     private var pullToTearHint: some View {
+        // Fixed-height row. The events drawer's opaque background covers it
+        // when the drawer slides up, so we only need to fade the text itself —
+        // never animate the frame.
         Text(invertDaySwipe
              ? "Pull to tear · ↑ Prev · ↓ Next"
              : "Pull to tear · ↑ Next · ↓ Prev")
@@ -145,9 +159,7 @@ struct DayView: View {
             .tracking(1.2)
             .foregroundStyle(.secondary.opacity(0.6))
             .frame(maxWidth: .infinity)
-            // See note on `tearStack` — same jitter mitigation.
-            .geometryGroup()
-            .frame(height: pullToTearHintExpandedHeight * (1 - collapseProgress))
+            .frame(height: pullToTearHintHeight)
             .opacity(tearHintOpacity)
             .animation(.easeOut(duration: 0.32), value: isTearing)
     }
@@ -299,13 +311,7 @@ struct DayView: View {
             .opacity(max(0, 1 - abs(incomingCardY) / 400))
             .allowsHitTesting(false)
         }
-        // Without this, the card overlays (binding holes, perforation, page
-        // content) interpret the parent frame's animating height independently
-        // per frame and visibly jitter during slow drags. `geometryGroup()`
-        // (iOS 17+) makes the frame change resolve atomically before being
-        // propagated to children.
-        .geometryGroup()
-        .frame(height: tearStackExpandedHeight - (tearStackExpandedHeight - tearStackCollapsedHeight) * collapseProgress)
+        .frame(height: tearStackHeight)
     }
 
     // MARK: - Paper card builder
@@ -372,15 +378,7 @@ struct DayView: View {
                 color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.08 * shadowAmount),
                 radius: 4, x: 0, y: 2
             )
-            // The collapse-time extra inset is folded in here (per-card) rather
-            // than applied as an outer padding on `tearStack`. Applying it
-            // outside would change the GeometryReader's width on every drag
-            // frame and cascade layout into every card. `geometryGroup()` then
-            // makes the resulting per-card width change resolve atomically so
-            // the overlays (page content, binding holes, perforation) don't
-            // interpret the changing parent geometry independently per frame.
-            .geometryGroup()
-            .padding(.horizontal, horizontalInset + extraHorizontalPaddingWhenCollapsed * collapseProgress)
+            .padding(.horizontal, horizontalInset)
             .padding(.bottom, bottomPeek)
     }
 
@@ -656,10 +654,11 @@ private struct PageContent: View {
     let weather: DayWeather?
     let locationName: String?
     let preview: Bool
-    /// 1 = corner widgets fully visible at their full row heights.
-    /// 0 = sunrise/sunset/weather/Apple-Weather are invisible and the
-    /// top/bottom rows shrink to give the numeral + weekday more room.
-    /// Driven by the schedule-separator drawer in `DayView`.
+    /// 1 = corner widgets fully visible.
+    /// 0 = sunrise/sunset/weather/Apple-Weather are invisible. Frame heights
+    /// stay fixed regardless — the events drawer covers the bottom of the
+    /// card when fully collapsed. Driven by the schedule-separator drawer in
+    /// `DayView`.
     var chromeOpacity: Double = 1
 
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
@@ -688,10 +687,10 @@ private struct PageContent: View {
     }
 
     private var topRow: some View {
-        // Shrinks to just enough for the weekday text when chrome is fully
-        // faded, so the numeral block keeps its full size as the card shrinks.
-        let rowHeight: CGFloat = 30 + 14 * CGFloat(chromeOpacity)  // 30 → 44
-        return HStack(alignment: .top) {
+        // Fixed height — the row never changes size during a drag. The
+        // sunrise/sunset corner widgets fade via opacity only, while the
+        // weekday text in the centre stays at full size and full opacity.
+        HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 2) {
                 Image(systemName: "sunrise")
                     .font(.system(size: 16))
@@ -719,7 +718,7 @@ private struct PageContent: View {
             }
             .opacity(weather?.sunset == nil ? 0 : chromeOpacity)
         }
-        .frame(height: rowHeight)
+        .frame(height: 44)
     }
 
     private var numeralBlock: some View {
@@ -755,8 +754,11 @@ private struct PageContent: View {
     private var bottomRow: some View {
         // Always render the row at a fixed height — fade the weather pill to
         // opacity 0 on days without weather so the paper's vertical rhythm
-        // doesn't change between days. The whole row also collapses to zero
-        // height as the schedule separator drawer is dragged up.
+        // doesn't change between days. The whole row is covered by the
+        // events drawer once it slides up, and its contents fade via opacity
+        // alone during the drag — the row's frame and clip extents never
+        // animate, which is what was producing the per-frame re-rasterisation
+        // flicker in the previous shrink-the-card implementation.
         HStack(alignment: .bottom) {
             HStack(spacing: 8) {
                 WeatherIcon(code: weather?.code ?? .sun, size: 22)
@@ -782,8 +784,7 @@ private struct PageContent: View {
             AppleWeatherAttribution()
                 .opacity(weather == nil ? 0 : chromeOpacity)
         }
-        .frame(height: 56 * CGFloat(chromeOpacity))
-        .clipped()
+        .frame(height: 56)
     }
 }
 
