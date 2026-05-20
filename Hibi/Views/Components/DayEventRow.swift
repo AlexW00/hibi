@@ -35,11 +35,23 @@ struct DayEventRow: View {
         // Two stacked backgrounds: the progress fill sits above the base tint,
         // so the row shows a subtle category color by default and darkens
         // left-to-right as the event elapses.
+        //
+        // The progress fill is a full-width Rectangle scaled horizontally
+        // via .scaleEffect. The earlier implementation used a GeometryReader
+        // that read its container's width and sized the fill to a fraction
+        // of it — that's the classic GeometryReader-in-background pattern
+        // Apple flagged in WWDC23's "Demystify SwiftUI performance" and
+        // replaced with onGeometryChange. With many rows in a ScrollView
+        // whose container resizes per-frame (the schedule-collapse drag),
+        // each row's GR re-reports geometry in a follow-up layout pass,
+        // those passes converge over ~10-20 frames, and the convergence is
+        // what surfaces as flicker mid-drag and a smooth "settle" when the
+        // finger stops. scaleEffect is a render-time transform — no layout
+        // pass, no async geometry, pixel-identical visual.
         .background(alignment: .leading) {
-            GeometryReader { geo in
-                event.tint.opacity(event.allDay ? 0.28 : 0.26)
-                    .frame(width: geo.size.width * CGFloat(fillAmount))
-            }
+            Rectangle()
+                .fill(event.tint.opacity(event.allDay ? 0.28 : 0.26))
+                .scaleEffect(x: CGFloat(fillAmount), y: 1, anchor: .leading)
         }
         .background(event.tint.opacity(event.allDay ? 0.38 : 0.10))
         .clipShape(RoundedRectangle(cornerRadius: 12))

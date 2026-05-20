@@ -68,6 +68,48 @@ window.extendIfNearEdge(visibleID: id)
 - **`scrollPosition(id: $scrollTarget)` binding for programmatic scroll**: race-prone when data and position update in the same tick; no-op when binding value hasn't changed.
 - **`defaultScrollAnchor(.center)` for "start on today"**: imprecise with lazy, variable-height content.
 
+## `GeometryReader` inside `.background` causes flicker when the container resizes per-frame
+
+**Symptom we hit:** the draggable Schedule separator in `DayView` flickered heavily during slow drags. Both the paper stack *and* the events list rows rippled. When the user stopped moving but kept their finger down, the flicker would **smoothly settle over ~10-20 frames** — not snap. That settling pattern is the signature.
+
+**Cause:** every `DayEventRow` had a progress fill drawn with this pattern:
+
+```swift
+.background(alignment: .leading) {
+    GeometryReader { geo in
+        event.tint.opacity(...)
+            .frame(width: geo.size.width * CGFloat(fillAmount))
+    }
+}
+```
+
+`GeometryReader` reports geometry in a **follow-up layout pass**, not synchronously. When a drag resizes the ScrollView's container 60×/sec, every row's GR re-reports its width in an async pass, that triggers another layout pass, which the GR republishes again. The system iterates toward convergence over many frames — visible as flicker mid-drag and as a deceleration-style settle when input stops. Apple flagged this in WWDC23 *Demystify SwiftUI performance* and shipped `onGeometryChange` (iOS 18) as the replacement.
+
+A second-order contributor was the gesture transaction inheriting an ambient animation context (TabView / NavigationStack iOS-26 transitions wrap their content in animated transactions). Without `t.disablesAnimations = true` on the per-frame writes, `Animatable` `.padding` / `.frame` modifiers got re-bound to that inherited animation.
+
+**Fix.** For fractional-width fills, use `.scaleEffect` on a full-width `Rectangle`:
+
+```swift
+.background(alignment: .leading) {
+    Rectangle()
+        .fill(event.tint.opacity(...))
+        .scaleEffect(x: CGFloat(fillAmount), y: 1, anchor: .leading)
+}
+```
+
+`scaleEffect` is a render-time transform — no layout pass, no async geometry, pixel-identical visual. For any per-frame state write driving layout (gestures, animation drivers), also set both flags on the transaction:
+
+```swift
+var t = Transaction()
+t.disablesAnimations = true
+t.scrollContentOffsetAdjustmentBehavior = .disabled   // iOS 18+
+withTransaction(t) { state = newValue }
+```
+
+The scroll-offset flag stops a `ScrollView` from animating its own content offset when its container size changes; the disabled-animations flag stops inherited animation contexts from re-binding to our writes. Both are needed when the per-frame write resizes a `ScrollView`'s container.
+
+**Diagnostic heuristic.** If a slow drag flickers and the flicker *smooths out over a fraction of a second* when input stops, suspect an async-layout convergence loop — almost always a `GeometryReader` placed where a fractional `.frame` or `.padding` could be a `.scaleEffect` instead. Value-scoped `.animation(_:value:)` modifiers are a red herring here: they only fire when *their* value changes, not when neighboring layout changes.
+
 ## Reference: the research brief
 
 The full background on why SwiftUI infinite scrolling is structurally hard (vs. `UICollectionView`), and why HorizonCalendar (UIKit) beats any pure-SwiftUI implementation for flat memory over decades of scroll, is in the original deep-research document — ask the user for it if needed. Hibi's approach is the "90% solution" sliding-window pattern it recommends.
