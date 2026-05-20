@@ -2451,74 +2451,74 @@
         }
       }
     },
-    "Events you create now appear on the calendar right away — no more waiting for an app restart to see them.": {
-      "comment": "What's New 1.9 — instant event sync feature subtitle.",
+    "Event sync fix": {
+      "comment": "What's New 1.9 — instant event sync bug fix title.",
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Neue Termine erscheinen jetzt sofort im Kalender — kein App-Neustart mehr nötig."
+            "value": "Synchronisierungs-Fix"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Events you create now appear on the calendar right away — no more waiting for an app restart to see them."
+            "value": "Event sync fix"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los eventos que creas ahora aparecen en el calendario al instante — ya no hace falta reiniciar la app para verlos."
+            "value": "Corrección de sincronización"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gli eventi che crei ora compaiono subito nel calendario — niente più riavvii dell'app per vederli."
+            "value": "Correzione sincronizzazione"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "作成したイベントが、保存後すぐにカレンダーに表示されるようになりました。再起動はもう必要ありません。"
+            "value": "イベント同期の修正"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "만든 이벤트가 캘린더에 바로 표시됩니다 — 앱을 다시 시작하지 않아도 됩니다."
+            "value": "이벤트 동기화 수정"
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Acara yang anda cipta kini muncul terus dalam kalendar — tidak perlu memulakan semula aplikasi untuk melihatnya."
+            "value": "Pembetulan segerak acara"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Os eventos que você cria já aparecem no calendário na hora — sem precisar reiniciar o app para vê-los."
+            "value": "Correção de sincronização"
           }
         },
         "zh-Hans-CN": {
           "stringUnit": {
             "state": "translated",
-            "value": "新建的事件现在会立即显示在日历中——无需重启应用即可看到。"
+            "value": "事件同步修复"
           }
         },
         "zh-Hant-HK": {
           "stringUnit": {
             "state": "translated",
-            "value": "新建立的事件現在會立即顯示在行事曆中——無需重新啟動應用程式即可看到。"
+            "value": "事件同步修復"
           }
         },
         "zh-Hant-TW": {
           "stringUnit": {
             "state": "translated",
-            "value": "新建立的事件現在會立即顯示在行事曆中——無需重新啟動應用程式即可看到。"
+            "value": "事件同步修復"
           }
         }
       }
@@ -2591,6 +2591,150 @@
           "stringUnit": {
             "state": "translated",
             "value": "跨多天的事件現在會在月、週、日檢視中的每個涵蓋日期顯示。"
+          }
+        }
+      }
+    },
+    "Events you create now appear on the calendar right away — no more waiting for an app restart to see them.": {
+      "comment": "What's New 1.9 — instant event sync feature subtitle.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neue Termine erscheinen jetzt sofort im Kalender — kein App-Neustart mehr nötig."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Events you create now appear on the calendar right away — no more waiting for an app restart to see them."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los eventos que creas ahora aparecen en el calendario al instante — ya no hace falta reiniciar la app para verlos."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gli eventi che crei ora compaiono subito nel calendario — niente più riavvii dell'app per vederli."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作成したイベントが、保存後すぐにカレンダーに表示されるようになりました。再起動はもう必要ありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "만든 이벤트가 캘린더에 바로 표시됩니다 — 앱을 다시 시작하지 않아도 됩니다."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acara yang anda cipta kini muncul terus dalam kalendar — tidak perlu memulakan semula aplikasi untuk melihatnya."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os eventos que você cria já aparecem no calendário na hora — sem precisar reiniciar o app para vê-los."
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建的事件现在会立即显示在日历中——无需重启应用即可看到。"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建立的事件現在會立即顯示在行事曆中——無需重新啟動應用程式即可看到。"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建立的事件現在會立即顯示在行事曆中——無需重新啟動應用程式即可看到。"
+          }
+        }
+      }
+    },
+    "Expandable schedule": {
+      "comment": "What's New 2.0 — collapsible day view paper stack feature title.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehr Platz für den Tagesplan"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expandable schedule"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agenda expandible"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Programma espandibile"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スケジュールを広く表示"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일정 더 크게 보기"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jadual boleh dikembangkan"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agenda expansível"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可展开的日程"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可展開的日程"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可展開的行程"
           }
         }
       }
@@ -4828,6 +4972,78 @@
         }
       }
     },
+    "Pull the Schedule handle down to collapse the day's paper stack and see more of your events at once.": {
+      "comment": "What's New 2.0 — collapsible day view paper stack feature subtitle.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zieh den Tagesplan-Griff nach unten, um den Papierstapel des Tages einzuklappen und mehr Termine auf einmal zu sehen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pull the Schedule handle down to collapse the day's paper stack and see more of your events at once."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrastra el tirador de la Agenda hacia abajo para plegar la pila de papel del día y ver más eventos a la vez."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trascina la maniglia del Programma verso il basso per ripiegare la pila di carta del giorno e vedere più eventi insieme."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「スケジュール」のハンドルを下に引くと、その日のペーパースタックがたたまれ、予定をまとめて確認できます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일정 핸들을 아래로 내리면 그날의 페이퍼 스택이 접히면서 더 많은 일정을 한눈에 볼 수 있어요."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tarik pemegang Jadual ke bawah untuk melipat susunan kertas hari itu dan melihat lebih banyak acara sekali gus."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arraste a alça da Agenda para baixo para recolher a pilha de papéis do dia e ver mais eventos de uma vez."
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "向下拖动「日程」手柄，即可收起当天的纸张堆叠，一次查看更多事件。"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "向下拖動「日程」把手，即可收起當日的紙張堆疊，一次查看更多事件。"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "向下拖曳「行程」把手，即可收起當天的紙張堆疊，一次查看更多事件。"
+          }
+        }
+      }
+    },
     "Pull to tear · ↑ Next · ↓ Prev": {
       "comment": "Day tab hint text above the tear-off paper stack.",
       "extractionState": "manual",
@@ -6128,6 +6344,78 @@
         }
       }
     },
+    "Smoother day transitions": {
+      "comment": "What's New 2.0 — day switch animation polish feature title.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sanftere Tageswechsel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smoother day transitions"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambios de día más fluidos"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambi giorno più fluidi"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日付切替がなめらかに"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "더 부드러운 날짜 전환"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peralihan hari lebih lancar"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transições entre dias mais suaves"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日期切换更流畅"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日期切換更流暢"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日期切換更流暢"
+          }
+        }
+      }
+    },
     "Switching between Month, Week, and Day now picks up right where you left off.": {
       "comment": "What's New 1.9 — tab position preservation feature subtitle.",
       "extractionState": "manual",
@@ -6196,6 +6484,78 @@
           "stringUnit": {
             "state": "translated",
             "value": "在月、週、日之間切換時，顯示位置會保持不變。"
+          }
+        }
+      }
+    },
+    "Switching between days now animates cleanly, without the schedule briefly flashing.": {
+      "comment": "What's New 2.0 — day switch animation polish feature subtitle.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Wechsel zwischen Tagen läuft jetzt sauber ab, ohne dass der Tagesplan kurz aufblitzt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switching between days now animates cleanly, without the schedule briefly flashing."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambiar entre días ahora se anima de forma limpia, sin que la agenda parpadee por un instante."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passare da un giorno all'altro ora si anima in modo pulito, senza che il programma lampeggi per un istante."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日付を切り替えたときに予定リストが一瞬ちらつくことなく、なめらかにアニメーションするようになりました。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "날짜를 전환할 때 일정 리스트가 잠깐 깜빡이지 않고 부드러운 애니메이션으로 바뀌어요."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pertukaran antara hari kini beranimasi dengan kemas, tanpa jadual berkelip seketika."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trocar de dia agora anima de forma limpa, sem que a agenda dê um piscar rápido."
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在不同日期之间切换时动画更干净，不再出现日程的短暂闪烁。"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在不同日期之間切換時動畫更乾淨，不再出現日程的短暫閃爍。"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在不同日期之間切換時動畫更乾淨，不再出現行程的短暫閃爍。"
           }
         }
       }
@@ -7492,78 +7852,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "沒有安排"
-          }
-        }
-      }
-    },
-    "Event sync fix": {
-      "comment": "What's New 1.9 — instant event sync bug fix title.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synchronisierungs-Fix"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Event sync fix"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Corrección de sincronización"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Correzione sincronizzazione"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "イベント同期の修正"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "이벤트 동기화 수정"
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pembetulan segerak acara"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Correção de sincronização"
-          }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "事件同步修复"
-          }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "事件同步修復"
-          }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "事件同步修復"
           }
         }
       }

@@ -5,14 +5,39 @@ import WhatsNewKit
 ///
 /// Version string must match `CFBundleShortVersionString` so
 /// `UserDefaultsWhatsNewVersionStore` correctly records the presentation.
-/// We currently ship `MARKETING_VERSION = 1.9`.
+/// We currently ship `MARKETING_VERSION = 2.0`.
 enum WhatsNewContent {
-    static let version: WhatsNew.Version = "1.9"
+    static let version: WhatsNew.Version = "2.0"
 
     /// Built on access so `String(localized:)` resolves against the user's current locale.
     static var latest: WhatsNew {
         WhatsNew(
             version: version,
+            title: .init(stringLiteral: String(localized: "What's New in Hibi")),
+            features: [
+                WhatsNew.Feature(
+                    image: .init(systemName: "rectangle.expand.vertical"),
+                    title: .init(String(localized: "Expandable schedule")),
+                    subtitle: .init(String(localized: "Pull the Schedule handle down to collapse the day's paper stack and see more of your events at once."))
+                ),
+                WhatsNew.Feature(
+                    image: .init(systemName: "calendar.day.timeline.left"),
+                    title: .init(String(localized: "Smoother day transitions")),
+                    subtitle: .init(String(localized: "Switching between days now animates cleanly, without the schedule briefly flashing."))
+                ),
+            ],
+            primaryAction: WhatsNew.PrimaryAction(
+                title: .init(String(localized: "Continue")),
+                backgroundColor: .primary,
+                foregroundColor: Color(uiColor: .systemBackground),
+                hapticFeedback: .selection
+            )
+        )
+    }
+
+    static var v1_9: WhatsNew {
+        WhatsNew(
+            version: "1.9",
             title: .init(stringLiteral: String(localized: "What's New in Hibi")),
             features: [
                 WhatsNew.Feature(
@@ -187,5 +212,5 @@ enum WhatsNewContent {
         )
     }
 
-    static var collection: WhatsNewCollection { [latest, v1_8, v1_7, v1_5, v1_4, v1_3, v1_2] }
+    static var collection: WhatsNewCollection { [latest, v1_9, v1_8, v1_7, v1_5, v1_4, v1_3, v1_2] }
 }
