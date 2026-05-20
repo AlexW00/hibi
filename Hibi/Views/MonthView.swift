@@ -96,13 +96,14 @@ private struct DayCell: View {
     let day: Int
 
     @Environment(EventStore.self) private var eventStore
+    @Environment(Clock.self) private var clock
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
 
     var body: some View {
         let events = eventStore.events(year: year, month: month, day: day)
         let reminders = eventStore.reminders(year: year, month: month, day: day)
             .filter { !$0.isCompleted }
-        let isToday = SampleData.isToday(year: year, month: month, day: day)
+        let isToday = clock.isToday(year: year, month: month, day: day)
         let dots: [(id: String, tint: Color)] =
             reminders.prefix(2).map { (id: $0.id, tint: $0.tint) }
             + events.prefix(4 - min(reminders.count, 2)).map { (id: $0.id, tint: $0.tint) }
