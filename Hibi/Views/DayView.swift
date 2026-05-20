@@ -750,9 +750,15 @@ private struct PageContent: View {
             Spacer(minLength: 0)
             bottomRow
         }
+        // Keep the page's inner padding constant across the schedule
+        // collapse — the weekday/numeral/underline are "stays" elements and
+        // need to sit at their original distance from the binding holes /
+        // perforation edge regardless of card height. The numeral block has
+        // plenty of room at the collapsed height (260 - 34 - 20 = 206pt
+        // inner area is more than the day number's intrinsic ~180pt).
         .padding(.horizontal, 22)
-        .padding(.top, 34 * chromeFade + 12 * (1 - chromeFade))
-        .padding(.bottom, 20 * chromeFade + 8 * (1 - chromeFade))
+        .padding(.top, 34)
+        .padding(.bottom, 20)
     }
 
     private var topRow: some View {
