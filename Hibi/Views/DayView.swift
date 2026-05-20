@@ -432,7 +432,6 @@ struct DayView: View {
         .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: scheduleSnapCount)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Schedule"))
-        .accessibilityAddTraits(.isAdjustable)
     }
 
     /// One side of the handle: a serif tick at the outer edge + a hairline
