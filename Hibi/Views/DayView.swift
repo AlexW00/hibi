@@ -85,20 +85,16 @@ struct DayView: View {
             pullToTearHint
             scheduleHeader
                 .padding(.horizontal, 20)
-            ScrollView {
+            HijackingScrollView(
+                progress: $scheduleProgress,
+                collapseDistance: scheduleDragRange,
+                onSnap: { scheduleSnapCount &+= 1 }
+            ) {
                 scheduleEvents
                     .padding(.horizontal, 16)
                     .padding(.top, 28)
                     .padding(.bottom, 140)
             }
-            .scrollIndicators(.hidden)
-            .scrollBounceBehavior(.basedOnSize)
-            // Pin the content's top edge when the ScrollView's own frame
-            // grows/shrinks as the schedule separator collapses. The default
-            // anchor tries to keep the visible centroid stable, which during
-            // a drag means the list animates its offset to compensate — the
-            // source of the flicker the user saw on slow drags.
-            .defaultScrollAnchor(.top, for: .sizeChanges)
             .mask(scrollFadeMask)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
