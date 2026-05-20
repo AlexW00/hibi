@@ -452,7 +452,19 @@ struct DayView: View {
                 let raw = scheduleDragBaseProgress + delta
                 let clamped = max(0, min(1, raw))
                 if clamped != scheduleProgress {
-                    withTransaction(\.scrollContentOffsetAdjustmentBehavior, .disabled) {
+                    // Per-frame writes must be (a) un-animated and (b) must
+                    // not let the ScrollView animate its content offset for
+                    // the resulting container resize. Setting both flags
+                    // explicitly defends against an ambient animation
+                    // context being inherited from an ancestor (TabView /
+                    // NavigationStack iOS-26 transitions do wrap content in
+                    // animated transactions, and value-scoped .animation
+                    // modifiers elsewhere in the tree could otherwise
+                    // re-bind to our Animatable padding/frame writes).
+                    var t = Transaction()
+                    t.disablesAnimations = true
+                    t.scrollContentOffsetAdjustmentBehavior = .disabled
+                    withTransaction(t) {
                         scheduleProgress = clamped
                     }
                 }
