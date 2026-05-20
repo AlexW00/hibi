@@ -134,17 +134,28 @@ struct HijackingScrollView<Content: View>: UIViewRepresentable {
             let currentY = scrollView.contentOffset.y
             let dy = currentY - lastContentOffsetY
 
-            if currentProgress < 1, dy > 0 {
-                // Scrolling up while paper not fully collapsed: consume dy to
-                // drive progress toward 1, leak any leftover dy back to the
-                // scroll view so the inner list begins scrolling at the exact
-                // pixel the collapse completes.
-                let remaining = (1 - currentProgress) * collapseDistance
-                let consumed = min(dy, remaining)
-                let newProgress = min(1, currentProgress + consumed / collapseDistance)
-                currentProgress = newProgress
-                writeProgress(newProgress)
-                scrollView.contentOffset.y = lastContentOffsetY + (dy - consumed)
+            if currentProgress < 1, currentY > 0 {
+                // Scrolling up while paper not fully collapsed: consume the
+                // portion of the motion that crosses into positive territory
+                // and leak any leftover dy back to the scroll view so the
+                // inner list begins scrolling at the exact pixel the collapse
+                // completes.
+                //
+                // The `currentY > 0` guard (and `fromY` clamp below) are
+                // what stop a downward flick's rubberband-return from being
+                // misread as "user is scrolling up". Without it, the spring-
+                // back from a deep negative offset produces positive dy
+                // frames and quietly drives progress toward 1.
+                let fromY = max(0, lastContentOffsetY)
+                let effectiveDy = currentY - fromY
+                if effectiveDy > 0 {
+                    let remaining = (1 - currentProgress) * collapseDistance
+                    let consumed = min(effectiveDy, remaining)
+                    let newProgress = min(1, currentProgress + consumed / collapseDistance)
+                    currentProgress = newProgress
+                    writeProgress(newProgress)
+                    scrollView.contentOffset.y = fromY + (effectiveDy - consumed)
+                }
             } else if currentProgress > 0, dy < 0, lastContentOffsetY <= 0 {
                 // At top of inner list, pulling down: consume rubberband
                 // delta to drive progress back to 0 (re-expand paper).
