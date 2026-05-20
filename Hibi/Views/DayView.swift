@@ -412,20 +412,21 @@ struct DayView: View {
 
     // MARK: - Schedule
 
-    /// Minimal drag handle — just a centered pill. No flanking lines or
-    /// serif caps for now; the gesture and snap motion communicate the
-    /// affordance.
+    /// Centered pill handle flanked by hairlines that run out to the edges.
     private var scheduleHeader: some View {
-        Capsule()
-            .fill(.tertiary)
-            .frame(width: 36, height: 5)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)              // generous vertical hit area
-            .contentShape(Rectangle())           // entire row receives the drag
-            .gesture(scheduleDragGesture)
-            .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: scheduleSnapCount)
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text("Schedule"))
+        HStack(spacing: 10) {
+            Rectangle().fill(.quaternary).frame(height: 0.5)
+            Capsule()
+                .fill(.tertiary)
+                .frame(width: 36, height: 5)
+            Rectangle().fill(.quaternary).frame(height: 0.5)
+        }
+        .padding(.vertical, 12)              // generous vertical hit area
+        .contentShape(Rectangle())           // entire row receives the drag
+        .gesture(scheduleDragGesture)
+        .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: scheduleSnapCount)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Schedule"))
     }
 
     /// Vertical drag on the schedule separator. Drives `scheduleProgress`
