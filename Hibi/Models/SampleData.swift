@@ -57,11 +57,6 @@ enum SampleData {
         return cal.component(.weekday, from: date) - 1
     }
 
-    static func isToday(year: Int, month: Int, day: Int) -> Bool {
-        let t = todayComponents
-        return year == t.year && month == t.month && day == t.day
-    }
-
     /// True when the given (y, m, d) matches the fixed demo anchor date.
     /// Used only by the demo-time-of-day branch in `CalendarEvent.progress`.
     static func isDemoAnchor(year: Int, month: Int, day: Int) -> Bool {
