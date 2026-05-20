@@ -87,6 +87,12 @@ struct DayView: View {
             }
             .scrollIndicators(.hidden)
             .scrollBounceBehavior(.basedOnSize)
+            // Pin the content's top edge when the ScrollView's own frame
+            // grows/shrinks as the schedule separator collapses. The default
+            // anchor tries to keep the visible centroid stable, which during
+            // a drag means the list animates its offset to compensate — the
+            // source of the flicker the user saw on slow drags.
+            .defaultScrollAnchor(.top, for: .sizeChanges)
             .mask(scrollFadeMask)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -421,6 +427,16 @@ struct DayView: View {
     /// a single spring animation. We use velocity to bias the snap target —
     /// a quick flick commits even from below the halfway point, matching
     /// iOS sheet behavior.
+    ///
+    /// Every write to `scheduleProgress` propagates inside a transaction
+    /// that sets `scrollContentOffsetAdjustmentBehavior = .disabled`. The
+    /// schedule list's ScrollView would otherwise treat each per-frame
+    /// growth of its container as a reason to animate its own content
+    /// offset (UIScrollView-style deceleration), which surfaces as flicker
+    /// during slow drags — and as the characteristic "settle" after the
+    /// finger stops. Pair that with `.defaultScrollAnchor(.top, for:
+    /// .sizeChanges)` on the ScrollView so any residual adjustment pins
+    /// the content's top edge rather than its visible centroid.
     private var scheduleDragGesture: some Gesture {
         // .global so translation tracks the finger in screen space — the
         // separator's own layout position shifts up as scheduleProgress
@@ -436,7 +452,9 @@ struct DayView: View {
                 let raw = scheduleDragBaseProgress + delta
                 let clamped = max(0, min(1, raw))
                 if clamped != scheduleProgress {
-                    scheduleProgress = clamped
+                    withTransaction(\.scrollContentOffsetAdjustmentBehavior, .disabled) {
+                        scheduleProgress = clamped
+                    }
                 }
             }
             .onEnded { value in
@@ -450,7 +468,10 @@ struct DayView: View {
                 if target != scheduleProgress {
                     scheduleSnapCount &+= 1
                 }
-                withAnimation(.spring(response: 0.38, dampingFraction: 0.86)) {
+                var t = Transaction()
+                t.animation = .spring(response: 0.38, dampingFraction: 0.86)
+                t.scrollContentOffsetAdjustmentBehavior = .disabled
+                withTransaction(t) {
                     scheduleProgress = target
                 }
             }
