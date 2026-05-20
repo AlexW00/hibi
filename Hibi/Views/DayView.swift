@@ -412,19 +412,42 @@ struct DayView: View {
 
     // MARK: - Schedule
 
+    /// Drag handle that replaces the old "Schedule" label. The bracketed
+    /// hairlines + small center pill read as a typographic separator
+    /// (think editorial dingbat) rather than an iOS drawer grabber, which
+    /// matches the rest of the app's paper-and-serif aesthetic. Outer
+    /// vertical ticks are the "serif" ends the user asked for.
     private var scheduleHeader: some View {
-        HStack(spacing: 10) {
-            Rectangle().fill(.quaternary).frame(height: 0.5)
-            Text("Schedule")
-                .font(.system(size: 10, weight: .semibold))
-                .tracking(2.2)
-                .foregroundStyle(.secondary)
-            Rectangle().fill(.quaternary).frame(height: 0.5)
+        HStack(spacing: 8) {
+            scheduleHandleArm(leading: true)
+            Capsule()
+                .fill(.tertiary)
+                .frame(width: 28, height: 4)
+            scheduleHandleArm(leading: false)
         }
+        .frame(maxWidth: .infinity)
         .padding(.vertical, 12)              // generous vertical hit area
         .contentShape(Rectangle())           // entire row receives the drag
         .gesture(scheduleDragGesture)
         .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: scheduleSnapCount)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Schedule"))
+        .accessibilityAddTraits(.isAdjustable)
+    }
+
+    /// One side of the handle: a serif tick at the outer edge + a hairline
+    /// running in to the center pill. The tick anchors the line visually
+    /// the way a small bracket anchors a typographic rule.
+    private func scheduleHandleArm(leading: Bool) -> some View {
+        HStack(spacing: 0) {
+            if leading {
+                Rectangle().fill(.quaternary).frame(width: 1, height: 5)
+                Rectangle().fill(.quaternary).frame(height: 0.5)
+            } else {
+                Rectangle().fill(.quaternary).frame(height: 0.5)
+                Rectangle().fill(.quaternary).frame(width: 1, height: 5)
+            }
+        }
     }
 
     /// Vertical drag on the schedule separator. Drives `scheduleProgress`
