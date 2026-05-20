@@ -85,7 +85,11 @@ struct DayView: View {
             pullToTearHint
             scheduleHeader
                 .padding(.horizontal, 20)
-            HijackingScrollView(progress: $scheduleProgress, collapseDistance: scheduleDragRange) {
+            HijackingScrollView(
+                progress: $scheduleProgress,
+                collapseDistance: scheduleDragRange,
+                onSnap: { scheduleSnapCount &+= 1 }
+            ) {
                 scheduleEvents
                     .padding(.horizontal, 16)
                     .padding(.top, 28)

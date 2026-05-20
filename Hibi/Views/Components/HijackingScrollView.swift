@@ -18,6 +18,7 @@ import UIKit
 struct HijackingScrollView<Content: View>: UIViewRepresentable {
     @Binding var progress: CGFloat
     let collapseDistance: CGFloat
+    var onSnap: (() -> Void)? = nil
     @ViewBuilder var content: () -> Content
 
     func makeCoordinator() -> Coordinator {
@@ -39,7 +40,8 @@ struct HijackingScrollView<Content: View>: UIViewRepresentable {
                 withTransaction(t) { binding.wrappedValue = target }
             },
             collapseDistance: collapseDistance,
-            initialProgress: progress
+            initialProgress: progress,
+            onSnap: onSnap
         )
     }
 
@@ -74,6 +76,7 @@ struct HijackingScrollView<Content: View>: UIViewRepresentable {
     func updateUIView(_ uiView: UIScrollView, context: Context) {
         context.coordinator.collapseDistance = collapseDistance
         context.coordinator.currentProgress = progress
+        context.coordinator.onSnap = onSnap
         let binding = $progress
         context.coordinator.writeProgress = { newValue in
             var t = Transaction()
@@ -93,6 +96,7 @@ struct HijackingScrollView<Content: View>: UIViewRepresentable {
     final class Coordinator: NSObject, UIScrollViewDelegate {
         var writeProgress: (CGFloat) -> Void
         var snapProgress: (CGFloat) -> Void
+        var onSnap: (() -> Void)?
         var collapseDistance: CGFloat
         var currentProgress: CGFloat
         var lastContentOffsetY: CGFloat = 0
@@ -105,12 +109,14 @@ struct HijackingScrollView<Content: View>: UIViewRepresentable {
             writeProgress: @escaping (CGFloat) -> Void,
             snapProgress: @escaping (CGFloat) -> Void,
             collapseDistance: CGFloat,
-            initialProgress: CGFloat
+            initialProgress: CGFloat,
+            onSnap: (() -> Void)?
         ) {
             self.writeProgress = writeProgress
             self.snapProgress = snapProgress
             self.collapseDistance = collapseDistance
             self.currentProgress = initialProgress
+            self.onSnap = onSnap
         }
 
         // Why these delegate methods write progress through a transaction:
@@ -205,6 +211,7 @@ struct HijackingScrollView<Content: View>: UIViewRepresentable {
             }
             currentProgress = target
             snapProgress(target)
+            onSnap?()
         }
     }
 }
