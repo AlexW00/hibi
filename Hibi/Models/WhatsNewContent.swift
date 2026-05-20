@@ -5,9 +5,9 @@ import WhatsNewKit
 ///
 /// Version string must match `CFBundleShortVersionString` so
 /// `UserDefaultsWhatsNewVersionStore` correctly records the presentation.
-/// We currently ship `MARKETING_VERSION = 2.0`.
+/// We currently ship `MARKETING_VERSION = 1.10`.
 enum WhatsNewContent {
-    static let version: WhatsNew.Version = "2.0"
+    static let version: WhatsNew.Version = "1.10"
 
     /// Built on access so `String(localized:)` resolves against the user's current locale.
     static var latest: WhatsNew {

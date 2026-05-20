@@ -2668,7 +2668,7 @@
       }
     },
     "Expandable schedule": {
-      "comment": "What's New 2.0 — collapsible day view paper stack feature title.",
+      "comment": "What's New 1.10 — collapsible day view paper stack feature title.",
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -4973,7 +4973,7 @@
       }
     },
     "Pull the Schedule handle down to collapse the day's paper stack and see more of your events at once.": {
-      "comment": "What's New 2.0 — collapsible day view paper stack feature subtitle.",
+      "comment": "What's New 1.10 — collapsible day view paper stack feature subtitle.",
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -6345,7 +6345,7 @@
       }
     },
     "Smoother day transitions": {
-      "comment": "What's New 2.0 — day switch animation polish feature title.",
+      "comment": "What's New 1.10 — day switch animation polish feature title.",
       "extractionState": "manual",
       "localizations": {
         "de": {
@@ -6489,7 +6489,7 @@
       }
     },
     "Switching between days now animates cleanly, without the schedule briefly flashing.": {
-      "comment": "What's New 2.0 — day switch animation polish feature subtitle.",
+      "comment": "What's New 1.10 — day switch animation polish feature subtitle.",
       "extractionState": "manual",
       "localizations": {
         "de": {
