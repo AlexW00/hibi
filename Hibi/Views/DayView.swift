@@ -18,6 +18,7 @@ struct DayView: View {
     @Environment(Clock.self) private var clock
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
+    @AppStorage("preferCompactDayView") private var preferCompactDayView: Bool = false
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @State private var dragY: CGFloat = 0
     @State private var isTearing: Bool = false
@@ -134,6 +135,17 @@ struct DayView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea(.container, edges: .bottom)
         .sensoryFeedback(.selection, trigger: scrollToNowToken)
+        // Toggling the preference in Settings should switch the UI immediately
+        // — otherwise users wonder why nothing happened. Animate with the same
+        // spring used for the drag-release snap so the motion feels familiar.
+        .onChange(of: preferCompactDayView) { _, newValue in
+            let target: CGFloat = newValue ? 1 : 0
+            guard scheduleProgress != target else { return }
+            scheduleSnapCount &+= 1
+            withAnimation(.spring(response: 0.38, dampingFraction: 0.86)) {
+                scheduleProgress = target
+            }
+        }
     }
 
     private var scrollFadeMask: some View {
