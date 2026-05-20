@@ -30,8 +30,15 @@ struct DayView: View {
 
     // Schedule separator drag — pull the "Schedule" handle up to shrink the
     // paper stack and give the events list more room. Two snap positions.
-    @State private var scheduleCompact: Bool = false
-    @State private var separatorDragY: CGFloat = 0
+    //
+    // Single source of truth: `compactness` (0 = expanded, 1 = compact). The
+    // drag mutates it directly inside a `disablesAnimations` transaction so
+    // per-frame body invalidations never get picked up by an ambient implicit
+    // animation; the release snap is the *only* withAnimation in the path.
+    // `dragAnchor` snapshots the compactness at drag start so finger delta
+    // converts deterministically to a compactness delta (no two-input tearing).
+    @State private var compactness: Double = 0
+    @State private var dragAnchor: Double? = nil
 
     // MARK: - Layout constants
 
@@ -47,17 +54,6 @@ struct DayView: View {
     private let expandedStackHeight: CGFloat = 380
     private let compactStackHeight: CGFloat = 260
     private let compactHorizontalInsetMax: CGFloat = 35
-
-    /// 0 = paper stack at full size, 1 = paper stack compacted up.
-    /// Driven by `scheduleCompact` (snap target) plus the live `separatorDragY`
-    /// during a drag. Everything visual derives from this one value — keeps the
-    /// drag smooth and avoids competing animations.
-    private var compactness: Double {
-        let base: Double = scheduleCompact ? 1 : 0
-        let range = Double(expandedStackHeight - compactStackHeight)
-        let delta = range > 0 ? -Double(separatorDragY) / range : 0
-        return min(1, max(0, base + delta))
-    }
 
     private var stackHeight: CGFloat {
         expandedStackHeight - CGFloat(compactness) * (expandedStackHeight - compactStackHeight)
@@ -354,7 +350,14 @@ struct DayView: View {
             }
             .clipShape(shape)
 
+        // `.compositingGroup()` flattens the card (fill + overlays + clipShape)
+        // into a single offscreen buffer before the shadow is drawn. Without
+        // it, SwiftUI re-rasterizes the shadow against each overlay per frame
+        // when the parent frame is animating — visible as a shadow shimmer /
+        // edge flicker during the schedule-separator drag. See nemecek.be
+        // "Fixing weird shadow animation glitch in SwiftUI".
         return card
+            .compositingGroup()
             .shadow(
                 color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18 * shadowAmount),
                 radius: 22, x: 0, y: 18
@@ -380,34 +383,46 @@ struct DayView: View {
         }
         .padding(.vertical, 14)
         .contentShape(Rectangle())
-        .gesture(separatorDrag)
+        // `.highPriorityGesture` wins arbitration against the ScrollView below
+        // on iOS 26 (gesture-resolution regression in the iOS 26 SDK makes the
+        // default `.gesture` lose to the scroll on slow drags — confirmed via
+        // Apple Developer Forums thread 794212).
+        .highPriorityGesture(separatorDrag)
     }
 
-    /// Drag the "Schedule" handle to shrink or restore the paper stack. The
-    /// drag follows the finger; on release, snaps to either the expanded or
-    /// compact position (predictedEndTranslation gives velocity-aware snap so
-    /// a quick flick commits even with a short drag).
+    /// Drag the "Schedule" handle to shrink or restore the paper stack.
+    ///
+    /// Drag updates run inside a transaction with `disablesAnimations = true`
+    /// so each frame's body invalidation is *not* implicitly animated — that
+    /// was the source of the slow-drag flicker (per-frame body re-evaluations
+    /// chasing each other through ambient implicit animations). The snap is
+    /// the only `withAnimation` in this path; `.interactiveSpring` blends if
+    /// the user immediately starts a new drag mid-snap.
     private var separatorDrag: some Gesture {
         DragGesture(minimumDistance: 4)
             .onChanged { g in
                 guard !isTearing else { return }
-                separatorDragY = g.translation.height
+                let anchor = dragAnchor ?? compactness
+                let range = Double(expandedStackHeight - compactStackHeight)
+                let delta = range > 0 ? -Double(g.translation.height) / range : 0
+                let next = min(1, max(0, anchor + delta))
+                var t = Transaction()
+                t.disablesAnimations = true
+                withTransaction(t) {
+                    if dragAnchor == nil { dragAnchor = anchor }
+                    compactness = next
+                }
             }
             .onEnded { g in
-                guard !isTearing else {
-                    separatorDragY = 0
-                    return
-                }
+                let anchor = dragAnchor ?? compactness
+                dragAnchor = nil
+                guard !isTearing else { return }
                 let range = Double(expandedStackHeight - compactStackHeight)
-                let base: Double = scheduleCompact ? 1 : 0
-                let dragDelta = range > 0 ? -Double(g.translation.height) / range : 0
                 let predictedDelta = range > 0 ? -Double(g.predictedEndTranslation.height) / range : 0
-                let projected = base + predictedDelta
-                let immediate = base + dragDelta
-                let snap = projected > 0.5 || immediate > 0.5
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.86)) {
-                    scheduleCompact = snap
-                    separatorDragY = 0
+                let projected = anchor + predictedDelta
+                let snap: Double = projected > 0.5 ? 1 : 0
+                withAnimation(.interactiveSpring(response: 0.4, dampingFraction: 0.86)) {
+                    compactness = snap
                 }
             }
     }
@@ -428,8 +443,13 @@ struct DayView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 40)
             } else {
+                // LazyVStack so only visible rows lay out per frame — the
+                // schedule-separator drag changes the ScrollView's height
+                // every frame on slow drags, and an eager VStack would
+                // re-measure all rows each time (visible flicker once the
+                // list got more than a handful of items).
                 TimelineView(.periodic(from: .now, by: 60)) { ctx in
-                    VStack(spacing: 6) {
+                    LazyVStack(spacing: 6) {
                         ForEach(reminders) { r in
                             ReminderRow(reminder: r) {
                                 eventStore.toggleReminderCompletion(r)
