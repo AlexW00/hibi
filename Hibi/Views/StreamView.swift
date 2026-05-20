@@ -254,6 +254,7 @@ private struct StreamDayRow: View {
 
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
+    @Environment(Clock.self) private var clock
     @State private var isDropTargeted: Bool = false
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
@@ -267,7 +268,7 @@ private struct StreamDayRow: View {
         let reminders = eventStore.reminders(year: year, month: month, day: day)
         let wx = weatherStore.weather(year: year, month: month, day: day)
         let weekday = SampleData.weekday(year: year, month: month, day: day)
-        let isToday = SampleData.isToday(year: year, month: month, day: day)
+        let isToday = clock.isToday(year: year, month: month, day: day)
         // Row divider appears at the start of each week so the stream reads as
         // week-sized groups. Uses locale's first weekday (German=Mon, Sun else).
         let firstDayOfWeek = Calendar.autoupdatingCurrent.firstWeekday - 1

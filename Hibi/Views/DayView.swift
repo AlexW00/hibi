@@ -15,6 +15,7 @@ struct DayView: View {
 
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
+    @Environment(Clock.self) private var clock
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
@@ -385,7 +386,7 @@ struct DayView: View {
     ) -> some View {
         let shape = RoundedRectangle(cornerRadius: 18)
         let weather = weatherStore.weather(year: dayInfo.year, month: dayInfo.month, day: dayInfo.day)
-        let isToday = SampleData.isToday(year: dayInfo.year, month: dayInfo.month, day: dayInfo.day)
+        let isToday = clock.isToday(year: dayInfo.year, month: dayInfo.month, day: dayInfo.day)
 
         // Hairline border for cards behind the front — defines the card
         // silhouette against the background (critical in dark mode where

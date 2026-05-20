@@ -25,6 +25,7 @@ struct ContentView: View {
     @State private var selectedDay = SampleData.todayDay
     @State private var eventStore = EventStore()
     @State private var weatherStore = WeatherStore()
+    @State private var clock = Clock()
     @State private var editorMode: EventEditorSheet.Mode?
     @State private var showOnboarding = false
     @State private var needsOnboarding = false
@@ -62,6 +63,30 @@ struct ContentView: View {
                 selection = newValue
             }
         )
+    }
+
+    /// Triggered by `NSCalendarDayChanged` and by scene-foreground transitions
+    /// (catches the case where the app was backgrounded across midnight). If
+    /// the user was looking at "today" before the rollover, advance their
+    /// displayed date so they stay on today; otherwise leave the selection
+    /// alone — the today highlight will refresh on its own because views read
+    /// from the `Clock` we just updated. The new month is also pre-loaded so
+    /// reminders that pivot on `Date()` (overdue carry-over) reflect the new day.
+    private func handleDayChange() {
+        let wasOnOldToday = displayedYear == clock.year
+            && displayedMonth == clock.month
+            && selectedDay == clock.day
+        guard clock.refresh() != nil else { return }
+        if wasOnOldToday {
+            displayedYear = clock.year
+            displayedMonth = clock.month
+            selectedDay = clock.day
+            // Bump the scroll token so list-based tabs recenter on the new
+            // today — without it, the Week list still shows the previous
+            // day at center after midnight even though selectedDay advanced.
+            scrollToNowToken &+= 1
+        }
+        eventStore.ensureLoaded(year: clock.year, month: clock.month)
     }
 
     private func returnToNow() {
@@ -152,6 +177,7 @@ struct ContentView: View {
         }
         .environment(eventStore)
         .environment(weatherStore)
+        .environment(clock)
         .whatsNewSheet(onDismiss: {
             if needsOnboarding {
                 showOnboarding = true
@@ -224,7 +250,11 @@ struct ContentView: View {
             if phase == .active {
                 eventStore.refreshAccessFromScenePhase()
                 weatherStore.refresh()
+                handleDayChange()
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
+            handleDayChange()
         }
         .preferredColorScheme(colorScheme)
         .tint(.primary)
