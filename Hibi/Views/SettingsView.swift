@@ -12,6 +12,7 @@ struct SettingsView: View {
     @Environment(WeatherStore.self) private var weatherStore
     @AppStorage("appearance") private var appearanceRaw: String = Appearance.system.rawValue
     @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
+    @AppStorage("preferCompactDayView") private var preferCompactDayView: Bool = false
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
     @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
@@ -47,6 +48,8 @@ struct SettingsView: View {
 
                 Section("Day View") {
                     Toggle("Invert swipe direction", isOn: $invertDaySwipe)
+                        .tint(.black)
+                    Toggle("Prefer compact mode", isOn: $preferCompactDayView)
                         .tint(.black)
                 }
 

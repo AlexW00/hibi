@@ -18,6 +18,7 @@ struct DayView: View {
     @Environment(Clock.self) private var clock
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
+    @AppStorage("preferCompactDayView") private var preferCompactDayView: Bool = false
     @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
     @State private var dragY: CGFloat = 0
     @State private var isTearing: Bool = false
@@ -40,7 +41,10 @@ struct DayView: View {
     // magnetic snap.
 
     /// 0 = paper stack at full size (default); 1 = collapsed, events list expanded.
-    @State private var scheduleProgress: CGFloat = 0
+    /// Initial value is seeded from `preferCompactDayView` in `init` so the app
+    /// launches into the user's preferred state. Within a session, the user
+    /// can drag freely — the preference is only consulted on view creation.
+    @State private var scheduleProgress: CGFloat
     /// Progress at the moment the current drag began. Translation is applied
     /// relative to this so the separator tracks the finger 1:1.
     @State private var scheduleDragBaseProgress: CGFloat = 0
@@ -75,6 +79,26 @@ struct DayView: View {
     private let card1Fill = PaperTints.card1
     private let card2Fill = PaperTints.card2
     private let card3Fill = PaperTints.card3
+
+    init(
+        year: Int,
+        month: Int,
+        day: Binding<Int>,
+        scrollToNowToken: Int,
+        onTapEvent: @escaping (CalendarEvent) -> Void,
+        onDateChange: ((_ year: Int, _ month: Int, _ day: Int) -> Void)? = nil
+    ) {
+        self.year = year
+        self.month = month
+        self._day = day
+        self.scrollToNowToken = scrollToNowToken
+        self.onTapEvent = onTapEvent
+        self.onDateChange = onDateChange
+        // Seed initial collapse state from preference. Read once at view
+        // creation so the user can still drag freely during the session.
+        let preferCompact = UserDefaults.standard.bool(forKey: "preferCompactDayView")
+        self._scheduleProgress = State(initialValue: preferCompact ? 1 : 0)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -111,6 +135,17 @@ struct DayView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea(.container, edges: .bottom)
         .sensoryFeedback(.selection, trigger: scrollToNowToken)
+        // Toggling the preference in Settings should switch the UI immediately
+        // — otherwise users wonder why nothing happened. Animate with the same
+        // spring used for the drag-release snap so the motion feels familiar.
+        .onChange(of: preferCompactDayView) { _, newValue in
+            let target: CGFloat = newValue ? 1 : 0
+            guard scheduleProgress != target else { return }
+            scheduleSnapCount &+= 1
+            withAnimation(.spring(response: 0.38, dampingFraction: 0.86)) {
+                scheduleProgress = target
+            }
+        }
     }
 
     private var scrollFadeMask: some View {
