@@ -56,13 +56,19 @@ struct DayView: View {
     private let offScreen: CGFloat = 700
 
     // Schedule-collapse geometry. The paper stack and the "Pull to tear" hint
-    // shrink toward `…Collapsed` values as scheduleProgress → 1. Drag range is
-    // tuned to match the total visual displacement so the finger and the
+    // shrink toward `…Collapsed` values as scheduleProgress → 1. Drag range
+    // is tuned to match the total visual displacement so the finger and the
     // separator move at roughly 1:1.
+    //
+    // `paperHeightCollapsed` is the floor for the paper-stack height; on top
+    // of it the hint row contributes 36pt of additional collapse. Together
+    // they place the schedule separator near the vertical center of the
+    // screen at maximum collapse (the spec's stop position — "don't let it
+    // go all the way to the top"). 380→260 + 36→0 ≈ 156pt of upward travel.
     private let paperHeightExpanded: CGFloat = 380
-    private let paperHeightCollapsed: CGFloat = 150
+    private let paperHeightCollapsed: CGFloat = 260
     private let hintHeightExpanded: CGFloat = 36
-    private let scheduleDragRange: CGFloat = 260
+    private let scheduleDragRange: CGFloat = 160
 
     // Progressive paper tints — white → off-white → beige (depth cue).
     private let card1Fill = PaperTints.card1
