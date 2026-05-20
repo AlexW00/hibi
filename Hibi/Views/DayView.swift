@@ -48,6 +48,16 @@ struct DayView: View {
     /// Tick for haptic on snap.
     @State private var scheduleSnapCount: Int = 0
 
+    // Schedule-list scroll-driven progress. Read-only mirrors of the list's
+    // ScrollView geometry plus the gesture-active flag. We never write back
+    // into the ScrollView from these — that would feed the per-frame resize
+    // loop documented in learnings.md (GeometryReader-style flicker).
+    @State private var listContentOffsetY: CGFloat = 0
+    @State private var listContentSizeH: CGFloat = 0
+    @State private var listContainerSizeH: CGFloat = 0
+    @State private var isScrollDragActive: Bool = false
+    @State private var scrollDragBaseProgress: CGFloat = 0
+
     // MARK: - Layout constants
 
     private let peekAmount: CGFloat = 10      // pts each card behind peeks below the one in front
@@ -93,12 +103,25 @@ struct DayView: View {
             }
             .scrollIndicators(.hidden)
             .scrollBounceBehavior(.basedOnSize)
+            .scrollDisabled(shouldDisableList)
             // Pin the content's top edge when the ScrollView's own frame
             // grows/shrinks as the schedule separator collapses. The default
             // anchor tries to keep the visible centroid stable, which during
             // a drag means the list animates its offset to compensate — the
             // source of the flicker the user saw on slow drags.
             .defaultScrollAnchor(.top, for: .sizeChanges)
+            .onScrollGeometryChange(for: ListGeometry.self) { geo in
+                ListGeometry(
+                    offsetY: geo.contentOffset.y,
+                    contentH: geo.contentSize.height,
+                    containerH: geo.containerSize.height
+                )
+            } action: { _, new in
+                listContentOffsetY = new.offsetY
+                listContentSizeH = new.contentH
+                listContainerSizeH = new.containerH
+            }
+            .simultaneousGesture(scheduleListScrollGesture)
             .mask(scrollFadeMask)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -451,6 +474,7 @@ struct DayView: View {
         // grows, which would skew .local translation and cause feedback.
         DragGesture(minimumDistance: 4, coordinateSpace: .global)
             .onChanged { value in
+                guard !isTearing else { return }
                 if !isDraggingSchedule {
                     scheduleDragBaseProgress = scheduleProgress
                     isDraggingSchedule = true
@@ -496,6 +520,71 @@ struct DayView: View {
                 }
             }
     }
+
+    /// Simultaneous gesture attached to the schedule ScrollView so an upward
+    /// drag on the list itself drives `scheduleProgress` (paper collapses)
+    /// before the list scrolls — Apple Maps' two-stage drag. Writes the same
+    /// state as `scheduleDragGesture` with the same transaction flags so the
+    /// documented flicker fix stays intact.
+    ///
+    /// Non-obvious constraint: while progress < 1 the ScrollView is
+    /// `.scrollDisabled` (see `shouldDisableList`) — this gesture is the sole
+    /// writer of scroll-like motion. Once progress == 1 the gesture refuses
+    /// to engage further upward drags, and scrollDisabled flips off so the
+    /// list scrolls natively on the NEXT finger-down. The `onScrollGeometryChange`
+    /// observer is read-only: we only need `listContentOffsetY` to gate the
+    /// downward-engage rule (we must be at the top to disengage the list).
+    private var scheduleListScrollGesture: some Gesture {
+        DragGesture(minimumDistance: 8, coordinateSpace: .global)
+            .onChanged { value in
+                guard !isTearing else { return }
+                if !isScrollDragActive {
+                    let dy = value.translation.height
+                    let goingUp = dy < 0
+                    let atTop = listContentOffsetY <= 0.5
+                    let shouldEngage =
+                        (goingUp && scheduleProgress < 1) ||
+                        (!goingUp && scheduleProgress > 0 && atTop)
+                    guard shouldEngage else { return }
+                    scrollDragBaseProgress = scheduleProgress
+                    isScrollDragActive = true
+                }
+                let delta = -value.translation.height / scheduleDragRange
+                let raw = scrollDragBaseProgress + delta
+                let clamped = max(0, min(1, raw))
+                if clamped != scheduleProgress {
+                    var t = Transaction()
+                    t.disablesAnimations = true
+                    t.scrollContentOffsetAdjustmentBehavior = .disabled
+                    withTransaction(t) {
+                        scheduleProgress = clamped
+                    }
+                }
+            }
+            .onEnded { value in
+                guard isScrollDragActive else { return }
+                isScrollDragActive = false
+                let predicted = value.predictedEndTranslation.height
+                let predictedDelta = -predicted / scheduleDragRange
+                let projected = scrollDragBaseProgress + predictedDelta
+                let target: CGFloat = projected >= 0.5 ? 1 : 0
+                if target != scheduleProgress { scheduleSnapCount &+= 1 }
+                var t = Transaction()
+                t.animation = .spring(response: 0.38, dampingFraction: 0.86)
+                t.scrollContentOffsetAdjustmentBehavior = .disabled
+                withTransaction(t) {
+                    scheduleProgress = target
+                }
+            }
+    }
+
+    private struct ListGeometry: Equatable {
+        var offsetY: CGFloat
+        var contentH: CGFloat
+        var containerH: CGFloat
+    }
+
+    private var shouldDisableList: Bool { scheduleProgress < 1 }
 
     private var scheduleEvents: some View {
         let sd = scheduleDate
