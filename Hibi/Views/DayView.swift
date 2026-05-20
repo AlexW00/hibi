@@ -95,6 +95,16 @@ struct DayView: View {
                     .padding(.top, 28)
                     .padding(.bottom, 140)
             }
+            // Opacity + slide are applied OUTSIDE the HijackingScrollView so
+            // withAnimation transactions resolve in the native SwiftUI tree.
+            // When these modifiers lived inside the closure they sat on the
+            // hosted content of a UIHostingController, and the animation
+            // context didn't propagate across that UIKit boundary — the
+            // tear-time fade was a hard cut, and interrupted animations
+            // could leave the events stuck at a mid-fade opacity (~0.5) until
+            // the app was restarted.
+            .opacity(eventsOpacity)
+            .offset(y: scheduleSlideY)
             .mask(scrollFadeMask)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -537,8 +547,6 @@ struct DayView: View {
                 }
             }
         }
-        .opacity(eventsOpacity)
-        .offset(y: scheduleSlideY)
     }
 
 
