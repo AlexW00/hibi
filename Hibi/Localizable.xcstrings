@@ -3459,6 +3459,78 @@
         }
       }
     },
+    "If you leave the app open overnight, the highlighted day now advances to the new day at midnight.": {
+      "comment": "What's New 1.10 — midnight day rollover fix feature subtitle.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wenn die App über Nacht geöffnet bleibt, springt der hervorgehobene Tag um Mitternacht automatisch auf den neuen Tag."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If you leave the app open overnight, the highlighted day now advances to the new day at midnight."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si dejas la app abierta durante la noche, el día resaltado avanza al nuevo día a medianoche."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se lasci l'app aperta tutta la notte, il giorno evidenziato passa automaticamente al nuovo giorno a mezzanotte."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリを開いたまま日付をまたいでも、ハイライトされる日が0時に自動で新しい日に切り替わります。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앱을 켜둔 채로 자정을 넘기면 강조된 날짜가 새로운 날로 자동으로 바뀌어요."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jika anda biarkan app terbuka semalaman, hari yang diserlahkan kini beralih ke hari baharu pada tengah malam."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se você deixar o app aberto durante a noite, o dia destacado avança para o novo dia à meia-noite."
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "若让 app 开着过夜，高亮的日期会在午夜自动更新为新的一天。"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "若讓 app 開著過夜，反白的日期會在午夜自動更新為新的一天。"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "若讓 app 開著過夜，反白的日期會在午夜自動更新為新的一天。"
+          }
+        }
+      }
+    },
     "Invert swipe direction": {
       "comment": "Toggle label in Settings → Day View: flips tear-up-for-next gesture.",
       "extractionState": "manual",
@@ -6416,78 +6488,6 @@
         }
       }
     },
-    "Smoother day transitions": {
-      "comment": "What's New 1.10 — day switch animation polish feature title.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sanftere Tageswechsel"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Smoother day transitions"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cambios de día más fluidos"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cambi giorno più fluidi"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "日付切替がなめらかに"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "더 부드러운 날짜 전환"
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Peralihan hari lebih lancar"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transições entre dias mais suaves"
-          }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "日期切换更流畅"
-          }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "日期切換更流暢"
-          }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "日期切換更流暢"
-          }
-        }
-      }
-    },
     "Switching between Month, Week, and Day now picks up right where you left off.": {
       "comment": "What's New 1.9 — tab position preservation feature subtitle.",
       "extractionState": "manual",
@@ -6556,78 +6556,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "在月、週、日之間切換時，顯示位置會保持不變。"
-          }
-        }
-      }
-    },
-    "Switching between days now animates cleanly, without the schedule briefly flashing.": {
-      "comment": "What's New 1.10 — day switch animation polish feature subtitle.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Wechsel zwischen Tagen läuft jetzt sauber ab, ohne dass der Tagesplan kurz aufblitzt."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Switching between days now animates cleanly, without the schedule briefly flashing."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cambiar entre días ahora se anima de forma limpia, sin que la agenda parpadee por un instante."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Passare da un giorno all'altro ora si anima in modo pulito, senza che il programma lampeggi per un istante."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "日付を切り替えたときに予定リストが一瞬ちらつくことなく、なめらかにアニメーションするようになりました。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "날짜를 전환할 때 일정 리스트가 잠깐 깜빡이지 않고 부드러운 애니메이션으로 바뀌어요."
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pertukaran antara hari kini beranimasi dengan kemas, tanpa jadual berkelip seketika."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Trocar de dia agora anima de forma limpa, sem que a agenda dê um piscar rápido."
-          }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在不同日期之间切换时动画更干净，不再出现日程的短暂闪烁。"
-          }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在不同日期之間切換時動畫更乾淨，不再出現日程的短暫閃爍。"
-          }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在不同日期之間切換時動畫更乾淨，不再出現行程的短暫閃爍。"
           }
         }
       }
@@ -7204,6 +7132,78 @@
           "stringUnit": {
             "state": "translated",
             "value": "單位"
+          }
+        }
+      }
+    },
+    "Updates at midnight": {
+      "comment": "What's New 1.10 — midnight day rollover fix feature title.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tageswechsel um Mitternacht"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updates at midnight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualización a medianoche"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiornamento a mezzanotte"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0時に自動で日付を更新"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "자정에 날짜 자동 갱신"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kemas kini pada tengah malam"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atualização à meia-noite"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "午夜自动更新日期"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "午夜自動更新日期"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "午夜自動更新日期"
           }
         }
       }

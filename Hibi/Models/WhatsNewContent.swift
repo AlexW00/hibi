@@ -21,9 +21,9 @@ enum WhatsNewContent {
                     subtitle: .init(String(localized: "Pull the Schedule handle down to collapse the day's paper stack and see more of your events at once."))
                 ),
                 WhatsNew.Feature(
-                    image: .init(systemName: "calendar.day.timeline.left"),
-                    title: .init(String(localized: "Smoother day transitions")),
-                    subtitle: .init(String(localized: "Switching between days now animates cleanly, without the schedule briefly flashing."))
+                    image: .init(systemName: "calendar.badge.clock"),
+                    title: .init(String(localized: "Updates at midnight")),
+                    subtitle: .init(String(localized: "If you leave the app open overnight, the highlighted day now advances to the new day at midnight."))
                 ),
             ],
             primaryAction: WhatsNew.PrimaryAction(
