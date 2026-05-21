@@ -55,32 +55,32 @@
 			);
 			target = 4B1507002FBEA5BF00F49AFD /* HibiWidgetsExtension */;
 		};
+		4B1507202FC0000000F49AFD /* Exceptions for "Hibi" folder in "HibiWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Fonts/InstrumentSerif-Italic.ttf",
+				"Fonts/InstrumentSerif-Regular.ttf",
+				"Fonts/NotoSerifJP-Regular.otf",
+				Localizable.xcstrings,
+				Models/AppGroup.swift,
+				Models/CalendarEvent.swift,
+				Models/Preferences.swift,
+				Models/SampleData.swift,
+				Models/WidgetWeatherSnapshot.swift,
+				Views/Components/MarqueeText.swift,
+				Views/Components/PageContent.swift,
+				Views/Components/PaperChrome.swift,
+				Views/Components/WeatherIcon.swift,
+				Views/PaperTints.swift,
+			);
+			target = 4B1507002FBEA5BF00F49AFD /* HibiWidgetsExtension */;
+		};
 		4B1507212FC0000100F49AFD /* Exceptions for "Hibi" folder in "Hibi" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = 4B802FCC2F8F5453008F00F4 /* Hibi */;
-		};
-		4B1507202FC0000000F49AFD /* Exceptions for "Hibi" folder in "HibiWidgetsExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Models/AppGroup.swift,
-				Models/WidgetWeatherSnapshot.swift,
-				Models/CalendarEvent.swift,
-				Models/SampleData.swift,
-				Models/Preferences.swift,
-				Views/PaperTints.swift,
-				Views/Components/PaperChrome.swift,
-				Views/Components/WeatherIcon.swift,
-				Views/Components/MarqueeText.swift,
-				Views/Components/PageContent.swift,
-				Localizable.xcstrings,
-				Fonts/InstrumentSerif-Regular.ttf,
-				Fonts/InstrumentSerif-Italic.ttf,
-				Fonts/NotoSerifJP-Regular.otf,
-			);
-			target = 4B1507002FBEA5BF00F49AFD /* HibiWidgetsExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -315,7 +315,7 @@
 				INFOPLIST_FILE = HibiWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HibiWidgets;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -346,7 +346,7 @@
 				INFOPLIST_FILE = HibiWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HibiWidgets;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
