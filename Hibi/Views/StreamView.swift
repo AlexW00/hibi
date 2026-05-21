@@ -28,6 +28,7 @@ struct StreamView: View {
     @Environment(EventStore.self) private var eventStore
     @State private var window: StreamWindow
     @State private var position: ScrollPosition
+    @State private var isSnapping = false
 
     init(
         displayedYear: Binding<Int>,
@@ -92,7 +93,6 @@ struct StreamView: View {
             .padding(.bottom, 160)
         }
         .scrollPosition($position, anchor: .center)
-        .scrollTargetBehavior(.viewAligned(anchor: .center))
         .overlay(alignment: .leading) {
             Image(systemName: "chevron.right")
                 .font(.system(size: 14, weight: .medium))
@@ -102,9 +102,18 @@ struct StreamView: View {
         }
         .sensoryFeedback(.selection, trigger: position.viewID(type: Int.self))
         .onScrollPhaseChange { _, newPhase in
-            if newPhase == .idle {
-                let id = position.viewID(type: Int.self) ?? window.visibleDayID
-                window.extendIfNearEdge(visibleID: id)
+            guard newPhase == .idle, !isSnapping else { return }
+            let id = position.viewID(type: Int.self) ?? window.visibleDayID
+            window.extendIfNearEdge(visibleID: id)
+            guard let id else { return }
+            // Native `viewAligned(anchor:)` snaps item edges to the anchor —
+            // not item centers. Re-center the closest day imperatively so the
+            // chevron always points at a day's vertical midpoint.
+            isSnapping = true
+            withAnimation(.snappy(duration: 0.22)) {
+                position.scrollTo(id: id, anchor: .center)
+            } completion: {
+                isSnapping = false
             }
         }
         .onChange(of: position.viewID(type: Int.self)) { _, newID in
