@@ -913,7 +913,7 @@ private struct PageContent: View {
 private struct AppleWeatherAttribution: View {
     var body: some View {
         Link(destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!) {
-            (Text(Image(systemName: "apple.logo")) + Text(verbatim: "\u{00a0}Weather"))
+            Text("\(Image(systemName: "apple.logo"))\u{00a0}Weather")
                 .font(.system(size: 10, weight: .regular))
                 .foregroundStyle(.secondary)
         }
