@@ -91,7 +91,7 @@ struct PermissionsOnboardingSheet: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .presentationBackground {
-            AppBackgroundGradient().ignoresSafeArea()
+            OnboardingBackground().ignoresSafeArea()
         }
         .onAppear {
             appeared = true
@@ -253,6 +253,33 @@ private struct PermissionRow: View {
         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: granted)
         .animation(.easeInOut(duration: 0.2), value: denied)
         .animation(.easeInOut(duration: 0.15), value: isRequesting)
+    }
+}
+
+// MARK: - Background
+
+/// Sheet-specific canvas. In dark mode it reuses `AppBackgroundGradient`
+/// (cool tones, no issue). In light mode the shared radial's outer ring is
+/// a warm yellow-beige — on the main app it's hidden behind toolbar / tab
+/// bar / scrolling content, but on a near-full-screen sheet the bottom-right
+/// corner exposes it and reads as out-of-place orange. Use a gentle vertical
+/// cream wash that stays in the lighter band of the same paper palette.
+private struct OnboardingBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        if colorScheme == .dark {
+            AppBackgroundGradient()
+        } else {
+            LinearGradient(
+                colors: [
+                    Color(.displayP3, red: 0.984, green: 0.980, blue: 0.965),
+                    Color(.displayP3, red: 0.965, green: 0.960, blue: 0.945),
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
     }
 }
 
