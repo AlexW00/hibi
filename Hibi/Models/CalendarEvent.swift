@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-enum WeatherCode: String, Hashable {
+enum WeatherCode: String, Hashable, Codable, Sendable {
     case sun, pcloud, cloud, rain, wind, storm
 
     var sfSymbol: String {
