@@ -102,7 +102,6 @@ struct DayView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            masthead
             tearStack
                 .padding(.horizontal, 16)
                 .padding(.bottom, 4)
@@ -228,27 +227,6 @@ struct DayView: View {
             .opacity(tearHintOpacity * chromeFadeOpacity)
             .clipped()
             .animation(.easeOut(duration: 0.32), value: isTearing)
-    }
-
-    // MARK: - Masthead
-
-    private var masthead: some View {
-        HStack {
-            // Typographic constant — identical across all locales per design.
-            Text(verbatim: "日々 · No. \(String(format: "%03d", day))")
-                .font(.system(size: 11, weight: .medium))
-                .tracking(1.8)
-                .foregroundStyle(.secondary)
-                .contentTransition(.numericText(value: Double(day)))
-            Spacer()
-            // Typographic constant — identical across all locales per design.
-            Text(verbatim: "est. MMXXVI")
-                .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 2)
-        .padding(.bottom, 14)
     }
 
     // MARK: - Tear stack (3-card paper stack)
