@@ -104,6 +104,7 @@ struct DayView: View {
         VStack(spacing: 0) {
             tearStack
                 .padding(.horizontal, 16)
+                .padding(.top, 20)
                 .padding(.bottom, 4)
                 .sensoryFeedback(.impact(weight: .medium), trigger: tearCommitCount)
             pullToTearHint
