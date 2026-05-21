@@ -6,7 +6,7 @@ struct MonthView: View {
     var onPickDay: (Int) -> Void
 
     @Environment(EventStore.self) private var eventStore
-    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
 
     var body: some View {
         let totalDays = SampleData.daysInMonth(year: year, month: month)
@@ -97,7 +97,7 @@ private struct DayCell: View {
 
     @Environment(EventStore.self) private var eventStore
     @Environment(Clock.self) private var clock
-    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
 
     var body: some View {
         let events = eventStore.events(year: year, month: month, day: day)

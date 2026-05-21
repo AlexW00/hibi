@@ -5,7 +5,7 @@ struct EventCard: View {
     /// 0 before the event starts, 1 after it ends. Ignored for all-day events.
     var progress: Double = 0
 
-    @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
+    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
 
     private var timeFormat: TimeFormat {
         TimeFormat(rawValue: timeFormatRaw) ?? .system

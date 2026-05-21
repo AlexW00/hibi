@@ -35,7 +35,7 @@ struct ContentView: View {
     @State private var reopenOnboardingAfterSettings = false
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearanceRaw: String = SettingsView.Appearance.system.rawValue
-    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
 
     private var selectionBinding: Binding<CalendarTab> {
         Binding(
@@ -333,7 +333,7 @@ struct ContentView: View {
 private struct SearchResultsView: View {
     let query: String
     @Environment(EventStore.self) private var eventStore
-    @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
+    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
 
     private var timeFormat: TimeFormat {
         TimeFormat(rawValue: timeFormatRaw) ?? .system

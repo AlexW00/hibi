@@ -19,9 +19,9 @@ struct DayView: View {
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
     @AppStorage("preferCompactDayView") private var preferCompactDayView: Bool = false
-    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
-    @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
-    @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
+    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
+    @AppStorage(TemperatureUnit.defaultsKey, store: AppGroup.defaults) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
     @State private var dragY: CGFloat = 0
     @State private var isTearing: Bool = false
     @State private var cardShiftAmount: CGFloat = 0
