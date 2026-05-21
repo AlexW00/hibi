@@ -7927,6 +7927,57 @@
           }
         }
       }
+    },
+    "Open Hibi to update" : {
+      "comment": "Today's Page widget — shown on the large widget when the cached weather is 3+ days old.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Hibi öffnen, um zu aktualisieren" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Open Hibi to update" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Abre Hibi para actualizar" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Apri Hibi per aggiornare" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "Hibi を開いて更新" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "업데이트하려면 Hibi 열기" } },
+        "ms": { "stringUnit": { "state": "translated", "value": "Buka Hibi untuk kemas kini" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Abra o Hibi para atualizar" } },
+        "zh-Hans-CN": { "stringUnit": { "state": "translated", "value": "打开 Hibi 以更新" } },
+        "zh-Hant-HK": { "stringUnit": { "state": "translated", "value": "打開 Hibi 以更新" } },
+        "zh-Hant-TW": { "stringUnit": { "state": "translated", "value": "開啟 Hibi 來更新" } }
+      }
+    },
+    "Today as a tear-off page." : {
+      "comment": "Today's Page widget — description shown in the widget gallery.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Der heutige Tag als Abreißblatt." } },
+        "en": { "stringUnit": { "state": "translated", "value": "Today as a tear-off page." } },
+        "es": { "stringUnit": { "state": "translated", "value": "Hoy, como una hoja arrancable." } },
+        "it": { "stringUnit": { "state": "translated", "value": "Oggi, come un foglio strappabile." } },
+        "ja": { "stringUnit": { "state": "translated", "value": "今日を一枚の紙で。" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "오늘을 한 장의 종이로." } },
+        "ms": { "stringUnit": { "state": "translated", "value": "Hari ini sebagai sehelai kertas koyak." } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "O dia de hoje em uma folha destacável." } },
+        "zh-Hans-CN": { "stringUnit": { "state": "translated", "value": "把今天放进一页纸里。" } },
+        "zh-Hant-HK": { "stringUnit": { "state": "translated", "value": "把今天放進一頁紙裡。" } },
+        "zh-Hant-TW": { "stringUnit": { "state": "translated", "value": "把今天放進一頁紙裡。" } }
+      }
+    },
+    "Today's Page" : {
+      "comment": "Today's Page widget — display name in the widget gallery.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": { "stringUnit": { "state": "translated", "value": "Tagesblatt" } },
+        "en": { "stringUnit": { "state": "translated", "value": "Today's Page" } },
+        "es": { "stringUnit": { "state": "translated", "value": "Página de hoy" } },
+        "it": { "stringUnit": { "state": "translated", "value": "Pagina di oggi" } },
+        "ja": { "stringUnit": { "state": "translated", "value": "今日のページ" } },
+        "ko": { "stringUnit": { "state": "translated", "value": "오늘의 페이지" } },
+        "ms": { "stringUnit": { "state": "translated", "value": "Halaman Hari Ini" } },
+        "pt-BR": { "stringUnit": { "state": "translated", "value": "Página de hoje" } },
+        "zh-Hans-CN": { "stringUnit": { "state": "translated", "value": "今日页面" } },
+        "zh-Hant-HK": { "stringUnit": { "state": "translated", "value": "今日頁面" } },
+        "zh-Hant-TW": { "stringUnit": { "state": "translated", "value": "今日頁面" } }
+      }
     }
   },
   "version": "1.0"
