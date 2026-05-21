@@ -6,6 +6,7 @@ import Observation
 import OSLog
 import PermissionsKit
 import WeatherKit
+import WidgetKit
 
 @MainActor
 @Observable
@@ -139,6 +140,33 @@ final class WeatherStore: NSObject {
             )
         }
         self.weatherByDay = byDay
+
+        // Persist today's forecast for the widget. "Today" is computed in
+        // the store's own calendar to match the app's day boundary.
+        let now = Date()
+        let todayComps = self.calendar.dateComponents([.year, .month, .day], from: now)
+        if let y = todayComps.year, let m = todayComps.month, let d = todayComps.day,
+           let today = byDay[DayKey(year: y, month: m, day: d)] {
+            writeWidgetSnapshot(today: today, year: y, month: m, day: d)
+        }
+    }
+
+    // MARK: - Widget snapshot
+
+    /// Persist today's forecast to the App Group so the Today's Page widget
+    /// can render. Called from `apply(...)` after a successful fetch.
+    /// No-op if the App Group capability hasn't been configured.
+    private func writeWidgetSnapshot(today: DayWeather, year: Int, month: Int, day: Int) {
+        let snapshot = WidgetWeatherSnapshot(
+            year: year, month: month, day: day,
+            high: today.high, low: today.low, code: today.code,
+            sunrise: today.sunrise, sunset: today.sunset,
+            locationName: self.locationName,
+            capturedAt: Date()
+        )
+        guard let data = try? JSONEncoder().encode(snapshot) else { return }
+        AppGroup.defaults?.set(data, forKey: AppGroup.Key.snapshot)
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     // MARK: - Mapping
