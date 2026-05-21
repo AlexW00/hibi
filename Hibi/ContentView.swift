@@ -178,6 +178,22 @@ struct ContentView: View {
         .environment(eventStore)
         .environment(weatherStore)
         .environment(clock)
+        .onOpenURL { url in
+            guard url.scheme == "hibi" else { return }
+            switch url.host {
+            case "today", nil:
+                // Anchor the displayed date on the device's real "today" —
+                // not whatever the user had selected. The widget always
+                // shows today, so tapping it should land you there.
+                displayedYear = SampleData.todayYear
+                displayedMonth = SampleData.todayMonth
+                selectedDay = SampleData.todayDay
+                selection = .day
+                scrollToNowToken &+= 1
+            default:
+                break
+            }
+        }
         .whatsNewSheet(onDismiss: {
             if needsOnboarding {
                 showOnboarding = true
