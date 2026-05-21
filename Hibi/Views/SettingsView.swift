@@ -130,7 +130,7 @@ struct SettingsView: View {
                     }
 
                     Link(destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!) {
-                        (Text("Weather data provided by ") + Text(Image(systemName: "apple.logo")) + Text(verbatim: "\u{00a0}Weather"))
+                        Text("Weather data provided by \(Image(systemName: "apple.logo"))\u{00a0}Weather")
                             .foregroundStyle(.secondary)
                             .font(.footnote)
                     }
