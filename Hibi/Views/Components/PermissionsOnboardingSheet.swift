@@ -34,7 +34,7 @@ struct PermissionsOnboardingSheet: View {
     /// Brief success state shown between the last grant and the actual dismiss,
     /// so the user sees confirmation instead of the sheet just yanking away.
     @State private var isCelebrating = false
-    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {

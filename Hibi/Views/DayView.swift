@@ -19,7 +19,9 @@ struct DayView: View {
     @Environment(\.colorScheme) private var colorScheme
     @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
     @AppStorage("preferCompactDayView") private var preferCompactDayView: Bool = false
-    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
+    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
+    @AppStorage(TemperatureUnit.defaultsKey, store: AppGroup.defaults) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
     @State private var dragY: CGFloat = 0
     @State private var isTearing: Bool = false
     @State private var cardShiftAmount: CGFloat = 0
@@ -102,9 +104,9 @@ struct DayView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            masthead
             tearStack
                 .padding(.horizontal, 16)
-                .padding(.top, 20)
                 .padding(.bottom, 4)
                 .sensoryFeedback(.impact(weight: .medium), trigger: tearCommitCount)
             pullToTearHint
@@ -228,6 +230,27 @@ struct DayView: View {
             .opacity(tearHintOpacity * chromeFadeOpacity)
             .clipped()
             .animation(.easeOut(duration: 0.32), value: isTearing)
+    }
+
+    // MARK: - Masthead
+
+    private var masthead: some View {
+        HStack {
+            // Typographic constant — identical across all locales per design.
+            Text(verbatim: "日々 · No. \(String(format: "%03d", day))")
+                .font(.system(size: 11, weight: .medium))
+                .tracking(1.8)
+                .foregroundStyle(.secondary)
+                .contentTransition(.numericText(value: Double(day)))
+            Spacer()
+            // Typographic constant — identical across all locales per design.
+            Text(verbatim: "est. MMXXVI")
+                .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 2)
+        .padding(.bottom, 14)
     }
 
     // MARK: - Tear stack (3-card paper stack)
@@ -409,7 +432,10 @@ struct DayView: View {
                     weather: weather,
                     locationName: weatherStore.locationName,
                     preview: chromeAmount < 1,
-                    chromeFade: Double(1 - scheduleProgress)
+                    chromeFade: Double(1 - scheduleProgress),
+                    useSimpleFont: useSimpleFont,
+                    timeFormat: TimeFormat(rawValue: timeFormatRaw) ?? .system,
+                    temperatureUnit: TemperatureUnit(rawValue: temperatureUnitRaw) ?? .system
                 )
                 .allowsHitTesting(false)
             }
@@ -730,172 +756,5 @@ struct DayView: View {
         } else {
             day = target.day
         }
-    }
-}
-
-// MARK: - Page Content
-
-private struct PageContent: View {
-    let day: Int
-    let month: Int
-    let year: Int
-    let isToday: Bool
-    let weather: DayWeather?
-    let locationName: String?
-    let preview: Bool
-    /// 1.0 = paper expanded (full corner widgets); 0.0 = collapsed via the
-    /// schedule separator drag. Multiplies the opacity of the sunrise/sunset
-    /// widgets, weather pill, Apple Weather attribution, and month/year
-    /// sub-text — and collapses their reserved height so the central numeral
-    /// block keeps its breathing room as the card shrinks. The weekday, day
-    /// number, and today underline are not faded.
-    var chromeFade: Double = 1.0
-
-    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
-    @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
-    @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
-
-    private var timeFormat: TimeFormat {
-        TimeFormat(rawValue: timeFormatRaw) ?? .system
-    }
-
-    private var temperatureUnit: TemperatureUnit {
-        TemperatureUnit(rawValue: temperatureUnitRaw) ?? .system
-    }
-
-    var body: some View {
-        VStack(spacing: 0) {
-            topRow
-            Spacer(minLength: 0)
-            numeralBlock
-            Spacer(minLength: 0)
-            bottomRow
-        }
-        // Keep the page's inner padding constant across the schedule
-        // collapse — the weekday/numeral/underline are "stays" elements and
-        // need to sit at their original distance from the binding holes /
-        // perforation edge regardless of card height. The numeral block has
-        // plenty of room at the collapsed height (260 - 34 - 20 = 206pt
-        // inner area is more than the day number's intrinsic ~180pt).
-        .padding(.horizontal, 22)
-        .padding(.top, 34)
-        .padding(.bottom, 20)
-    }
-
-    private var topRow: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 2) {
-                Image(systemName: "sunrise")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
-                Text(weather?.sunrise.map { timeFormat.string(from: $0) } ?? "")
-                    .font(.system(size: 9.5, design: .monospaced))
-                    .tracking(0.6)
-                    .foregroundStyle(.secondary)
-            }
-            .opacity(weather?.sunrise == nil ? 0 : chromeFade)
-            Spacer()
-            Text(DayNames.full[SampleData.weekday(year: year, month: month, day: day)])
-                .font(.appSerif(size: 19, italic: true, simple: useSimpleFont))
-                .foregroundStyle(.primary)
-                .padding(.top, 2)
-            Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Image(systemName: "sunset")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
-                Text(weather?.sunset.map { timeFormat.string(from: $0) } ?? "")
-                    .font(.system(size: 9.5, design: .monospaced))
-                    .tracking(0.6)
-                    .foregroundStyle(.secondary)
-            }
-            .opacity(weather?.sunset == nil ? 0 : chromeFade)
-        }
-        // Don't collapse all the way to 0 — the weekday text in the center
-        // is a "stays" element per the schedule-collapse spec. Floor at the
-        // weekday's own intrinsic height so it remains visible.
-        .frame(height: 44 * chromeFade + 24 * (1 - chromeFade))
-        .clipped()
-    }
-
-    private var numeralBlock: some View {
-        VStack(spacing: 2) {
-            Text(verbatim: "\(day)")
-                .font(.appSerif(size: 180, simple: useSimpleFont))
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.5)
-                .contentTransition(.numericText(value: Double(day)))
-                .frame(maxWidth: .infinity, alignment: .center)
-                .overlay(alignment: .bottom) {
-                    if isToday {
-                        Rectangle()
-                            .fill(.primary)
-                            .frame(width: 80, height: 1.5)
-                            .offset(y: -8)
-                    }
-                }
-            // Month name is already localized via the MonthNames accessor;
-            // separator + year are locale-invariant. `verbatim:` skips the
-            // LocalizedStringKey lookup so we don't pollute the catalog with a
-            // generic "%@ · %@" key.
-            Text(verbatim: "\(MonthNames.full[month - 1]) · \(String(year))")
-                .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
-                .foregroundStyle(.secondary)
-                .padding(.top, 2)
-                .frame(height: 18 * chromeFade)
-                .opacity(chromeFade)
-                .clipped()
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var bottomRow: some View {
-        // Always render the row at a fixed height — fade the weather pill to
-        // opacity 0 on days without weather so the paper's vertical rhythm
-        // doesn't change between days.
-        HStack(alignment: .bottom) {
-            HStack(spacing: 8) {
-                WeatherIcon(code: weather?.code ?? .sun, size: 22)
-                    .foregroundStyle(.secondary)
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack(spacing: 0) {
-                        Text(verbatim: "\(temperatureUnit.display(celsius: weather?.high ?? 0))°")
-                            .font(.system(size: 15, weight: .medium))
-                            .tracking(-0.3)
-                        Text(verbatim: " / \(temperatureUnit.display(celsius: weather?.low ?? 0))°")
-                            .font(.system(size: 15))
-                            .foregroundStyle(.secondary)
-                    }
-                    .foregroundStyle(.primary)
-                    MarqueeText(text: locationName ?? "")
-                        .font(.system(size: 9.5))
-                        .tracking(1.4)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .opacity(weather == nil ? 0 : 1)
-            Spacer()
-            AppleWeatherAttribution()
-                .opacity(weather == nil ? 0 : 1)
-        }
-        .frame(height: 56 * chromeFade)
-        .opacity(chromeFade)
-        .clipped()
-    }
-}
-
-/// Apple Weather attribution required by WeatherKit when weather data is
-/// displayed (App Store Review Guideline 5.2.5). Renders the Apple Weather
-/// trademark — the apple-logo glyph + the word "Weather" — and links to the
-/// legal source page. Tappable; opens the attribution page in Safari.
-private struct AppleWeatherAttribution: View {
-    var body: some View {
-        Link(destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!) {
-            Text("\(Image(systemName: "apple.logo"))\u{00a0}Weather")
-                .font(.system(size: 10, weight: .regular))
-                .foregroundStyle(.secondary)
-        }
-        .accessibilityLabel(Text("Apple Weather"))
     }
 }

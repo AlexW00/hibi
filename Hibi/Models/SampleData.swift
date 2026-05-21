@@ -1,3 +1,4 @@
+import CoreText
 import Foundation
 import SwiftUI
 
@@ -107,6 +108,27 @@ enum AppFont {
             return true
         default:
             return false
+        }
+    }
+
+    /// Idempotent: registers Instrument Serif (Regular/Italic) and Noto
+    /// Serif JP with the process-wide CoreText font manager. Called from
+    /// `HibiApp.init` in the main app and from `HibiWidgetsBundle.init` in
+    /// the widget extension. Each process has its own font namespace so the
+    /// widget MUST call this; fonts registered by the app are not visible
+    /// to the widget extension.
+    static func registerFonts() {
+        let fonts: [(name: String, ext: String)] = [
+            ("InstrumentSerif-Regular", "ttf"),
+            ("InstrumentSerif-Italic", "ttf"),
+            ("NotoSerifJP-Regular", "otf"),
+        ]
+        for font in fonts {
+            guard let url = Bundle.main.url(forResource: font.name, withExtension: font.ext) else {
+                continue
+            }
+            var error: Unmanaged<CFError>?
+            CTFontManagerRegisterFontsForURL(url as CFURL, .process, &error)
         }
     }
 }

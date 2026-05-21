@@ -6,7 +6,7 @@ struct DayEventRow: View {
     /// Ignored for all-day events — those always render fully filled.
     var progress: Double = 0
 
-    @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
+    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
 
     private var timeFormat: TimeFormat {
         TimeFormat(rawValue: timeFormatRaw) ?? .system

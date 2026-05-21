@@ -256,8 +256,8 @@ private struct StreamDayRow: View {
     @Environment(WeatherStore.self) private var weatherStore
     @Environment(Clock.self) private var clock
     @State private var isDropTargeted: Bool = false
-    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
-    @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
+    @AppStorage(TemperatureUnit.defaultsKey, store: AppGroup.defaults) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
 
     private var temperatureUnit: TemperatureUnit {
         TemperatureUnit(rawValue: temperatureUnitRaw) ?? .system

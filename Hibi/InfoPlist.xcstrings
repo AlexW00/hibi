@@ -1,510 +1,510 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "CFBundleDisplayName": {
-      "comment": "Home Screen app name. 'Hibi' is already Japanese (日々); stays constant across all three locales per product decision.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Home Screen app name. 'Hibi' is already Japanese (日々); stays constant across all three locales per product decision.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
-          }
-        }
-      }
-    },
-    "CFBundleName": {
-      "comment": "Bundle name",
-      "extractionState": "extracted_with_value",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "Hibi"
-          }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
-          }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
-          }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi"
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         }
       }
     },
-    "NSCalendarsFullAccessUsageDescription": {
-      "comment": "Shown by iOS when the app requests full Calendar access.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi möchte auf deinen Kalender zugreifen, um deine Termine anzuzeigen."
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi would like to access your Calendar so it can display your events."
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hibi"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibiがイベントを表示するために、カレンダーへのアクセスを求めています。"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 想取用你的行事曆，以顯示你的事件。"
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 想取用你的日曆，以顯示你的事件。"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 想访问你的日历，以显示你的事件。"
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi가 이벤트를 표시하기 위해 캘린더 접근 권한을 요청합니다."
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi ingin mengakses Kalendar anda supaya ia boleh memaparkan acara anda."
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi quiere acceder a tu calendario para mostrar tus eventos."
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Hibi gostaria de acessar seu Calendário para exibir seus eventos."
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi vorrebbe accedere al tuo calendario per mostrare i tuoi eventi."
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi"
           }
         }
       }
     },
-    "NSCalendarsUsageDescription": {
-      "comment": "Privacy - Calendars Usage Description",
-      "extractionState": "extracted_with_value",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "Hibi would like to access your Calendar so it can display your events."
+    "NSCalendarsFullAccessUsageDescription" : {
+      "comment" : "Shown by iOS when the app requests full Calendar access.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi möchte auf deinen Kalender zugreifen, um deine Termine anzuzeigen."
           }
         },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 想取用你的行事曆，以顯示你的事件。"
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi would like to access your Calendar so it can display your events."
           }
         },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 想取用你的日曆，以顯示你的事件。"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi quiere acceder a tu calendario para mostrar tus eventos."
           }
         },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 想访问你的日历，以显示你的事件。"
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi vorrebbe accedere al tuo calendario per mostrare i tuoi eventi."
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi가 이벤트를 표시하기 위해 캘린더 접근 권한을 요청합니다."
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibiがイベントを表示するために、カレンダーへのアクセスを求めています。"
           }
         },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi ingin mengakses Kalendar anda supaya ia boleh memaparkan acara anda."
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi가 이벤트를 표시하기 위해 캘린더 접근 권한을 요청합니다."
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi quiere acceder a tu calendario para mostrar tus eventos."
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi ingin mengakses Kalendar anda supaya ia boleh memaparkan acara anda."
           }
         },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Hibi gostaria de acessar seu Calendário para exibir seus eventos."
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Hibi gostaria de acessar seu Calendário para exibir seus eventos."
           }
         },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi vorrebbe accedere al tuo calendario per mostrare i tuoi eventi."
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 想访问你的日历，以显示你的事件。"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi möchte auf deinen Kalender zugreifen, um deine Termine anzuzeigen."
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 想取用你的日曆，以顯示你的事件。"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibiがイベントを表示するために、カレンダーへのアクセスを求めています。"
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 想取用你的行事曆，以顯示你的事件。"
           }
         }
       }
     },
-    "NSRemindersFullAccessUsageDescription": {
-      "comment": "Shown by iOS when the app requests full Reminders access.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi möchte auf deine Erinnerungen zugreifen, um sie neben deinen Terminen anzuzeigen."
+    "NSCalendarsUsageDescription" : {
+      "comment" : "Privacy - Calendars Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi möchte auf deinen Kalender zugreifen, um deine Termine anzuzeigen."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi would like to access your Reminders so it can display them alongside your events."
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hibi would like to access your Calendar so it can display your events."
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibiがイベントと一緒にリマインダーを表示するために、リマインダーへのアクセスを求めています。"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi quiere acceder a tu calendario para mostrar tus eventos."
           }
         },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 想取用你的提醒事項，以便與事件一起顯示。"
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi vorrebbe accedere al tuo calendario per mostrare i tuoi eventi."
           }
         },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 想取用你的提醒事項，以便與事件一起顯示。"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibiがイベントを表示するために、カレンダーへのアクセスを求めています。"
           }
         },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 想访问你的提醒事项，以便与事件一起显示。"
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi가 이벤트를 표시하기 위해 캘린더 접근 권한을 요청합니다."
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi가 이벤트와 함께 미리 알림을 표시하기 위해 미리 알림 접근 권한을 요청합니다."
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi ingin mengakses Kalendar anda supaya ia boleh memaparkan acara anda."
           }
         },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi ingin mengakses Peringatan anda supaya ia boleh memaparkannya bersama acara anda."
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Hibi gostaria de acessar seu Calendário para exibir seus eventos."
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi quiere acceder a tus recordatorios para mostrarlos junto a tus eventos."
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 想访问你的日历，以显示你的事件。"
           }
         },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Hibi gostaria de acessar seus Lembretes para exibi-los junto aos seus eventos."
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 想取用你的日曆，以顯示你的事件。"
           }
         },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi vorrebbe accedere ai tuoi promemoria per mostrarli insieme ai tuoi eventi."
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 想取用你的行事曆，以顯示你的事件。"
           }
         }
       }
     },
-    "NSLocationAlwaysAndWhenInUseUsageDescription": {
-      "comment": "Privacy - Location Always and When In Use Usage Description",
-      "extractionState": "extracted_with_value",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "Hibi uses your location to show local weather and sunrise/sunset on each day."
+    "NSLocationAlwaysAndWhenInUseUsageDescription" : {
+      "comment" : "Privacy - Location Always and When In Use Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi verwendet deinen Standort, um das lokale Wetter sowie Sonnenauf- und -untergang anzuzeigen."
           }
         },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 會使用你的位置，在每天顯示當地天氣與日出 / 日落時間。"
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Hibi uses your location to show local weather and sunrise/sunset on each day."
           }
         },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 會使用你的位置，在每天顯示本地天氣與日出 / 日落時間。"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi usa tu ubicación para mostrar el tiempo local y la salida/puesta del sol de cada día."
           }
         },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 会使用你的位置，在每天显示本地天气与日出 / 日落时间。"
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi usa la tua posizione per mostrare il meteo locale e alba/tramonto di ogni giorno."
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi는 각 날짜의 현지 날씨와 일출/일몰 시간을 표시하기 위해 위치를 사용합니다."
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibiは、各日の地域の天気と日の出・日の入り時刻を表示するために位置情報を使用します。"
           }
         },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi menggunakan lokasi anda untuk menunjukkan cuaca setempat serta matahari terbit/terbenam pada setiap hari."
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi는 각 날짜의 현지 날씨와 일출/일몰 시간을 표시하기 위해 위치를 사용합니다."
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi usa tu ubicación para mostrar el tiempo local y la salida/puesta del sol de cada día."
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi menggunakan lokasi anda untuk menunjukkan cuaca setempat serta matahari terbit/terbenam pada setiap hari."
           }
         },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Hibi usa sua localização para mostrar o clima local e o nascer/pôr do sol de cada dia."
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Hibi usa sua localização para mostrar o clima local e o nascer/pôr do sol de cada dia."
           }
         },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi usa la tua posizione per mostrare il meteo locale e alba/tramonto di ogni giorno."
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 会使用你的位置，在每天显示本地天气与日出 / 日落时间。"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi verwendet deinen Standort, um das lokale Wetter sowie Sonnenauf- und -untergang anzuzeigen."
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 會使用你的位置，在每天顯示本地天氣與日出 / 日落時間。"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibiは、各日の地域の天気と日の出・日の入り時刻を表示するために位置情報を使用します。"
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 會使用你的位置，在每天顯示當地天氣與日出 / 日落時間。"
           }
         }
       }
     },
-    "NSLocationWhenInUseUsageDescription": {
-      "comment": "Shown by iOS when the app requests location while in use.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi verwendet deinen Standort, um das lokale Wetter sowie Sonnenauf- und -untergang anzuzeigen."
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Shown by iOS when the app requests location while in use.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi verwendet deinen Standort, um das lokale Wetter sowie Sonnenauf- und -untergang anzuzeigen."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi uses your location to show local weather and sunrise/sunset on each day."
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi uses your location to show local weather and sunrise/sunset on each day."
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibiは、各日の地域の天気と日の出・日の入り時刻を表示するために位置情報を使用します。"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi usa tu ubicación para mostrar el tiempo local y la salida/puesta del sol de cada día."
           }
         },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 會使用你的位置，在每天顯示當地天氣與日出 / 日落時間。"
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi usa la tua posizione per mostrare il meteo locale e alba/tramonto di ogni giorno."
           }
         },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 會使用你的位置，在每天顯示本地天氣與日出 / 日落時間。"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibiは、各日の地域の天気と日の出・日の入り時刻を表示するために位置情報を使用します。"
           }
         },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi 会使用你的位置，在每天显示本地天气与日出 / 日落时间。"
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi는 각 날짜의 현지 날씨와 일출/일몰 시간을 표시하기 위해 위치를 사용합니다."
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi는 각 날짜의 현지 날씨와 일출/일몰 시간을 표시하기 위해 위치를 사용합니다."
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi menggunakan lokasi anda untuk menunjukkan cuaca setempat serta matahari terbit/terbenam pada setiap hari."
           }
         },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi menggunakan lokasi anda untuk menunjukkan cuaca setempat serta matahari terbit/terbenam pada setiap hari."
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Hibi usa sua localização para mostrar o clima local e o nascer/pôr do sol de cada dia."
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi usa tu ubicación para mostrar el tiempo local y la salida/puesta del sol de cada día."
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 会使用你的位置，在每天显示本地天气与日出 / 日落时间。"
           }
         },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Hibi usa sua localização para mostrar o clima local e o nascer/pôr do sol de cada dia."
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 會使用你的位置，在每天顯示本地天氣與日出 / 日落時間。"
           }
         },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi usa la tua posizione per mostrare il meteo locale e alba/tramonto di ogni giorno."
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 會使用你的位置，在每天顯示當地天氣與日出 / 日落時間。"
+          }
+        }
+      }
+    },
+    "NSRemindersFullAccessUsageDescription" : {
+      "comment" : "Shown by iOS when the app requests full Reminders access.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi möchte auf deine Erinnerungen zugreifen, um sie neben deinen Terminen anzuzeigen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi would like to access your Reminders so it can display them alongside your events."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi quiere acceder a tus recordatorios para mostrarlos junto a tus eventos."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi vorrebbe accedere ai tuoi promemoria per mostrarli insieme ai tuoi eventi."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibiがイベントと一緒にリマインダーを表示するために、リマインダーへのアクセスを求めています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi가 이벤트와 함께 미리 알림을 표시하기 위해 미리 알림 접근 권한을 요청합니다."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi ingin mengakses Peringatan anda supaya ia boleh memaparkannya bersama acara anda."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Hibi gostaria de acessar seus Lembretes para exibi-los junto aos seus eventos."
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 想访问你的提醒事项，以便与事件一起显示。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 想取用你的提醒事項，以便與事件一起顯示。"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 想取用你的提醒事項，以便與事件一起顯示。"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

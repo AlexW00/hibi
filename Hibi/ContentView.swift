@@ -35,7 +35,7 @@ struct ContentView: View {
     @State private var reopenOnboardingAfterSettings = false
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearanceRaw: String = SettingsView.Appearance.system.rawValue
-    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
 
     private var selectionBinding: Binding<CalendarTab> {
         Binding(
@@ -178,6 +178,22 @@ struct ContentView: View {
         .environment(eventStore)
         .environment(weatherStore)
         .environment(clock)
+        .onOpenURL { url in
+            guard url.scheme == "hibi" else { return }
+            switch url.host {
+            case "today", nil:
+                // Anchor the displayed date on the device's real "today" —
+                // not whatever the user had selected. The widget always
+                // shows today, so tapping it should land you there.
+                displayedYear = SampleData.todayYear
+                displayedMonth = SampleData.todayMonth
+                selectedDay = SampleData.todayDay
+                selection = .day
+                scrollToNowToken &+= 1
+            default:
+                break
+            }
+        }
         .whatsNewSheet(onDismiss: {
             if needsOnboarding {
                 showOnboarding = true
@@ -333,7 +349,7 @@ struct ContentView: View {
 private struct SearchResultsView: View {
     let query: String
     @Environment(EventStore.self) private var eventStore
-    @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
+    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
 
     private var timeFormat: TimeFormat {
         TimeFormat(rawValue: timeFormatRaw) ?? .system

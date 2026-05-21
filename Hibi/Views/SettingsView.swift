@@ -13,9 +13,9 @@ struct SettingsView: View {
     @AppStorage("appearance") private var appearanceRaw: String = Appearance.system.rawValue
     @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
     @AppStorage("preferCompactDayView") private var preferCompactDayView: Bool = false
-    @AppStorage("useSimpleFont") private var useSimpleFont: Bool = false
-    @AppStorage(TemperatureUnit.defaultsKey) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
-    @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
+    @AppStorage(TemperatureUnit.defaultsKey, store: AppGroup.defaults) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
+    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
     @State private var showWhatsNew = false
 
     enum Appearance: String, CaseIterable, Identifiable {

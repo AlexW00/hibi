@@ -4,7 +4,7 @@ struct ReminderRow: View {
     let reminder: CalendarReminder
     let onToggle: () -> Void
 
-    @AppStorage(TimeFormat.defaultsKey) private var timeFormatRaw: String = TimeFormat.system.rawValue
+    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
 
     private var timeFormat: TimeFormat {
         TimeFormat(rawValue: timeFormatRaw) ?? .system
