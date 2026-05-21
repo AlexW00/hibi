@@ -104,9 +104,9 @@ struct DayView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            masthead
             tearStack
                 .padding(.horizontal, 16)
+                .padding(.top, 20)
                 .padding(.bottom, 4)
                 .sensoryFeedback(.impact(weight: .medium), trigger: tearCommitCount)
             pullToTearHint
@@ -230,27 +230,6 @@ struct DayView: View {
             .opacity(tearHintOpacity * chromeFadeOpacity)
             .clipped()
             .animation(.easeOut(duration: 0.32), value: isTearing)
-    }
-
-    // MARK: - Masthead
-
-    private var masthead: some View {
-        HStack {
-            // Typographic constant — identical across all locales per design.
-            Text(verbatim: "日々 · No. \(String(format: "%03d", day))")
-                .font(.system(size: 11, weight: .medium))
-                .tracking(1.8)
-                .foregroundStyle(.secondary)
-                .contentTransition(.numericText(value: Double(day)))
-            Spacer()
-            // Typographic constant — identical across all locales per design.
-            Text(verbatim: "est. MMXXVI")
-                .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 2)
-        .padding(.bottom, 14)
     }
 
     // MARK: - Tear stack (3-card paper stack)
@@ -560,14 +539,23 @@ struct DayView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 40)
             } else {
+                // Reminders render above events in one continuous stack;
+                // edges per row let the corner radii tighten between
+                // adjacent rows so the stack reads as a single list
+                // rather than detached cards (the same grammar the
+                // Upcoming Events widget uses).
+                let lastIdx = reminders.count + events.count - 1
                 TimelineView(.periodic(from: .now, by: 60)) { ctx in
                     VStack(spacing: 6) {
-                        ForEach(reminders) { r in
-                            ReminderRow(reminder: r) {
-                                eventStore.toggleReminderCompletion(r)
-                            }
+                        ForEach(Array(reminders.enumerated()), id: \.element.id) { idx, r in
+                            ReminderRow(
+                                reminder: r,
+                                onToggle: { eventStore.toggleReminderCompletion(r) },
+                                edges: EventRowEdges(top: idx == 0, bottom: idx == lastIdx)
+                            )
                         }
-                        ForEach(events) { e in
+                        ForEach(Array(events.enumerated()), id: \.element.id) { idx, e in
+                            let absIdx = reminders.count + idx
                             Button {
                                 onTapEvent(e)
                             } label: {
@@ -579,7 +567,8 @@ struct DayView: View {
                                         listYear: sd.year,
                                         listMonth: sd.month,
                                         listDay: sd.day
-                                    )
+                                    ),
+                                    edges: EventRowEdges(top: absIdx == 0, bottom: absIdx == lastIdx)
                                 )
                             }
                             .buttonStyle(.plain)

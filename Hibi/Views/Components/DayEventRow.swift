@@ -5,6 +5,17 @@ struct DayEventRow: View {
     /// 0 before the event starts, 1 after it ends, linear in between.
     /// Ignored for all-day events — those always render fully filled.
     var progress: Double = 0
+    /// Which corners sit against the outside of the schedule stack. Top
+    /// of the first row and bottom of the last keep the 12pt outer radius;
+    /// corners that face an adjacent row tighten to `EventRowEdges.innerRadius`
+    /// so the seam between stacked rows reads as one continuous list.
+    /// Defaults to a solo (all-outer) row so existing call sites that
+    /// render a single card aren't visually changed.
+    var edges: EventRowEdges = .solo
+
+    /// Outer corner radius for in-app rows. The shared 12pt that the
+    /// schedule list has used since launch.
+    static let outerRadius: CGFloat = 12
 
     @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
 
@@ -54,9 +65,9 @@ struct DayEventRow: View {
                 .scaleEffect(x: CGFloat(fillAmount), y: 1, anchor: .leading)
         }
         .background(event.tint.opacity(event.allDay ? 0.38 : 0.10))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(edges.shape(outer: Self.outerRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            edges.shape(outer: Self.outerRadius)
                 .strokeBorder(event.tint.opacity(0.35), lineWidth: 0.5)
         )
     }

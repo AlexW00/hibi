@@ -3,6 +3,9 @@ import SwiftUI
 struct ReminderCard: View {
     let reminder: CalendarReminder
     let onToggle: () -> Void
+    /// Which corners sit against the outside of the day's row stack — see
+    /// `EventRowEdges` for the rationale.
+    var edges: EventRowEdges = .solo
 
     @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
 
@@ -73,10 +76,10 @@ struct ReminderCard: View {
         .frame(height: 44)
         .background(
             reminder.tint.opacity(reminder.isCompleted ? 0.38 : 0.10)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .clipShape(edges.shape(outer: EventCard.outerRadius))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 14)
+            edges.shape(outer: EventCard.outerRadius)
                 .strokeBorder(reminder.tint.opacity(0.35), lineWidth: 0.5)
         )
         .animation(.easeInOut(duration: 0.3), value: reminder.isCompleted)

@@ -4,6 +4,15 @@ struct EventCard: View {
     let event: CalendarEvent
     /// 0 before the event starts, 1 after it ends. Ignored for all-day events.
     var progress: Double = 0
+    /// Which corners sit against the outside of the day's row stack — see
+    /// `EventRowEdges` and the Day view rationale. Defaults to solo so
+    /// single-row call sites are unchanged.
+    var edges: EventRowEdges = .solo
+
+    /// Outer corner radius for the Week tab's cards. Slightly larger than
+    /// `DayEventRow.outerRadius` because Week cards have more vertical
+    /// padding to absorb the curve.
+    static let outerRadius: CGFloat = 14
 
     @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
 
@@ -27,6 +36,10 @@ struct EventCard: View {
         } else {
             timedCard
         }
+    }
+
+    private var shape: UnevenRoundedRectangle {
+        edges.shape(outer: Self.outerRadius)
     }
 
     private var allDayCard: some View {
@@ -54,12 +67,9 @@ struct EventCard: View {
         .padding(.vertical, 8)
         .background(
             event.tint.opacity(0.38)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .clipShape(shape)
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(event.tint.opacity(0.55), lineWidth: 0.5)
-        )
+        .overlay(shape.strokeBorder(event.tint.opacity(0.55), lineWidth: 0.5))
     }
 
     private var timedCard: some View {
@@ -93,16 +103,13 @@ struct EventCard: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 9)
-        .background(filledBackground(cornerRadius: 14))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(event.tint.opacity(0.35), lineWidth: 0.5)
-        )
+        .background(filledBackground)
+        .overlay(shape.strokeBorder(event.tint.opacity(0.35), lineWidth: 0.5))
     }
 
     /// Light category tint underneath, progress-driven tint on top, clipped
     /// to the card's rounded rectangle. Matches the DayEventRow styling.
-    private func filledBackground(cornerRadius: CGFloat) -> some View {
+    private var filledBackground: some View {
         ZStack(alignment: .leading) {
             event.tint.opacity(0.10)
             GeometryReader { geo in
@@ -110,6 +117,6 @@ struct EventCard: View {
                     .frame(width: geo.size.width * CGFloat(fillAmount))
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        .clipShape(shape)
     }
 }

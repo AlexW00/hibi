@@ -294,14 +294,31 @@ private struct StreamDayRow: View {
                         .padding(.horizontal, 4)
                         .padding(.vertical, 10)
                 } else {
+                    // Edges per row let the corner radii tighten between
+                    // adjacent rows so the day's stack reads as one
+                    // continuous list (same grammar as the Day view and
+                    // the Upcoming Events widget). The inner VStack —
+                    // not just the outer one — owns the row spacing: a
+                    // TimelineView wraps its children as a single subtree,
+                    // so the outer VStack's spacing doesn't reach inside.
+                    let lastIdx = reminders.count + events.count - 1
                     TimelineView(.periodic(from: .now, by: 60)) { ctx in
-                        ForEach(reminders) { reminder in
-                            ReminderCard(reminder: reminder) {
-                                eventStore.toggleReminderCompletion(reminder)
+                        VStack(spacing: 6) {
+                            ForEach(Array(reminders.enumerated()), id: \.element.id) { idx, reminder in
+                                ReminderCard(
+                                    reminder: reminder,
+                                    onToggle: { eventStore.toggleReminderCompletion(reminder) },
+                                    edges: EventRowEdges(top: idx == 0, bottom: idx == lastIdx)
+                                )
                             }
-                        }
-                        ForEach(events) { event in
-                            eventButton(event: event, now: ctx.date)
+                            ForEach(Array(events.enumerated()), id: \.element.id) { idx, event in
+                                let absIdx = reminders.count + idx
+                                eventButton(
+                                    event: event,
+                                    now: ctx.date,
+                                    edges: EventRowEdges(top: absIdx == 0, bottom: absIdx == lastIdx)
+                                )
+                            }
                         }
                     }
                 }
@@ -354,7 +371,7 @@ private struct StreamDayRow: View {
     }
 
     @ViewBuilder
-    private func eventButton(event: CalendarEvent, now: Date) -> some View {
+    private func eventButton(event: CalendarEvent, now: Date, edges: EventRowEdges) -> some View {
         let card = EventCard(
             event: event,
             progress: event.progress(
@@ -363,7 +380,8 @@ private struct StreamDayRow: View {
                 listYear: year,
                 listMonth: month,
                 listDay: day
-            )
+            ),
+            edges: edges
         )
         let button = Button {
             onTapEvent(event)

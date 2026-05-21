@@ -66,11 +66,13 @@
 				Models/CalendarEvent.swift,
 				Models/Preferences.swift,
 				Models/SampleData.swift,
+				Models/WidgetEventsSnapshot.swift,
 				Models/WidgetWeatherSnapshot.swift,
 				Views/Components/MarqueeText.swift,
 				Views/Components/PageContent.swift,
 				Views/Components/PaperChrome.swift,
 				Views/Components/WeatherIcon.swift,
+				Views/EventRowShape.swift,
 				Views/PaperTints.swift,
 			);
 			target = 4B1507002FBEA5BF00F49AFD /* HibiWidgetsExtension */;

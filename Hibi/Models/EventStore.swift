@@ -4,6 +4,8 @@ import Foundation
 import Observation
 import PermissionsKit
 import SwiftUI
+import UIKit
+import WidgetKit
 
 @MainActor
 @Observable
@@ -103,6 +105,7 @@ final class EventStore {
     private func applyDemoFixtures() {
         eventsByMonth = DemoFixtures.events
         loadedMonths = Set(DemoFixtures.events.keys)
+        writeEventsWidgetSnapshot()
     }
 
     deinit {
@@ -275,6 +278,13 @@ final class EventStore {
 
         eventsByMonth[key] = grouped
         loadedMonths.insert(key)
+
+        // Keep the Schedule widget in sync. The snapshot is for *today*, so
+        // we only need to rewrite when the month we just loaded contains it.
+        let todayComps = calendar.dateComponents([.year, .month], from: Date())
+        if todayComps.year == year && todayComps.month == month {
+            writeEventsWidgetSnapshot()
+        }
     }
 
     private func reloadAll() {
@@ -572,6 +582,63 @@ final class EventStore {
             }
         }
         return Array(bestByID.values)
+    }
+
+    // MARK: - Widget snapshot
+
+    /// Persist today's events to the App Group so the Schedule widget can
+    /// render. Mirrors `WeatherStore.writeWidgetSnapshot`. No-op if the App
+    /// Group capability hasn't been configured.
+    private func writeEventsWidgetSnapshot() {
+        let now = Date()
+        let comps = calendar.dateComponents([.year, .month, .day], from: now)
+        guard let y = comps.year, let m = comps.month, let d = comps.day else { return }
+
+        let todays = events(year: y, month: m, day: d)
+        let snapshotEvents: [WidgetEventsSnapshot.Event] = todays.map { event in
+            // Re-fetch the raw EKCalendar color so the widget can re-run
+            // pastelization with its own (light/dark) trait collection.
+            // Demo events have no identifier — fall back to the cached
+            // pastelized tint, which will look correct in light mode and
+            // acceptable in dark mode.
+            let rawCGColor: CGColor? = {
+                guard let id = event.eventIdentifier else { return nil }
+                return ekStore.event(withIdentifier: id)?.calendar?.cgColor
+            }()
+            return Self.snapshotEvent(from: event, rawCGColor: rawCGColor)
+        }
+
+        let payload = WidgetEventsSnapshot(
+            year: y, month: m, day: d,
+            events: snapshotEvents,
+            capturedAt: now
+        )
+        guard let data = try? JSONEncoder().encode(payload) else { return }
+        AppGroup.defaults?.set(data, forKey: AppGroup.Key.eventsSnapshot)
+        WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    private static func snapshotEvent(
+        from event: CalendarEvent,
+        rawCGColor: CGColor?
+    ) -> WidgetEventsSnapshot.Event {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        if let cg = rawCGColor {
+            UIColor(cgColor: cg).getRed(&r, green: &g, blue: &b, alpha: &a)
+        } else {
+            UIColor(event.tint).getRed(&r, green: &g, blue: &b, alpha: &a)
+        }
+        return WidgetEventsSnapshot.Event(
+            id: event.id,
+            title: event.title,
+            location: event.location,
+            startDate: event.startDate,
+            endDate: event.endDate,
+            allDay: event.allDay,
+            tintRGB: .init(
+                red: Double(r), green: Double(g), blue: Double(b), alpha: Double(a)
+            )
+        )
     }
 
     // MARK: - Adapters

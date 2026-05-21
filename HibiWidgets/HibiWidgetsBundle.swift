@@ -11,5 +11,6 @@ struct HibiWidgetsBundle: WidgetBundle {
 
     var body: some Widget {
         TodaysPageWidget()
+        EventsWidget()
     }
 }
