@@ -14,6 +14,8 @@ struct EventsWidgetView: View {
 
     var body: some View {
         switch family {
+        case .systemLarge:
+            EventsWidgetLargeBody(entry: entry)
         case .systemMedium:
             EventsWidgetBody(entry: entry, isMedium: true)
         default:
@@ -65,6 +67,86 @@ private struct EventsWidgetBody: View {
             }
         }
         .padding(pad)
+    }
+}
+
+// MARK: - Large (4×4 cell) body
+
+private struct EventsWidgetLargeBody: View {
+    let entry: EventsEntry
+
+    var body: some View {
+        let pad = WidgetMetrics.pad(isMedium: true)
+
+        Group {
+            switch entry.events.count {
+            case 0:
+                EmptyOpenPage(isMedium: true)
+            case 1:
+                // Single event reads as featured editorial content even at
+                // the larger 4×4 size — same Hero treatment as on medium.
+                HeroEventCard(event: entry.events[0], now: entry.date, isMedium: true)
+            default:
+                LargeList(events: entry.events, now: entry.date)
+            }
+        }
+        .padding(pad)
+    }
+}
+
+/// The large widget's multi-event layout. Pills size to the same 48pt
+/// minimum as in-app `DayEventRow`s — no stretching to fill the widget,
+/// no compressing to a smaller fixed height. If the day's events run
+/// past the widget bottom, the overflow fades; otherwise the stack just
+/// anchors to the top with empty space below.
+private struct LargeList: View {
+    let events: [WidgetEventsSnapshot.Event]
+    let now: Date
+
+    var body: some View {
+        let last = events.count - 1
+        let gap = WidgetMetrics.gap(isMedium: true, peek: true)
+
+        // Conservative overflow heuristic: ~336pt usable height ÷ (48pt
+        // row + 5pt gap) ≈ 6 full rows. Past that the stack pushes into
+        // the bottom of the widget and the gradient mask fades it out.
+        let overflows = events.count > 6
+
+        VStack(spacing: gap) {
+            ForEach(Array(events.enumerated()), id: \.element.id) { idx, event in
+                EventPill(
+                    event: event,
+                    now: now,
+                    isMedium: true,
+                    edges: EventRowEdges(
+                        top: idx == 0,
+                        // When the day overflows the bottom edge, no row
+                        // claims the bottom outer corner — the fade owns
+                        // it. Otherwise the last row picks it up.
+                        bottom: !overflows && idx == last
+                    )
+                )
+                .frame(minHeight: 48)
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .mask(
+            LinearGradient(
+                stops: overflows
+                    ? [
+                        .init(color: .black, location: 0.0),
+                        .init(color: .black, location: 0.88),
+                        .init(color: .clear, location: 1.0),
+                    ]
+                    : [
+                        .init(color: .black, location: 0.0),
+                        .init(color: .black, location: 1.0),
+                    ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
 }
 

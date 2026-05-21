@@ -21,7 +21,7 @@ struct EventsWidget: Widget {
         }
         .configurationDisplayName(String(localized: "Upcoming Events"))
         .description(String(localized: "Today's events at a glance."))
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
         .contentMarginsDisabled()
     }
 }

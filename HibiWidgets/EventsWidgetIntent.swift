@@ -15,4 +15,11 @@ struct EventsWidgetConfigurationIntent: WidgetConfigurationIntent {
     /// long-running travel blocks.
     @Parameter(title: "Show all-day events", default: true)
     var showAllDay: Bool
+
+    /// When on, hide events that have already finished — the widget shows
+    /// only what's still ahead today. Default off so the widget mirrors the
+    /// in-app schedule list, which keeps finished rows visible (with the
+    /// progress fill at 100%) until midnight.
+    @Parameter(title: "Hide past events", default: false)
+    var upcomingOnly: Bool
 }
