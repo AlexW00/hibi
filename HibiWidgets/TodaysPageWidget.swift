@@ -13,5 +13,6 @@ struct TodaysPageWidget: Widget {
         .configurationDisplayName(String(localized: "Today's Page"))
         .description(String(localized: "Today as a tear-off page."))
         .supportedFamilies([.systemSmall, .systemLarge])
+        .contentMarginsDisabled()
     }
 }
