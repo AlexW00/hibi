@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Item
 
@@ -71,11 +72,10 @@ struct PermissionsOnboardingSheet: View {
                     .padding(.vertical, 14)
             }
             .buttonStyle(.borderedProminent)
-            .tint(isCelebrating ? Color.green : .primary)
-            // In the normal state the tint is `.primary` (black/white depending
-            // on appearance) so the label needs the inverse for contrast.
-            // During celebration the tint is green, and white reads on green
-            // in both light and dark.
+            .tint(isCelebrating ? PermissionPalette.mutedGreen : .primary)
+            // Normal: tint is `.primary` (black/white per appearance), so the
+            // label uses the inverse for contrast. Celebration: tint is the
+            // muted paper-green, and white reads on it in both modes.
             .foregroundStyle(isCelebrating ? Color.white : Color(.systemBackground))
             .disabled(!canContinue)
             .padding(.horizontal, 28)
@@ -182,20 +182,23 @@ private struct PermissionRow: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
         )
-        .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
     }
 
     private var iconBadge: some View {
         ZStack {
-            Circle()
-                .fill(item.tint)
-                .frame(width: 36, height: 36)
+            RoundedRectangle(cornerRadius: 11, style: .continuous)
+                .fill(item.tint.opacity(0.38))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                        .strokeBorder(item.tint.opacity(0.55), lineWidth: 0.5)
+                )
             Image(systemName: item.icon)
                 .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(.white)
+                .foregroundStyle(item.tint.mix(with: .primary, by: 0.35))
         }
+        .frame(width: 38, height: 38)
     }
 
     @ViewBuilder
@@ -208,7 +211,7 @@ private struct PermissionRow: View {
             if granted {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 26, weight: .regular))
-                    .foregroundStyle(Color.green.gradient)
+                    .foregroundStyle(PermissionPalette.mutedGreen)
                     .transition(.scale(scale: 0.6).combined(with: .opacity))
             } else if isRequesting {
                 ProgressView()
@@ -251,6 +254,20 @@ private struct PermissionRow: View {
         .animation(.easeInOut(duration: 0.2), value: denied)
         .animation(.easeInOut(duration: 0.15), value: isRequesting)
     }
+}
+
+// MARK: - Palette
+
+/// Dynamic accents for the onboarding sheet. Bright system greens (and
+/// `Color.green.gradient`) read as iOS-system chrome against the app's
+/// cream / near-black paper backgrounds; the muted moss / sage below sits
+/// in the same desaturated band as the row icon tints and `PaperTints`.
+private enum PermissionPalette {
+    static let mutedGreen = Color(uiColor: UIColor { trait in
+        trait.userInterfaceStyle == .dark
+            ? UIColor(displayP3Red: 0.58, green: 0.74, blue: 0.50, alpha: 1)
+            : UIColor(displayP3Red: 0.45, green: 0.60, blue: 0.38, alpha: 1)
+    })
 }
 
 // MARK: - Preview
