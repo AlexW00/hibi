@@ -108,9 +108,10 @@ struct StreamView: View {
             guard let id else { return }
             // Native `viewAligned(anchor:)` snaps item edges to the anchor —
             // not item centers. Re-center the closest day imperatively so the
-            // chevron always points at a day's vertical midpoint.
+            // chevron always points at a day's vertical midpoint. easeOut
+            // reads as deceleration continuing rather than a separate jerk.
             isSnapping = true
-            withAnimation(.snappy(duration: 0.22)) {
+            withAnimation(.easeOut(duration: 0.45)) {
                 position.scrollTo(id: id, anchor: .center)
             } completion: {
                 isSnapping = false
