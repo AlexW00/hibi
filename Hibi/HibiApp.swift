@@ -1,5 +1,4 @@
 import SwiftUI
-import CoreText
 import WhatsNewKit
 
 @main
@@ -7,7 +6,8 @@ struct HibiApp: App {
     private let whatsNewEnvironment: WhatsNewEnvironment
 
     init() {
-        Self.registerFonts()
+        AppFont.registerFonts()
+        AppGroup.migratePrefsIfNeeded()
         self.whatsNewEnvironment = Self.makeWhatsNewEnvironment()
     }
 
@@ -35,18 +35,4 @@ struct HibiApp: App {
         )
     }
 
-    private static func registerFonts() {
-        let fonts: [(name: String, ext: String)] = [
-            ("InstrumentSerif-Regular", "ttf"),
-            ("InstrumentSerif-Italic", "ttf"),
-            ("NotoSerifJP-Regular", "otf"),
-        ]
-        for font in fonts {
-            guard let url = Bundle.main.url(forResource: font.name, withExtension: font.ext) else {
-                continue
-            }
-            var error: Unmanaged<CFError>?
-            CTFontManagerRegisterFontsForURL(url as CFURL, .process, &error)
-        }
-    }
 }
