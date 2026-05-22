@@ -190,6 +190,19 @@ struct ContentView: View {
                 selectedDay = SampleData.todayDay
                 selection = .day
                 scrollToNowToken &+= 1
+            case "event":
+                // hibi://event/{identifier} — emitted by the Schedule
+                // widget when a specific event pill is tapped. Land on
+                // today (the widget only shows today) and present the
+                // editor for that event.
+                let identifier = url.pathComponents.dropFirst().first ?? ""
+                guard !identifier.isEmpty else { return }
+                displayedYear = SampleData.todayYear
+                displayedMonth = SampleData.todayMonth
+                selectedDay = SampleData.todayDay
+                selection = .day
+                scrollToNowToken &+= 1
+                openEditor(forEventIdentifier: identifier)
             default:
                 break
             }
@@ -280,6 +293,29 @@ struct ContentView: View {
         guard !eventStore.isDemoMode else { return }
         guard let ek = eventStore.ekEvent(matching: event) else { return }
         editorMode = .edit(ek)
+    }
+
+    /// Open the editor for an event identified by its EventKit identifier
+    /// — entry point for the `hibi://event/{identifier}` widget deep link.
+    ///
+    /// First tries to route through `openEditor(for:)` (which has the
+    /// recurrence-aware occurrence picker), falling back to a direct
+    /// EventKit lookup if today's events haven't loaded yet (cold launch
+    /// from the widget tap, before `ensureLoaded` settles).
+    private func openEditor(forEventIdentifier identifier: String) {
+        guard !eventStore.isDemoMode else { return }
+        let todays = eventStore.events(
+            year: SampleData.todayYear,
+            month: SampleData.todayMonth,
+            day: SampleData.todayDay
+        )
+        if let match = todays.first(where: { $0.eventIdentifier == identifier }) {
+            openEditor(for: match)
+            return
+        }
+        if let ek = eventStore.ekStore.event(withIdentifier: identifier) {
+            editorMode = .edit(ek)
+        }
     }
 
     private func startNewEvent() {
