@@ -10,6 +10,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
+    @State private var showWhatsNew = false
 
     enum Appearance: String, CaseIterable, Identifiable {
         case system, light, dark
@@ -27,6 +28,41 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    NavigationLink {
+                        AppearanceSettingsView()
+                    } label: {
+                        Label("Appearance", systemImage: "paintbrush")
+                    }
+                    NavigationLink {
+                        UnitsSettingsView()
+                    } label: {
+                        Label("Units", systemImage: "ruler")
+                    }
+                    NavigationLink {
+                        CalendarSelectionView()
+                    } label: {
+                        LabeledContent {
+                            Text(calendarSummary)
+                                .foregroundStyle(.secondary)
+                        } label: {
+                            Label("Calendars & Reminders", systemImage: "calendar")
+                        }
+                    }
+                }
+
+                #if DEBUG
+                Section("Debug") {
+                    Toggle(isOn: Binding(
+                        get: { eventStore.isDemoMode },
+                        set: { eventStore.setDemoMode($0) }
+                    )) {
+                        Label("Demo Mode", systemImage: "wand.and.stars")
+                    }
+                    .tint(.black)
+                }
+                #endif
+
                 if hasMissingPermission {
                     Section("Permissions") {
                         Button {
@@ -46,56 +82,39 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    NavigationLink {
-                        AppearanceSettingsView()
-                    } label: {
-                        Label("Appearance", systemImage: "paintbrush")
-                    }
-                    NavigationLink {
-                        UnitsSettingsView()
-                    } label: {
-                        Label("Units", systemImage: "ruler")
-                    }
-                }
-
-                Section {
-                    NavigationLink {
-                        CalendarSelectionView()
-                    } label: {
-                        LabeledContent {
-                            Text(calendarSummary)
-                                .foregroundStyle(.secondary)
-                        } label: {
-                            Label("Calendars & Reminders", systemImage: "calendar")
+                    Button("What's New") { showWhatsNew = true }
+                        .tint(.primary)
+                    LabeledContent("Version", value: Self.versionLabel)
+                    Link(destination: URL(string: "https://apps.weichart.de")!) {
+                        HStack(spacing: 12) {
+                            Image("WeichartApps")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 28, height: 28)
+                                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("More Apps")
+                                    .foregroundStyle(.primary)
+                                Text(verbatim: "apps.weichart.de")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(.tertiary)
                         }
                     }
                 }
-
-                Section {
-                    NavigationLink {
-                        AboutSettingsView()
-                    } label: {
-                        Label("About", systemImage: "info.circle")
-                    }
-                }
-
-                #if DEBUG
-                Section("Debug") {
-                    Toggle(isOn: Binding(
-                        get: { eventStore.isDemoMode },
-                        set: { eventStore.setDemoMode($0) }
-                    )) {
-                        Label("Demo Mode", systemImage: "wand.and.stars")
-                    }
-                    .tint(.black)
-                }
-                #endif
             }
             .navigationTitle("Settings")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .sheet(isPresented: $showWhatsNew) {
+                WhatsNewView(whatsNew: WhatsNewContent.latest)
             }
         }
     }
@@ -110,6 +129,13 @@ struct SettingsView: View {
 
     private var hasMissingPermission: Bool {
         !eventStore.hasCalendarAccess || !weatherStore.hasLocationAccess
+    }
+
+    private static var versionLabel: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "—"
+        let build = info?["CFBundleVersion"] as? String ?? "—"
+        return "\(short) (\(build))"
     }
 }
 
@@ -170,62 +196,5 @@ private struct UnitsSettingsView: View {
         }
         .navigationTitle("Units")
         .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-// MARK: - About
-
-private struct AboutSettingsView: View {
-    @State private var showWhatsNew = false
-
-    var body: some View {
-        Form {
-            Section {
-                Link(destination: URL(string: "https://apps.weichart.de")!) {
-                    HStack(spacing: 12) {
-                        Image("WeichartApps")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 28, height: 28)
-                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text("More Apps")
-                                .foregroundStyle(.primary)
-                            Text(verbatim: "apps.weichart.de")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        Image(systemName: "arrow.up.right")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-
-                Link(destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!) {
-                    Text("Weather data provided by \(Image(systemName: "apple.logo"))\u{00a0}Weather")
-                        .foregroundStyle(.secondary)
-                        .font(.footnote)
-                }
-            }
-
-            Section("Release") {
-                Button("What's New") { showWhatsNew = true }
-                    .tint(.primary)
-                LabeledContent("Version", value: Self.versionLabel)
-            }
-        }
-        .navigationTitle("About")
-        .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showWhatsNew) {
-            WhatsNewView(whatsNew: WhatsNewContent.latest)
-        }
-    }
-
-    private static var versionLabel: String {
-        let info = Bundle.main.infoDictionary
-        let short = info?["CFBundleShortVersionString"] as? String ?? "—"
-        let build = info?["CFBundleVersion"] as? String ?? "—"
-        return "\(short) (\(build))"
     }
 }
