@@ -23,17 +23,19 @@ Use `replace_all` since both configurations must match.
 
 ### 3. Update WhatsNewContent.swift
 
+Hibi's changelog uses [Notelet](https://github.com/mykolaharmash/notelet). Each release is one `NoteletVersionNotes` built via the private `notes(_:_:)` helper, holding a single `.list` item whose `rows` are the features (one `NoteletVersionNoteItem.ListRow` per change, with `symbolSystemName`, `title`, `description`).
+
 In `Hibi/Models/WhatsNewContent.swift`:
 
-1. Copy the current `latest` body into a new `static var v1_X` (using the OLD version number, e.g. `v1_8`), changing only `version:` to a hardcoded string (e.g. `"1.8"`).
-2. Replace `latest`'s features with the new release features (one `WhatsNew.Feature` per change, with SF Symbol, localized title, localized subtitle).
+1. Copy the current `latest` body into a new `static var v1_X` (using the OLD version number, e.g. `v1_8`), changing the `notes(version, …)` call to a hardcoded string (e.g. `notes("1.8", …)`).
+2. Replace `latest`'s rows with the new release features (one `.init(symbolSystemName:title:description:)` per change). `title`/`description` are `LocalizedStringResource` string literals — the literal IS the localization key.
 3. Update `static let version` to the new version string.
 4. Update the doc comment `MARKETING_VERSION` reference.
-5. Add the new `v1_X` to `collection` after `latest`.
+5. Add the new `v1_X` to `allNotes` after `latest`.
 
 ### 4. Add localizations
 
-Add each new `String(localized:)` key to `Hibi/Localizable.xcstrings` with translations for **all 11 locales**: `de`, `en`, `es`, `it`, `ja`, `ko`, `ms`, `pt-BR`, `zh-Hans-CN`, `zh-Hant-HK`, `zh-Hant-TW`.
+Add each new `title`/`description` string literal as a key in `Hibi/Localizable.xcstrings` with translations for **all 11 locales**: `de`, `en`, `es`, `it`, `ja`, `ko`, `ms`, `pt-BR`, `zh-Hans-CN`, `zh-Hant-HK`, `zh-Hant-TW`.
 
 Use Python/JSON to insert entries (the file is large). Set `extractionState: "manual"` and include a `comment` referencing the version.
 
