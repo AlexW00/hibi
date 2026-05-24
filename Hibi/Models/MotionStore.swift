@@ -3,11 +3,17 @@ import Observation
 
 /// Observable device-tilt source for the Day view's paper-stack parallax.
 ///
-/// Reports tilt **relative to the orientation the device was in when `start()`
-/// was called** — a reference pose is captured on the first sample and every
-/// later sample is expressed as a delta from it. That makes "however you're
-/// holding the phone right now" the neutral pose, so the stack rests centered
-/// whether you're upright on a couch or flat on a desk.
+/// **Motion-based, not orientation-based.** The effect responds to *changes* in
+/// tilt, then eases back to neutral: move the phone and the stack drifts; hold
+/// it steady at any angle and it returns to base. That's deliberate — people
+/// don't hold a phone perfectly upright, and an absolute-tilt mapping would
+/// leave a permanent offset for whatever resting angle they happen to use.
+///
+/// The recentering is a high-pass filter: a baseline pose continuously drifts
+/// toward the current pose (`baselineFollow`), and the output is the difference
+/// between the two. A sustained pose is absorbed by the baseline and decays to
+/// zero; a quick move outruns the baseline and produces a transient that springs
+/// back once you settle.
 ///
 /// Tilt is derived from the **gravity vector**, not the attitude's Euler
 /// angles. Euler `pitch`/`roll` degenerate (gimbal lock) when the phone is held
@@ -22,18 +28,23 @@ import Observation
 @MainActor
 @Observable
 final class MotionStore {
-    /// Smoothed left/right lean from rest, roughly -1…1.
+    /// Smoothed left/right lean transient, roughly -1…1. Decays to 0 at rest.
     private(set) var tiltX: Double = 0
-    /// Smoothed front/back recline from rest, roughly -1…1.
+    /// Smoothed front/back recline transient, roughly -1…1. Decays to 0 at rest.
     private(set) var tiltY: Double = 0
 
     @ObservationIgnored private let manager = CMMotionManager()
-    @ObservationIgnored private var referenceLean: Double?
-    @ObservationIgnored private var referenceRecline: Double?
+    @ObservationIgnored private var baselineLean: Double?
+    @ObservationIgnored private var baselineRecline: Double?
     @ObservationIgnored private var isRunning = false
 
-    /// Tilt of this many radians from rest maps to the full ±1 range (~20°).
-    private let maxTilt: Double = 0.35
+    /// A transient of this many radians maps to the full ±1 range. Smaller =
+    /// gentler moves reach full parallax.
+    private let maxTilt: Double = 0.2
+    /// How fast the neutral baseline drifts toward the current pose — i.e. how
+    /// quickly a held tilt returns to base. Larger = snappier return (and
+    /// demands quicker motion to register). ~0.04 ≈ settles in roughly a second.
+    private let baselineFollow: Double = 0.04
     /// Low-pass blend per sample. Lower = smoother but laggier.
     private let smoothing: Double = 0.12
     /// Skip publishing sub-pixel changes so a still device doesn't redraw.
@@ -42,8 +53,8 @@ final class MotionStore {
     func start() {
         guard !isRunning, manager.isDeviceMotionAvailable else { return }
         isRunning = true
-        referenceLean = nil
-        referenceRecline = nil
+        baselineLean = nil
+        baselineRecline = nil
         manager.deviceMotionUpdateInterval = 1.0 / 60.0
         manager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
             guard let motion else { return }
@@ -57,8 +68,8 @@ final class MotionStore {
         guard isRunning else { return }
         isRunning = false
         manager.stopDeviceMotionUpdates()
-        referenceLean = nil
-        referenceRecline = nil
+        baselineLean = nil
+        baselineRecline = nil
         // Recenter so the stack doesn't keep a stale offset while parallax is off.
         tiltX = 0
         tiltY = 0
@@ -73,14 +84,24 @@ final class MotionStore {
         // angle within the Y–Z plane. ~0 when upright, →π/2 when flat.
         let recline = atan2(-g.z, -g.y)
 
-        if referenceLean == nil {
-            referenceLean = lean
-            referenceRecline = recline
+        // First sample seeds the baseline so we don't fire a transient on start.
+        if baselineLean == nil {
+            baselineLean = lean
+            baselineRecline = recline
         }
-        guard let referenceLean, let referenceRecline else { return }
+        guard var bLean = baselineLean, var bRecline = baselineRecline else { return }
 
-        let newX = tiltX + (clampNorm(lean - referenceLean) - tiltX) * smoothing
-        let newY = tiltY + (clampNorm(recline - referenceRecline) - tiltY) * smoothing
+        // High-pass: ease the baseline toward the current pose so a sustained
+        // tilt is absorbed (returns to base) while a quick move produces a
+        // transient. The published value is the current pose minus this
+        // drifting baseline.
+        bLean += (lean - bLean) * baselineFollow
+        bRecline += (recline - bRecline) * baselineFollow
+        baselineLean = bLean
+        baselineRecline = bRecline
+
+        let newX = tiltX + (clampNorm(lean - bLean) - tiltX) * smoothing
+        let newY = tiltY + (clampNorm(recline - bRecline) - tiltY) * smoothing
         if abs(newX - tiltX) > epsilon { tiltX = newX }
         if abs(newY - tiltY) > epsilon { tiltY = newY }
     }
