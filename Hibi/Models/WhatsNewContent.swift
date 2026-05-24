@@ -1,216 +1,156 @@
+import Notelet
 import SwiftUI
-import WhatsNewKit
 
 /// Changelog shown on first launch after update, and re-openable from Settings.
 ///
-/// Version string must match `CFBundleShortVersionString` so
-/// `UserDefaultsWhatsNewVersionStore` correctly records the presentation.
-/// We currently ship `MARKETING_VERSION = 1.10`.
+/// `version` must match `CFBundleShortVersionString` so Notelet's `.current`
+/// presentation records the changelog as seen. We currently ship
+/// `MARKETING_VERSION = 1.10`.
 enum WhatsNewContent {
-    static let version: WhatsNew.Version = "1.10"
+    static let version = "1.10"
 
-    /// Built on access so `String(localized:)` resolves against the user's current locale.
-    static var latest: WhatsNew {
-        WhatsNew(
-            version: version,
-            title: .init(stringLiteral: String(localized: "What's New in Hibi")),
-            features: [
-                WhatsNew.Feature(
-                    image: .init(systemName: "rectangle.expand.vertical"),
-                    title: .init(String(localized: "Expandable schedule")),
-                    subtitle: .init(String(localized: "Pull the Schedule handle down to collapse the day's paper stack and see more of your events at once."))
-                ),
-                WhatsNew.Feature(
-                    image: .init(systemName: "calendar.badge.clock"),
-                    title: .init(String(localized: "Updates at midnight")),
-                    subtitle: .init(String(localized: "If you leave the app open overnight, the highlighted day now advances to the new day at midnight."))
-                ),
-            ],
-            primaryAction: WhatsNew.PrimaryAction(
-                title: .init(String(localized: "Continue")),
-                backgroundColor: .primary,
-                foregroundColor: Color(uiColor: .systemBackground),
-                hapticFeedback: .selection
-            )
+    /// Single page, dark "Continue" button to match the app's monochrome chrome.
+    static var configuration: NoteletConfiguration {
+        NoteletConfiguration(
+            doneButtonLabel: "Continue",
+            accentColor: .primary
         )
     }
 
-    static var v1_9: WhatsNew {
-        WhatsNew(
-            version: "1.9",
-            title: .init(stringLiteral: String(localized: "What's New in Hibi")),
-            features: [
-                WhatsNew.Feature(
-                    image: .init(systemName: "arrow.left.arrow.right"),
-                    title: .init(String(localized: "Seamless tab switching")),
-                    subtitle: .init(String(localized: "Switching between Month, Week, and Day now picks up right where you left off."))
-                ),
-                WhatsNew.Feature(
-                    image: .init(systemName: "mappin"),
-                    title: .init(String(localized: "Scrolling location names")),
-                    subtitle: .init(String(localized: "Long venue names now scroll smoothly instead of being cut off."))
-                ),
-                WhatsNew.Feature(
-                    image: .init(systemName: "repeat"),
-                    title: .init(String(localized: "Recurring event fixes")),
-                    subtitle: .init(String(localized: "Deleting a single occurrence of a recurring event now removes just that one, not the entire series."))
-                ),
-                WhatsNew.Feature(
-                    image: .init(systemName: "arrow.clockwise"),
-                    title: .init(String(localized: "Event sync fix")),
-                    subtitle: .init(String(localized: "Events you create now appear on the calendar right away — no more waiting for an app restart to see them."))
-                ),
-            ],
-            primaryAction: WhatsNew.PrimaryAction(
-                title: .init(String(localized: "Continue")),
-                backgroundColor: .primary,
-                foregroundColor: Color(uiColor: .systemBackground),
-                hapticFeedback: .selection
-            )
-        )
+    static var allNotes: [NoteletVersionNotes] {
+        [latest, v1_9, v1_8, v1_7, v1_5, v1_4, v1_3, v1_2]
     }
 
-    static var v1_8: WhatsNew {
-        WhatsNew(
-            version: "1.8",
-            title: .init(stringLiteral: String(localized: "What's New in Hibi")),
-            features: [
-                WhatsNew.Feature(
-                    image: .init(systemName: "checklist"),
-                    title: .init(String(localized: "Reminders")),
-                    subtitle: .init(String(localized: "Your reminders now appear alongside calendar events. Tap the checkbox to mark them complete — right from Hibi."))
-                ),
-                WhatsNew.Feature(
-                    image: .init(systemName: "arrow.triangle.2.circlepath"),
-                    title: .init(String(localized: "Recurring events")),
-                    subtitle: .init(String(localized: "Recurring calendar events now show a small repeat icon, so you can tell them apart at a glance."))
-                ),
-                WhatsNew.Feature(
-                    image: .init(systemName: "calendar"),
-                    title: .init(String(localized: "Polished month grid")),
-                    subtitle: .init(String(localized: "The today indicator no longer clips into the row below — the month grid has proper breathing room now."))
-                ),
-            ],
-            primaryAction: WhatsNew.PrimaryAction(
-                title: .init(String(localized: "Continue")),
-                backgroundColor: .primary,
-                foregroundColor: Color(uiColor: .systemBackground),
-                hapticFeedback: .selection
-            )
-        )
+    /// Shared header. `LocalizedStringResource` resolves lazily against the
+    /// user's current locale, so each entry stays localized without rebuilding.
+    private static let title: LocalizedStringResource = "What's New in Hibi"
+
+    private static func notes(
+        _ version: String,
+        _ rows: [NoteletVersionNoteItem.ListRow]
+    ) -> NoteletVersionNotes {
+        NoteletVersionNotes(version: version, items: [.list(title: title, rows: rows)])
     }
 
-    static var v1_7: WhatsNew {
-        WhatsNew(
-            version: "1.7",
-            title: .init(stringLiteral: String(localized: "What's New in Hibi")),
-            features: [
-                WhatsNew.Feature(
-                    image: .init(systemName: "character.bubble"),
-                    title: .init(String(localized: "More languages")),
-                    subtitle: .init(String(localized: "Hibi now includes Traditional Chinese for Taiwan and Hong Kong, Simplified Chinese for Mainland China, plus Korean, Malay, Spanish, Brazilian Portuguese, and Italian."))
-                ),
-            ],
-            primaryAction: WhatsNew.PrimaryAction(
-                title: .init(String(localized: "Continue")),
-                backgroundColor: .primary,
-                foregroundColor: Color(uiColor: .systemBackground),
-                hapticFeedback: .selection
-            )
-        )
+    static var latest: NoteletVersionNotes {
+        notes(version, [
+            .init(
+                symbolSystemName: "rectangle.expand.vertical",
+                title: "Expandable schedule",
+                description: "Pull the Schedule handle down to collapse the day's paper stack and see more of your events at once."
+            ),
+            .init(
+                symbolSystemName: "calendar.badge.clock",
+                title: "Updates at midnight",
+                description: "If you leave the app open overnight, the highlighted day now advances to the new day at midnight."
+            ),
+        ])
+    }
+
+    static var v1_9: NoteletVersionNotes {
+        notes("1.9", [
+            .init(
+                symbolSystemName: "arrow.left.arrow.right",
+                title: "Seamless tab switching",
+                description: "Switching between Month, Week, and Day now picks up right where you left off."
+            ),
+            .init(
+                symbolSystemName: "mappin",
+                title: "Scrolling location names",
+                description: "Long venue names now scroll smoothly instead of being cut off."
+            ),
+            .init(
+                symbolSystemName: "repeat",
+                title: "Recurring event fixes",
+                description: "Deleting a single occurrence of a recurring event now removes just that one, not the entire series."
+            ),
+            .init(
+                symbolSystemName: "arrow.clockwise",
+                title: "Event sync fix",
+                description: "Events you create now appear on the calendar right away — no more waiting for an app restart to see them."
+            ),
+        ])
+    }
+
+    static var v1_8: NoteletVersionNotes {
+        notes("1.8", [
+            .init(
+                symbolSystemName: "checklist",
+                title: "Reminders",
+                description: "Your reminders now appear alongside calendar events. Tap the checkbox to mark them complete — right from Hibi."
+            ),
+            .init(
+                symbolSystemName: "arrow.triangle.2.circlepath",
+                title: "Recurring events",
+                description: "Recurring calendar events now show a small repeat icon, so you can tell them apart at a glance."
+            ),
+            .init(
+                symbolSystemName: "calendar",
+                title: "Polished month grid",
+                description: "The today indicator no longer clips into the row below — the month grid has proper breathing room now."
+            ),
+        ])
+    }
+
+    static var v1_7: NoteletVersionNotes {
+        notes("1.7", [
+            .init(
+                symbolSystemName: "character.bubble",
+                title: "More languages",
+                description: "Hibi now includes Traditional Chinese for Taiwan and Hong Kong, Simplified Chinese for Mainland China, plus Korean, Malay, Spanish, Brazilian Portuguese, and Italian."
+            ),
+        ])
     }
 
     // MARK: - Previous versions
 
-    static var v1_5: WhatsNew {
-        WhatsNew(
-            version: "1.5",
-            title: .init(stringLiteral: String(localized: "What's New in Hibi")),
-            features: [
-                WhatsNew.Feature(
-                    image: .init(systemName: "sparkles"),
-                    title: .init(String(localized: "Discover more apps")),
-                    subtitle: .init(String(localized: "Settings now links to apps.weichart.de, where you can find my other apps ^^"))
-                ),
-            ],
-            primaryAction: WhatsNew.PrimaryAction(
-                title: .init(String(localized: "Continue")),
-                backgroundColor: .primary,
-                foregroundColor: Color(uiColor: .systemBackground),
-                hapticFeedback: .selection
-            )
-        )
+    static var v1_5: NoteletVersionNotes {
+        notes("1.5", [
+            .init(
+                symbolSystemName: "sparkles",
+                title: "Discover more apps",
+                description: "Settings now links to apps.weichart.de, where you can find my other apps ^^"
+            ),
+        ])
     }
 
-    static var v1_4: WhatsNew {
-        WhatsNew(
-            version: "1.4",
-            title: .init(stringLiteral: String(localized: "What's New in Hibi")),
-            features: [
-                WhatsNew.Feature(
-                    image: .init(systemName: "calendar.badge.arrow.right"),
-                    title: .init(String(localized: "Seamless month transitions")),
-                    subtitle: .init(String(localized: "Tearing past the last or first day of a month now smoothly continues into the next or previous month."))
-                ),
-            ],
-            primaryAction: WhatsNew.PrimaryAction(
-                title: .init(String(localized: "Continue")),
-                backgroundColor: .primary,
-                foregroundColor: Color(uiColor: .systemBackground),
-                hapticFeedback: .selection
-            )
-        )
+    static var v1_4: NoteletVersionNotes {
+        notes("1.4", [
+            .init(
+                symbolSystemName: "calendar.badge.arrow.right",
+                title: "Seamless month transitions",
+                description: "Tearing past the last or first day of a month now smoothly continues into the next or previous month."
+            ),
+        ])
     }
 
-    static var v1_3: WhatsNew {
-        WhatsNew(
-            version: "1.3",
-            title: .init(stringLiteral: String(localized: "What's New in Hibi")),
-            features: [
-                WhatsNew.Feature(
-                    image: .init(systemName: "thermometer.medium"),
-                    title: .init(String(localized: "Temperature & time format")),
-                    subtitle: .init(String(localized: "Choose Celsius or Fahrenheit, and 12-hour or 24-hour time — or let the system decide."))
-                ),
-                WhatsNew.Feature(
-                    image: .init(systemName: "arrow.down.doc"),
-                    title: .init(String(localized: "New back animation")),
-                    subtitle: .init(String(localized: "Navigating to the previous day now slides a new page onto the stack instead of tearing one away."))
-                ),
-            ],
-            primaryAction: WhatsNew.PrimaryAction(
-                title: .init(String(localized: "Continue")),
-                backgroundColor: .primary,
-                foregroundColor: Color(uiColor: .systemBackground),
-                hapticFeedback: .selection
-            )
-        )
+    static var v1_3: NoteletVersionNotes {
+        notes("1.3", [
+            .init(
+                symbolSystemName: "thermometer.medium",
+                title: "Temperature & time format",
+                description: "Choose Celsius or Fahrenheit, and 12-hour or 24-hour time — or let the system decide."
+            ),
+            .init(
+                symbolSystemName: "arrow.down.doc",
+                title: "New back animation",
+                description: "Navigating to the previous day now slides a new page onto the stack instead of tearing one away."
+            ),
+        ])
     }
 
-    static var v1_2: WhatsNew {
-        WhatsNew(
-            version: "1.2",
-            title: .init(stringLiteral: String(localized: "What's New in Hibi")),
-            features: [
-                WhatsNew.Feature(
-                    image: .init(systemName: "checkmark.shield"),
-                    title: .init(String(localized: "Permissions, walked through")),
-                    subtitle: .init(String(localized: "A first-launch sheet grants Calendar and Location access in one place, and dismisses itself once you're set."))
-                ),
-                WhatsNew.Feature(
-                    image: .init(systemName: "calendar"),
-                    title: .init(String(localized: "Month opens on today")),
-                    subtitle: .init(String(localized: "Fixed a case where Month could land on the wrong month if you'd scrolled Week first."))
-                ),
-            ],
-            primaryAction: WhatsNew.PrimaryAction(
-                title: .init(String(localized: "Continue")),
-                backgroundColor: .primary,
-                foregroundColor: Color(uiColor: .systemBackground),
-                hapticFeedback: .selection
-            )
-        )
+    static var v1_2: NoteletVersionNotes {
+        notes("1.2", [
+            .init(
+                symbolSystemName: "checkmark.shield",
+                title: "Permissions, walked through",
+                description: "A first-launch sheet grants Calendar and Location access in one place, and dismisses itself once you're set."
+            ),
+            .init(
+                symbolSystemName: "calendar",
+                title: "Month opens on today",
+                description: "Fixed a case where Month could land on the wrong month if you'd scrolled Week first."
+            ),
+        ])
     }
-
-    static var collection: WhatsNewCollection { [latest, v1_9, v1_8, v1_7, v1_5, v1_4, v1_3, v1_2] }
 }

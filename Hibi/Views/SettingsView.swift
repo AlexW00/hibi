@@ -1,6 +1,6 @@
 import EventKit
+import Notelet
 import SwiftUI
-import WhatsNewKit
 
 struct SettingsView: View {
     /// Called by the "Review permissions" button. ContentView latches this and
@@ -10,7 +10,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
-    @State private var showWhatsNew = false
+    @State private var whatsNewVersion: NoteletPresentedVersion?
 
     enum Appearance: String, CaseIterable, Identifiable {
         case system, light, dark
@@ -28,7 +28,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section {
+                Section("General") {
                     NavigationLink {
                         AppearanceSettingsView()
                     } label: {
@@ -81,10 +81,19 @@ struct SettingsView: View {
                     }
                 }
 
-                Section {
-                    Button("What's New") { showWhatsNew = true }
-                        .tint(.primary)
-                    LabeledContent("Version", value: Self.versionLabel)
+                Section("About") {
+                    Button {
+                        whatsNewVersion = .v(WhatsNewContent.version)
+                    } label: {
+                        LabeledContent {
+                            Text(Self.versionLabel)
+                                .foregroundStyle(.secondary)
+                        } label: {
+                            Text("What's New")
+                        }
+                    }
+                    .tint(.primary)
+
                     Link(destination: URL(string: "https://apps.weichart.de")!) {
                         HStack(spacing: 12) {
                             Image("WeichartApps")
@@ -113,9 +122,12 @@ struct SettingsView: View {
                     Button("Done") { dismiss() }
                 }
             }
-            .sheet(isPresented: $showWhatsNew) {
-                WhatsNewView(whatsNew: WhatsNewContent.latest)
-            }
+            .noteletSheet(
+                notes: WhatsNewContent.allNotes,
+                version: whatsNewVersion,
+                onDismiss: { whatsNewVersion = nil },
+                configuration: WhatsNewContent.configuration
+            )
         }
     }
 
