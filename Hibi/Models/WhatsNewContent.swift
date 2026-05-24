@@ -18,12 +18,14 @@ enum WhatsNewContent {
         )
     }
 
-    /// Notelet draws the action button with `.borderedProminent`, which always
-    /// renders the label white. `.primary` flips the fill to white in dark mode,
-    /// hiding the white label — so pin the fill to a dark tone in both schemes.
+    /// One accent color drives both the `.borderedProminent` button (whose label
+    /// is always white) and the hierarchical list icons. In light mode near-black
+    /// satisfies both. In dark mode those needs conflict — a dark fill hides the
+    /// icons, a light fill hides the white button label — so a mid gray keeps both
+    /// legible.
     private static let buttonAccentColor = Color(UIColor { traits in
         traits.userInterfaceStyle == .dark
-            ? UIColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
+            ? .systemGray
             : UIColor(red: 0.043, green: 0.043, blue: 0.051, alpha: 1)
     })
 
