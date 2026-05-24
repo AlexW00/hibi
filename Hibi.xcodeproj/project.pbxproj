@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4B0450C42F94C6EF009EA06E /* WhatsNewKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0450C32F94C6EF009EA06E /* WhatsNewKit */; };
+		4B0450C42F94C6EF009EA06E /* Notelet in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0450C32F94C6EF009EA06E /* Notelet */; };
 		4B0451032F94C6EF009EA06E /* CalendarPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0451012F94C6EF009EA06E /* CalendarPermission */; };
 		4B0451042F94C6EF009EA06E /* LocationPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0451022F94C6EF009EA06E /* LocationPermission */; };
 		4B1507042FBEA5BF00F49AFD /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B1507032FBEA5BF00F49AFD /* WidgetKit.framework */; };
@@ -120,7 +120,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4B0450C42F94C6EF009EA06E /* WhatsNewKit in Frameworks */,
+				4B0450C42F94C6EF009EA06E /* Notelet in Frameworks */,
 				4B0451032F94C6EF009EA06E /* CalendarPermission in Frameworks */,
 				4B0451042F94C6EF009EA06E /* LocationPermission in Frameworks */,
 			);
@@ -202,7 +202,7 @@
 			);
 			name = Hibi;
 			packageProductDependencies = (
-				4B0450C32F94C6EF009EA06E /* WhatsNewKit */,
+				4B0450C32F94C6EF009EA06E /* Notelet */,
 				4B0451012F94C6EF009EA06E /* CalendarPermission */,
 				4B0451022F94C6EF009EA06E /* LocationPermission */,
 			);
@@ -248,7 +248,7 @@
 			mainGroup = 4B802FC42F8F5453008F00F4;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "WhatsNewKit" */,
+				4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "Notelet" */,
 				4B0451002F94C6EF009EA06E /* XCRemoteSwiftPackageReference "PermissionsKit" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -589,12 +589,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "WhatsNewKit" */ = {
+		4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "Notelet" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SvenTiigi/WhatsNewKit";
+			repositoryURL = "https://github.com/mykolaharmash/notelet";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.2.1;
+				minimumVersion = 1.1.0;
 			};
 		};
 		4B0451002F94C6EF009EA06E /* XCRemoteSwiftPackageReference "PermissionsKit" */ = {
@@ -608,10 +608,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		4B0450C32F94C6EF009EA06E /* WhatsNewKit */ = {
+		4B0450C32F94C6EF009EA06E /* Notelet */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "WhatsNewKit" */;
-			productName = WhatsNewKit;
+			package = 4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "Notelet" */;
+			productName = Notelet;
 		};
 		4B0451012F94C6EF009EA06E /* CalendarPermission */ = {
 			isa = XCSwiftPackageProductDependency;
