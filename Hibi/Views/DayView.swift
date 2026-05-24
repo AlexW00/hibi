@@ -799,8 +799,9 @@ struct DayView: View {
 /// tick never re-runs the card builder or the surrounding Day-view body.
 ///
 /// Nearer cards (lower depth) drift farther than deeper ones, which is what
-/// reads as parallax. Signs map roll → x and pitch → y; negate a component
-/// here if the on-device direction feels inverted. A no-op under Reduce Motion.
+/// reads as parallax. `tiltX` is left/right lean, `tiltY` is front/back
+/// recline; negate a component here if the on-device direction feels inverted.
+/// A no-op under Reduce Motion.
 private struct ParallaxOffset: ViewModifier {
     let motion: MotionStore
     let depth: Int
