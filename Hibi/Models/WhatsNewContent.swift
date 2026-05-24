@@ -1,5 +1,6 @@
 import Notelet
 import SwiftUI
+import UIKit
 
 /// Changelog shown on first launch after update, and re-openable from Settings.
 ///
@@ -13,9 +14,20 @@ enum WhatsNewContent {
     static var configuration: NoteletConfiguration {
         NoteletConfiguration(
             doneButtonLabel: "Continue",
-            accentColor: .primary
+            accentColor: buttonAccentColor
         )
     }
+
+    /// One accent color drives both the `.borderedProminent` button (whose label
+    /// is always white) and the hierarchical list icons. In light mode near-black
+    /// satisfies both. In dark mode those needs conflict — a dark fill hides the
+    /// icons, a light fill hides the white button label — so a mid gray keeps both
+    /// legible.
+    private static let buttonAccentColor = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? .systemGray
+            : UIColor(red: 0.043, green: 0.043, blue: 0.051, alpha: 1)
+    })
 
     static var allNotes: [NoteletVersionNotes] {
         [latest, v1_9, v1_8, v1_7, v1_5, v1_4, v1_3, v1_2]
