@@ -17,6 +17,13 @@ struct DayView: View {
     @Environment(WeatherStore.self) private var weatherStore
     @Environment(Clock.self) private var clock
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
+    /// Drives the gyro parallax on the paper stack. Owned locally — only the
+    /// Day view uses it, so there's no need to inject it app-wide. Started on
+    /// appear / scene-active and stopped on disappear / background / Reduce
+    /// Motion so the gyro isn't running when the stack isn't on screen.
+    @State private var motion = MotionStore()
     @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
     @AppStorage("preferCompactDayView") private var preferCompactDayView: Bool = false
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
@@ -61,6 +68,11 @@ struct DayView: View {
     private let narrowStep: CGFloat = 14      // pts narrower per side per depth level
     private let tearThreshold: CGFloat = 80
     private let offScreen: CGFloat = 700
+
+    /// Max parallax travel (pts) for the front card at full tilt. Deeper cards
+    /// scale down from this, so the front drifts farther than the back and the
+    /// stack reads with depth. Kept intentionally small — "very slight."
+    private let parallaxMaxOffset: CGFloat = 4
 
     // Schedule-collapse geometry. The paper stack and the "Pull to tear" hint
     // shrink toward `…Collapsed` values as scheduleProgress → 1. Drag range
@@ -148,6 +160,20 @@ struct DayView: View {
                 scheduleProgress = target
             }
         }
+        // Gyro parallax lifecycle. Only run the motion manager while the Day
+        // view is on screen and the app is active, and never under Reduce Motion.
+        .onAppear { updateMotion() }
+        .onDisappear { motion.stop() }
+        .onChange(of: scenePhase) { _, _ in updateMotion() }
+        .onChange(of: reduceMotion) { _, _ in updateMotion() }
+    }
+
+    private func updateMotion() {
+        if scenePhase == .active && !reduceMotion {
+            motion.start()
+        } else {
+            motion.stop()
+        }
     }
 
     private var scrollFadeMask: some View {
@@ -218,6 +244,20 @@ struct DayView: View {
         return max(0, amount)
     }
 
+    /// Gyro parallax for a card at the given stack depth (0 = front). Applied
+    /// via a dedicated `ViewModifier` rather than reading `motion` here in the
+    /// body: the modifier scopes the ~60 Hz tilt observation to the offset
+    /// alone, so a gyro tick doesn't re-run the paper-card builders or the
+    /// schedule list (and its hosted scroll view) every frame.
+    private func parallax(depth: Int) -> ParallaxOffset {
+        ParallaxOffset(
+            motion: motion,
+            depth: depth,
+            maxOffset: parallaxMaxOffset,
+            reduceMotion: reduceMotion
+        )
+    }
+
     private var pullToTearHint: some View {
         Text(invertDaySwipe
              ? "Pull to tear · ↑ Prev · ↓ Next"
@@ -258,6 +298,7 @@ struct DayView: View {
                     shadowAmount: 0,
                     chromeAmount: 0
                 )
+                .modifier(parallax(depth: 3))
                 .opacity(goingForward ? cardShiftAmount : 0)
 
                 // Card 3 (back): rest inset = 2·narrowStep, peek = 0.
@@ -275,6 +316,7 @@ struct DayView: View {
                     shadowAmount: 0,
                     chromeAmount: 0
                 )
+                .modifier(parallax(depth: 2))
                 .opacity(goingForward ? 1 : 1 - cardShiftAmount)
 
                 // Card 2 (middle): rest inset = narrowStep, peek = peekAmount.
@@ -294,6 +336,7 @@ struct DayView: View {
                     shadowAmount: goingForward ? Double(cardShiftAmount) : 0,
                     chromeAmount: goingForward ? Double(cardShiftAmount) : 0
                 )
+                .modifier(parallax(depth: 1))
 
                 // Card 1 (front): widest, shortest.
                 // Forward: slides off via dragY.
@@ -316,6 +359,7 @@ struct DayView: View {
                     goingForward ? .degrees(Double(dragY * 0.02)) : .zero,
                     anchor: dragY > 0 ? .top : .bottom
                 )
+                .modifier(parallax(depth: 0))
                 .opacity(goingForward ? 1 - min(Double(abs(dragY)) / 400, 0.6) : 1)
                 .gesture(
                     DragGesture()
@@ -359,6 +403,7 @@ struct DayView: View {
                 .degrees(abs(incomingCardY) > 10 ? Double(incomingCardY) * 0.005 : 0),
                 anchor: incomingCardY < 0 ? .bottom : .top
             )
+            .modifier(parallax(depth: 0))
             .opacity(max(0, 1 - abs(incomingCardY) / 400))
             .allowsHitTesting(false)
         }
@@ -745,5 +790,34 @@ struct DayView: View {
         } else {
             day = target.day
         }
+    }
+}
+
+/// Translates a paper card by the gyro tilt for its stack depth. The tilt is
+/// read inside `body(content:)` so the ~60 Hz observation is confined to this
+/// modifier — `content` is the already-built card, reused untouched, so a gyro
+/// tick never re-runs the card builder or the surrounding Day-view body.
+///
+/// Nearer cards (lower depth) drift farther than deeper ones, which is what
+/// reads as parallax. `tiltX` is left/right lean, `tiltY` is front/back
+/// recline; negate a component here if the on-device direction feels inverted.
+/// A no-op under Reduce Motion.
+private struct ParallaxOffset: ViewModifier {
+    let motion: MotionStore
+    let depth: Int
+    let maxOffset: CGFloat
+    let reduceMotion: Bool
+
+    func body(content: Content) -> some View {
+        content.offset(offset)
+    }
+
+    private var offset: CGSize {
+        guard !reduceMotion else { return .zero }
+        let factor = max(0.25, 1 - CGFloat(depth) * 0.25)
+        return CGSize(
+            width: CGFloat(motion.tiltX) * maxOffset * factor,
+            height: CGFloat(motion.tiltY) * maxOffset * factor
+        )
     }
 }
