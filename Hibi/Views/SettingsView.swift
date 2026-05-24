@@ -4,7 +4,8 @@ import SwiftUI
 
 struct SettingsView: View {
     /// Called by the "Review permissions" button. ContentView latches this and
-    /// presents the onboarding sheet once Settings dismisses (can't stack sheets).
+    /// presents the onboarding sheet once this screen pops (can't show the
+    /// onboarding sheet while Settings is still on the navigation stack).
     let onReopenPermissions: () -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -26,109 +27,102 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section("General") {
-                    NavigationLink {
-                        AppearanceSettingsView()
+        Form {
+            Section("General") {
+                NavigationLink {
+                    AppearanceSettingsView()
+                } label: {
+                    Label("Appearance", systemImage: "paintbrush")
+                }
+                NavigationLink {
+                    UnitsSettingsView()
+                } label: {
+                    Label("Units", systemImage: "ruler")
+                }
+                NavigationLink {
+                    CalendarSelectionView()
+                } label: {
+                    LabeledContent {
+                        Text(calendarSummary)
+                            .foregroundStyle(.secondary)
                     } label: {
-                        Label("Appearance", systemImage: "paintbrush")
-                    }
-                    NavigationLink {
-                        UnitsSettingsView()
-                    } label: {
-                        Label("Units", systemImage: "ruler")
-                    }
-                    NavigationLink {
-                        CalendarSelectionView()
-                    } label: {
-                        LabeledContent {
-                            Text(calendarSummary)
-                                .foregroundStyle(.secondary)
-                        } label: {
-                            Label("Calendars & Reminders", systemImage: "calendar")
-                        }
+                        Label("Calendars & Reminders", systemImage: "calendar")
                     }
                 }
+            }
 
-                if hasMissingPermission {
-                    Section("Permissions") {
-                        Button {
-                            onReopenPermissions()
-                            dismiss()
-                        } label: {
-                            LabeledContent {
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundStyle(.tertiary)
-                            } label: {
-                                Label("Review permissions", systemImage: "exclamationmark.triangle")
-                            }
-                        }
-                        .tint(.primary)
-                    }
-                }
-
-                Section("About") {
+            if hasMissingPermission {
+                Section("Permissions") {
                     Button {
-                        whatsNewVersion = .v(WhatsNewContent.version)
+                        onReopenPermissions()
+                        dismiss()
                     } label: {
                         LabeledContent {
-                            Text(Self.versionLabel)
-                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(.tertiary)
                         } label: {
-                            Text("What's New")
+                            Label("Review permissions", systemImage: "exclamationmark.triangle")
                         }
                     }
                     .tint(.primary)
+                }
+            }
 
-                    Link(destination: URL(string: "https://apps.weichart.de")!) {
-                        HStack(spacing: 12) {
-                            Image("WeichartApps")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 28, height: 28)
-                                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text("More Apps")
-                                    .foregroundStyle(.primary)
-                                Text(verbatim: "apps.weichart.de")
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Image(systemName: "arrow.up.right")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(.tertiary)
+            Section("About") {
+                Button {
+                    whatsNewVersion = .v(WhatsNewContent.version)
+                } label: {
+                    LabeledContent {
+                        Text(Self.versionLabel)
+                            .foregroundStyle(.secondary)
+                    } label: {
+                        Text("What's New")
+                    }
+                }
+                .tint(.primary)
+
+                Link(destination: URL(string: "https://apps.weichart.de")!) {
+                    HStack(spacing: 12) {
+                        Image("WeichartApps")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 28, height: 28)
+                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("More Apps")
+                                .foregroundStyle(.primary)
+                            Text(verbatim: "apps.weichart.de")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
                         }
+                        Spacer()
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.tertiary)
                     }
                 }
+            }
 
-                #if DEBUG
-                Section("Debug") {
-                    Toggle(isOn: Binding(
-                        get: { eventStore.isDemoMode },
-                        set: { eventStore.setDemoMode($0) }
-                    )) {
-                        Label("Demo Mode", systemImage: "wand.and.stars")
-                    }
-                    .tint(.black)
+            #if DEBUG
+            Section("Debug") {
+                Toggle(isOn: Binding(
+                    get: { eventStore.isDemoMode },
+                    set: { eventStore.setDemoMode($0) }
+                )) {
+                    Label("Demo Mode", systemImage: "wand.and.stars")
                 }
-                #endif
+                .tint(.black)
             }
-            .navigationTitle("Settings")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                }
-            }
-            .noteletSheet(
-                notes: WhatsNewContent.allNotes,
-                version: whatsNewVersion,
-                onDismiss: { whatsNewVersion = nil },
-                configuration: WhatsNewContent.configuration
-            )
+            #endif
         }
+        .navigationTitle("Settings")
+        .noteletSheet(
+            notes: WhatsNewContent.allNotes,
+            version: whatsNewVersion,
+            onDismiss: { whatsNewVersion = nil },
+            configuration: WhatsNewContent.configuration
+        )
     }
 
     private var calendarSummary: LocalizedStringResource {

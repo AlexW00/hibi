@@ -39,9 +39,9 @@ struct ContentView: View {
     @State private var editorMode: EventEditorSheet.Mode?
     @State private var showOnboarding = false
     @State private var needsOnboarding = false
-    /// Latched by SettingsView — when Settings dismisses with this set we
-    /// present the onboarding sheet. Can't show two sheets at once, so we
-    /// chain via `onDismiss`.
+    /// Latched by SettingsView — when the Settings screen pops with this set we
+    /// present the onboarding sheet. Chained via `onChange(of: showSettings)`
+    /// since a pushed screen has no sheet `onDismiss`.
     @State private var reopenOnboardingAfterSettings = false
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearanceRaw: String = SettingsView.Appearance.system.rawValue
@@ -218,6 +218,22 @@ struct ContentView: View {
                 }
             }
             .background(AppBackgroundGradient().ignoresSafeArea())
+            .navigationDestination(isPresented: $showSettings) {
+                SettingsView(
+                    onReopenPermissions: {
+                        reopenOnboardingAfterSettings = true
+                    }
+                )
+            }
+        }
+        .onChange(of: showSettings) { _, isShown in
+            // Settings is a pushed screen now, so there's no sheet onDismiss to
+            // chain on. When it pops with the latch set (user tapped "Review
+            // permissions"), present the onboarding sheet over the root.
+            if !isShown, reopenOnboardingAfterSettings {
+                reopenOnboardingAfterSettings = false
+                showOnboarding = true
+            }
         }
         .environment(eventStore)
         .environment(weatherStore)
@@ -265,20 +281,6 @@ struct ContentView: View {
             },
             configuration: WhatsNewContent.configuration
         )
-        .sheet(isPresented: $showSettings, onDismiss: {
-            if reopenOnboardingAfterSettings {
-                reopenOnboardingAfterSettings = false
-                showOnboarding = true
-            }
-        }) {
-            SettingsView(
-                onReopenPermissions: {
-                    reopenOnboardingAfterSettings = true
-                }
-            )
-            .environment(eventStore)
-            .environment(weatherStore)
-        }
         .sheet(item: $editorMode) { mode in
             EventEditorSheet(store: eventStore.ekStore, mode: mode) {
                 editorMode = nil
