@@ -9,6 +9,7 @@ struct SettingsView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(EventStore.self) private var eventStore
+    @Environment(WeatherStore.self) private var weatherStore
 
     enum Appearance: String, CaseIterable, Identifiable {
         case system, light, dark
@@ -26,6 +27,24 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if hasMissingPermission {
+                    Section("Permissions") {
+                        Button {
+                            onReopenPermissions()
+                            dismiss()
+                        } label: {
+                            LabeledContent {
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundStyle(.tertiary)
+                            } label: {
+                                Label("Review permissions", systemImage: "exclamationmark.triangle")
+                            }
+                        }
+                        .tint(.primary)
+                    }
+                }
+
                 Section {
                     NavigationLink {
                         AppearanceSettingsView()
@@ -54,10 +73,7 @@ struct SettingsView: View {
 
                 Section {
                     NavigationLink {
-                        AboutSettingsView(onReviewPermissions: {
-                            onReopenPermissions()
-                            dismiss()
-                        })
+                        AboutSettingsView()
                     } label: {
                         Label("About", systemImage: "info.circle")
                     }
@@ -90,6 +106,10 @@ struct SettingsView: View {
         let all = eventStore.allCalendars()
         let visible = all.filter { !eventStore.isHidden($0) }.count
         return "\(visible) / \(all.count)"
+    }
+
+    private var hasMissingPermission: Bool {
+        !eventStore.hasCalendarAccess || !weatherStore.hasLocationAccess
     }
 }
 
@@ -156,28 +176,10 @@ private struct UnitsSettingsView: View {
 // MARK: - About
 
 private struct AboutSettingsView: View {
-    /// Dismisses Settings and re-opens the permissions onboarding sheet.
-    let onReviewPermissions: () -> Void
-
-    @Environment(EventStore.self) private var eventStore
-    @Environment(WeatherStore.self) private var weatherStore
     @State private var showWhatsNew = false
 
     var body: some View {
         Form {
-            if hasMissingPermission {
-                Section("Permissions") {
-                    Button(action: onReviewPermissions) {
-                        LabeledContent("Review permissions") {
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(.tertiary)
-                        }
-                    }
-                    .tint(.primary)
-                }
-            }
-
             Section {
                 Link(destination: URL(string: "https://apps.weichart.de")!) {
                     HStack(spacing: 12) {
@@ -218,10 +220,6 @@ private struct AboutSettingsView: View {
         .sheet(isPresented: $showWhatsNew) {
             WhatsNewView(whatsNew: WhatsNewContent.latest)
         }
-    }
-
-    private var hasMissingPermission: Bool {
-        !eventStore.hasCalendarAccess || !weatherStore.hasLocationAccess
     }
 
     private static var versionLabel: String {
