@@ -381,6 +381,7 @@ struct DayView: View {
                         }
                         .onEnded { _ in handleRelease() }
                 )
+                .onTapGesture { toggleScheduleCollapse() }
 
             }
             .frame(width: width, height: maxH)
@@ -566,6 +567,22 @@ struct DayView: View {
                     scheduleProgress = target
                 }
             }
+    }
+
+    /// Tap on the paper stack toggles between expanded (0) and collapsed (1).
+    /// Uses the same spring + transaction shape as the drag-release snap so
+    /// the motion matches the manual handle drag.
+    private func toggleScheduleCollapse() {
+        guard !isTearing else { return }
+        let target: CGFloat = scheduleProgress >= 0.5 ? 0 : 1
+        guard scheduleProgress != target else { return }
+        scheduleSnapCount &+= 1
+        var t = Transaction()
+        t.animation = .spring(response: 0.38, dampingFraction: 0.86)
+        t.scrollContentOffsetAdjustmentBehavior = .disabled
+        withTransaction(t) {
+            scheduleProgress = target
+        }
     }
 
     private var scheduleEvents: some View {
