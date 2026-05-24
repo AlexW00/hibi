@@ -103,12 +103,13 @@ struct StreamView: View {
         .onChange(of: position.viewID(type: Int.self)) { _, newID in
             guard let newID else { return }
             window.visibleDayID = newID
+            // Drive the shared position (toolbar title + Week→Month sync) from
+            // the scroll, but deliberately do NOT touch `selectedDay`: the Day
+            // tab keeps its own date, so scrolling the Week never moves it.
             let y = newID / 10_000
             let m = (newID / 100) % 100
-            let d = newID % 100
             if y != displayedYear { displayedYear = y }
             if m != displayedMonth { displayedMonth = m }
-            if d != selectedDay { selectedDay = d }
         }
         .onChange(of: scrollToNowToken) { _, _ in
             let today = DayKey(

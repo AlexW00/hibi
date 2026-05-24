@@ -21,8 +21,17 @@ struct ContentView: View {
     /// preserved so Day → Month → Day round-trips don't lose the day.
     @State private var monthEntry: (year: Int, month: Int)?
     @State private var showSettings = false
+    /// Shared "where are we looking" position. Drives the toolbar title and
+    /// the Month/Week mutual sync. Month and Week scrolling write these.
     @State private var displayedYear = SampleData.todayYear
     @State private var displayedMonth = SampleData.todayMonth
+    /// The Day tab's own date. Kept separate from `displayedYear/Month` so that
+    /// scrolling the Week (which moves the shared position for the title) never
+    /// drags the Day view to a new date — the Day tab remembers the day the
+    /// user actually picked. While the Day tab is active, the shared position
+    /// is realigned to this so the title stays correct.
+    @State private var selectedYear = SampleData.todayYear
+    @State private var selectedMonth = SampleData.todayMonth
     @State private var selectedDay = SampleData.todayDay
     @State private var eventStore = EventStore()
     @State private var weatherStore = WeatherStore()
@@ -45,19 +54,43 @@ struct ContentView: View {
                 if newValue == selection {
                     returnToNow()
                 } else {
-                    // Leaving Month: only anchor the destination on day 1 if
-                    // the user actually scrolled Month to a different month.
-                    // Otherwise they were just visiting and we preserve
-                    // selectedDay so Day → Month → Day stays on the same day.
-                    if selection == .month, let entry = monthEntry,
-                       entry.year != displayedYear || entry.month != displayedMonth {
-                        selectedDay = 1
-                    }
+                    // Did the user scroll the Month grid to a different month
+                    // before leaving it? A grid has no single "current day",
+                    // so a scrolled Month carries into Day/Week as day 1.
+                    // Scrolling the *Week*, by contrast, must not move the Day
+                    // view — the Day tab keeps its own selected date.
+                    let monthScrolled = selection == .month
+                        && monthEntry.map { $0.year != displayedYear || $0.month != displayedMonth } == true
+
                     if selection == .month {
                         monthEntry = nil
                     }
                     if newValue == .month {
                         monthEntry = (displayedYear, displayedMonth)
+                    }
+
+                    switch newValue {
+                    case .day:
+                        if monthScrolled {
+                            selectedYear = displayedYear
+                            selectedMonth = displayedMonth
+                            selectedDay = 1
+                        } else {
+                            // Coming from Week (or an unscrolled Month): keep
+                            // the Day's own date and realign the shared
+                            // position/title to it, so a scrolled Week lands
+                            // back on the day the user last looked at.
+                            displayedYear = selectedYear
+                            displayedMonth = selectedMonth
+                        }
+                    case .stream:
+                        if monthScrolled {
+                            selectedYear = displayedYear
+                            selectedMonth = displayedMonth
+                            selectedDay = 1
+                        }
+                    case .month:
+                        break
                     }
                     tabSwitchToken &+= 1
                 }
@@ -74,13 +107,15 @@ struct ContentView: View {
     /// from the `Clock` we just updated. The new month is also pre-loaded so
     /// reminders that pivot on `Date()` (overdue carry-over) reflect the new day.
     private func handleDayChange() {
-        let wasOnOldToday = displayedYear == clock.year
-            && displayedMonth == clock.month
+        let wasOnOldToday = selectedYear == clock.year
+            && selectedMonth == clock.month
             && selectedDay == clock.day
         guard clock.refresh() != nil else { return }
         if wasOnOldToday {
             displayedYear = clock.year
             displayedMonth = clock.month
+            selectedYear = clock.year
+            selectedMonth = clock.month
             selectedDay = clock.day
             // Bump the scroll token so list-based tabs recenter on the new
             // today — without it, the Week list still shows the previous
@@ -94,6 +129,8 @@ struct ContentView: View {
         withAnimation(.snappy(duration: 0.35)) {
             displayedYear = SampleData.todayYear
             displayedMonth = SampleData.todayMonth
+            selectedYear = SampleData.todayYear
+            selectedMonth = SampleData.todayMonth
             selectedDay = SampleData.todayDay
         }
         scrollToNowToken &+= 1
@@ -111,6 +148,8 @@ struct ContentView: View {
                         onPickDay: { year, month, day in
                             displayedYear = year
                             displayedMonth = month
+                            selectedYear = year
+                            selectedMonth = month
                             selectedDay = day
                             selection = .day
                         }
@@ -127,6 +166,8 @@ struct ContentView: View {
                         onPickDay: { year, month, day in
                             displayedYear = year
                             displayedMonth = month
+                            selectedYear = year
+                            selectedMonth = month
                             selectedDay = day
                             selection = .day
                         },
@@ -136,15 +177,17 @@ struct ContentView: View {
 
                 Tab("Day", systemImage: "calendar", value: CalendarTab.day) {
                     DayView(
-                        year: displayedYear,
-                        month: displayedMonth,
+                        year: selectedYear,
+                        month: selectedMonth,
                         day: $selectedDay,
                         scrollToNowToken: scrollToNowToken,
                         onTapEvent: openEditor(for:),
                         onDateChange: { y, m, d in
+                            selectedYear = y
+                            selectedMonth = m
+                            selectedDay = d
                             displayedYear = y
                             displayedMonth = m
-                            selectedDay = d
                         }
                     )
                 }
@@ -188,6 +231,8 @@ struct ContentView: View {
                 // shows today, so tapping it should land you there.
                 displayedYear = SampleData.todayYear
                 displayedMonth = SampleData.todayMonth
+                selectedYear = SampleData.todayYear
+                selectedMonth = SampleData.todayMonth
                 selectedDay = SampleData.todayDay
                 selection = .day
                 scrollToNowToken &+= 1
@@ -200,6 +245,8 @@ struct ContentView: View {
                 guard !identifier.isEmpty else { return }
                 displayedYear = SampleData.todayYear
                 displayedMonth = SampleData.todayMonth
+                selectedYear = SampleData.todayYear
+                selectedMonth = SampleData.todayMonth
                 selectedDay = SampleData.todayDay
                 selection = .day
                 scrollToNowToken &+= 1
@@ -328,7 +375,7 @@ struct ContentView: View {
         let (y, m, d): (Int, Int, Int)
         switch selection {
         case .day:
-            (y, m, d) = (displayedYear, displayedMonth, selectedDay)
+            (y, m, d) = (selectedYear, selectedMonth, selectedDay)
         default:
             (y, m, d) = (SampleData.todayYear, SampleData.todayMonth, SampleData.todayDay)
         }
