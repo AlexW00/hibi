@@ -329,7 +329,15 @@ final class CalendarWindow {
     }
 
     func recenter(on key: MonthKey) {
-        if months.contains(where: { $0.id == key.id }) { return }
+        // Keep the existing window only if the target already sits with a full
+        // buffer on both sides. If it's present but near an edge, rebuild so
+        // the next scroll doesn't immediately hit the wall and prepend a whole
+        // batch at once — a batch insert above the anchor visibly jumps.
+        if let idx = months.firstIndex(where: { $0.id == key.id }),
+           idx >= windowRadius,
+           months.count - 1 - idx >= windowRadius {
+            return
+        }
         months = (-windowRadius...windowRadius).map {
             MonthKey.offset($0, from: key)
         }
