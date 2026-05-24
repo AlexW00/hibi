@@ -10,12 +10,6 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
-    @AppStorage("appearance") private var appearanceRaw: String = Appearance.system.rawValue
-    @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
-    @AppStorage("preferCompactDayView") private var preferCompactDayView: Bool = false
-    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
-    @AppStorage(TemperatureUnit.defaultsKey, store: AppGroup.defaults) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
-    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
     @State private var whatsNewVersion: NoteletPresentedVersion?
 
     enum Appearance: String, CaseIterable, Identifiable {
@@ -34,52 +28,40 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Appearance") {
-                    Picker("Theme", selection: $appearanceRaw) {
-                        ForEach(Appearance.allCases) { a in
-                            Text(a.labelResource).tag(a.rawValue)
-                        }
+                Section("General") {
+                    NavigationLink {
+                        AppearanceSettingsView()
+                    } label: {
+                        Label("Appearance", systemImage: "paintbrush")
                     }
-                    .pickerStyle(.segmented)
-
-                    Toggle("Simple font", isOn: $useSimpleFont)
-                        .tint(.black)
-                }
-
-                Section("Day View") {
-                    Toggle("Invert swipe direction", isOn: $invertDaySwipe)
-                        .tint(.black)
-                    Toggle("Prefer compact mode", isOn: $preferCompactDayView)
-                        .tint(.black)
-                }
-
-                Section("Units") {
-                    Picker("Temperature", selection: $temperatureUnitRaw) {
-                        ForEach(TemperatureUnit.allCases) { u in
-                            Text(u.labelResource).tag(u.rawValue)
-                        }
+                    NavigationLink {
+                        UnitsSettingsView()
+                    } label: {
+                        Label("Units", systemImage: "ruler")
                     }
-                    Picker("Time", selection: $timeFormatRaw) {
-                        ForEach(TimeFormat.allCases) { f in
-                            Text(f.labelResource).tag(f.rawValue)
-                        }
-                    }
-                }
-
-                Section("Calendars & Reminders") {
                     NavigationLink {
                         CalendarSelectionView()
                     } label: {
-                        LabeledContent("Calendars") {
+                        LabeledContent {
                             Text(calendarSummary)
-                        }
-                    }
-                    if eventStore.hasReminderAccess {
-                        LabeledContent("Reminder Lists") {
-                            Text(reminderSummary)
+                                .foregroundStyle(.secondary)
+                        } label: {
+                            Label("Calendars & Reminders", systemImage: "calendar")
                         }
                     }
                 }
+
+                #if DEBUG
+                Section("Debug") {
+                    Toggle(isOn: Binding(
+                        get: { eventStore.isDemoMode },
+                        set: { eventStore.setDemoMode($0) }
+                    )) {
+                        Label("Demo Mode", systemImage: "wand.and.stars")
+                    }
+                    .tint(.black)
+                }
+                #endif
 
                 if hasMissingPermission {
                     Section("Permissions") {
@@ -87,27 +69,31 @@ struct SettingsView: View {
                             onReopenPermissions()
                             dismiss()
                         } label: {
-                            LabeledContent("Review permissions") {
+                            LabeledContent {
                                 Image(systemName: "chevron.right")
                                     .font(.system(size: 13, weight: .semibold))
                                     .foregroundStyle(.tertiary)
+                            } label: {
+                                Label("Review permissions", systemImage: "exclamationmark.triangle")
                             }
                         }
                         .tint(.primary)
                     }
                 }
 
-                #if DEBUG
-                Section("Debug") {
-                    Toggle("Demo Mode", isOn: Binding(
-                        get: { eventStore.isDemoMode },
-                        set: { eventStore.setDemoMode($0) }
-                    ))
-                    .tint(.black)
-                }
-                #endif
-
                 Section("About") {
+                    Button {
+                        whatsNewVersion = .v(WhatsNewContent.version)
+                    } label: {
+                        LabeledContent {
+                            Text(Self.versionLabel)
+                                .foregroundStyle(.secondary)
+                        } label: {
+                            Text("What's New")
+                        }
+                    }
+                    .tint(.primary)
+
                     Link(destination: URL(string: "https://apps.weichart.de")!) {
                         HStack(spacing: 12) {
                             Image("WeichartApps")
@@ -128,22 +114,9 @@ struct SettingsView: View {
                                 .foregroundStyle(.tertiary)
                         }
                     }
-
-                    Link(destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!) {
-                        Text("Weather data provided by \(Image(systemName: "apple.logo"))\u{00a0}Weather")
-                            .foregroundStyle(.secondary)
-                            .font(.footnote)
-                    }
-                }
-
-                Section("Release") {
-                    Button("What's New") { whatsNewVersion = .v(WhatsNewContent.version) }
-                        .tint(.primary)
-                    LabeledContent("Version", value: Self.versionLabel)
                 }
             }
             .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
@@ -158,13 +131,6 @@ struct SettingsView: View {
         }
     }
 
-    private static var versionLabel: String {
-        let info = Bundle.main.infoDictionary
-        let short = info?["CFBundleShortVersionString"] as? String ?? "—"
-        let build = info?["CFBundleVersion"] as? String ?? "—"
-        return "\(short) (\(build))"
-    }
-
     private var calendarSummary: LocalizedStringResource {
         if eventStore.isDemoMode { return "Demo" }
         guard eventStore.hasCalendarAccess else { return "Not connected" }
@@ -173,13 +139,74 @@ struct SettingsView: View {
         return "\(visible) / \(all.count)"
     }
 
-    private var reminderSummary: LocalizedStringResource {
-        let all = eventStore.allReminderLists()
-        let visible = all.filter { !eventStore.isHidden($0) }.count
-        return "\(visible) / \(all.count)"
-    }
-
     private var hasMissingPermission: Bool {
         !eventStore.hasCalendarAccess || !weatherStore.hasLocationAccess
+    }
+
+    private static var versionLabel: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "—"
+        let build = info?["CFBundleVersion"] as? String ?? "—"
+        return "\(short) (\(build))"
+    }
+}
+
+// MARK: - Appearance
+
+private struct AppearanceSettingsView: View {
+    @AppStorage("appearance") private var appearanceRaw: String = SettingsView.Appearance.system.rawValue
+    @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
+    @AppStorage("preferCompactDayView") private var preferCompactDayView: Bool = false
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
+
+    var body: some View {
+        Form {
+            Section {
+                Picker("Theme", selection: $appearanceRaw) {
+                    ForEach(SettingsView.Appearance.allCases) { a in
+                        Text(a.labelResource).tag(a.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                Toggle("Simple font", isOn: $useSimpleFont)
+                    .tint(.black)
+            }
+
+            Section("Day View") {
+                Toggle("Invert swipe direction", isOn: $invertDaySwipe)
+                    .tint(.black)
+                Toggle("Prefer compact mode", isOn: $preferCompactDayView)
+                    .tint(.black)
+            }
+        }
+        .navigationTitle("Appearance")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - Units
+
+private struct UnitsSettingsView: View {
+    @AppStorage(TemperatureUnit.defaultsKey, store: AppGroup.defaults) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
+    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
+
+    var body: some View {
+        Form {
+            Section {
+                Picker("Temperature", selection: $temperatureUnitRaw) {
+                    ForEach(TemperatureUnit.allCases) { u in
+                        Text(u.labelResource).tag(u.rawValue)
+                    }
+                }
+                Picker("Time", selection: $timeFormatRaw) {
+                    ForEach(TimeFormat.allCases) { f in
+                        Text(f.labelResource).tag(f.rawValue)
+                    }
+                }
+            }
+        }
+        .navigationTitle("Units")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
