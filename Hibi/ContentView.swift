@@ -1,5 +1,5 @@
+import Notelet
 import SwiftUI
-import WhatsNewKit
 
 enum CalendarTab: Hashable {
     case month, stream, day
@@ -207,11 +207,16 @@ struct ContentView: View {
                 break
             }
         }
-        .whatsNewSheet(onDismiss: {
-            if needsOnboarding {
-                showOnboarding = true
-            }
-        })
+        .noteletSheet(
+            notes: WhatsNewContent.allNotes,
+            version: .current,
+            onDismiss: {
+                if needsOnboarding {
+                    showOnboarding = true
+                }
+            },
+            configuration: WhatsNewContent.configuration
+        )
         .sheet(isPresented: $showSettings, onDismiss: {
             if reopenOnboardingAfterSettings {
                 reopenOnboardingAfterSettings = false
@@ -251,8 +256,8 @@ struct ContentView: View {
                 let shouldOnboard = !eventStore.hasCalendarAccess
                     || (!eventStore.hasReminderAccess && !eventStore.reminderAccessDenied)
                 if shouldOnboard {
-                    let whatsNewWillPresent = !UserDefaultsWhatsNewVersionStore()
-                        .hasPresented(WhatsNewContent.version)
+                    let whatsNewWillPresent = NoteletStorage.getLatestSeenAppVersion()
+                        != WhatsNewContent.version
                     needsOnboarding = true
                     if !whatsNewWillPresent {
                         showOnboarding = true

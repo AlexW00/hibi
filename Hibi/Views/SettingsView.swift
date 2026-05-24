@@ -1,6 +1,6 @@
 import EventKit
+import Notelet
 import SwiftUI
-import WhatsNewKit
 
 struct SettingsView: View {
     /// Called by the "Review permissions" button. ContentView latches this and
@@ -16,7 +16,7 @@ struct SettingsView: View {
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
     @AppStorage(TemperatureUnit.defaultsKey, store: AppGroup.defaults) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
     @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
-    @State private var showWhatsNew = false
+    @State private var whatsNewVersion: NoteletPresentedVersion?
 
     enum Appearance: String, CaseIterable, Identifiable {
         case system, light, dark
@@ -137,7 +137,7 @@ struct SettingsView: View {
                 }
 
                 Section("Release") {
-                    Button("What's New") { showWhatsNew = true }
+                    Button("What's New") { whatsNewVersion = .v(WhatsNewContent.version) }
                         .tint(.primary)
                     LabeledContent("Version", value: Self.versionLabel)
                 }
@@ -149,9 +149,12 @@ struct SettingsView: View {
                     Button("Done") { dismiss() }
                 }
             }
-            .sheet(isPresented: $showWhatsNew) {
-                WhatsNewView(whatsNew: WhatsNewContent.latest)
-            }
+            .noteletSheet(
+                notes: WhatsNewContent.allNotes,
+                version: whatsNewVersion,
+                onDismiss: { whatsNewVersion = nil },
+                configuration: WhatsNewContent.configuration
+            )
         }
     }
 
