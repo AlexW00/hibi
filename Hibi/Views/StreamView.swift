@@ -216,7 +216,15 @@ final class StreamWindow {
     }
 
     func recenter(on key: DayKey) {
-        if days.contains(where: { $0.id == key.id }) { return }
+        // Keep the existing window only if the target already sits with a full
+        // buffer on both sides. If it's present but near an edge, rebuild so
+        // the next scroll doesn't immediately hit the wall and prepend a whole
+        // batch at once — a batch insert above the anchor visibly jumps.
+        if let idx = days.firstIndex(where: { $0.id == key.id }),
+           idx >= windowRadius,
+           days.count - 1 - idx >= windowRadius {
+            return
+        }
         days = (-windowRadius...windowRadius).map {
             DayKey.offset($0, from: key)
         }
