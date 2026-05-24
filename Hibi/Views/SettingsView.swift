@@ -9,14 +9,6 @@ struct SettingsView: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(EventStore.self) private var eventStore
-    @Environment(WeatherStore.self) private var weatherStore
-    @AppStorage("appearance") private var appearanceRaw: String = Appearance.system.rawValue
-    @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
-    @AppStorage("preferCompactDayView") private var preferCompactDayView: Bool = false
-    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
-    @AppStorage(TemperatureUnit.defaultsKey, store: AppGroup.defaults) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
-    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
-    @State private var showWhatsNew = false
 
     enum Appearance: String, CaseIterable, Identifiable {
         case system, light, dark
@@ -34,132 +26,62 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Appearance") {
-                    Picker("Theme", selection: $appearanceRaw) {
-                        ForEach(Appearance.allCases) { a in
-                            Text(a.labelResource).tag(a.rawValue)
-                        }
+                Section {
+                    NavigationLink {
+                        AppearanceSettingsView()
+                    } label: {
+                        Label("Appearance", systemImage: "paintbrush")
                     }
-                    .pickerStyle(.segmented)
-
-                    Toggle("Simple font", isOn: $useSimpleFont)
-                        .tint(.black)
-                }
-
-                Section("Day View") {
-                    Toggle("Invert swipe direction", isOn: $invertDaySwipe)
-                        .tint(.black)
-                    Toggle("Prefer compact mode", isOn: $preferCompactDayView)
-                        .tint(.black)
-                }
-
-                Section("Units") {
-                    Picker("Temperature", selection: $temperatureUnitRaw) {
-                        ForEach(TemperatureUnit.allCases) { u in
-                            Text(u.labelResource).tag(u.rawValue)
-                        }
-                    }
-                    Picker("Time", selection: $timeFormatRaw) {
-                        ForEach(TimeFormat.allCases) { f in
-                            Text(f.labelResource).tag(f.rawValue)
-                        }
+                    NavigationLink {
+                        UnitsSettingsView()
+                    } label: {
+                        Label("Units", systemImage: "ruler")
                     }
                 }
 
-                Section("Calendars & Reminders") {
+                Section {
                     NavigationLink {
                         CalendarSelectionView()
                     } label: {
-                        LabeledContent("Calendars") {
+                        LabeledContent {
                             Text(calendarSummary)
-                        }
-                    }
-                    if eventStore.hasReminderAccess {
-                        LabeledContent("Reminder Lists") {
-                            Text(reminderSummary)
+                                .foregroundStyle(.secondary)
+                        } label: {
+                            Label("Calendars & Reminders", systemImage: "calendar")
                         }
                     }
                 }
 
-                if hasMissingPermission {
-                    Section("Permissions") {
-                        Button {
+                Section {
+                    NavigationLink {
+                        AboutSettingsView(onReviewPermissions: {
                             onReopenPermissions()
                             dismiss()
-                        } label: {
-                            LabeledContent("Review permissions") {
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundStyle(.tertiary)
-                            }
-                        }
-                        .tint(.primary)
+                        })
+                    } label: {
+                        Label("About", systemImage: "info.circle")
                     }
                 }
 
                 #if DEBUG
                 Section("Debug") {
-                    Toggle("Demo Mode", isOn: Binding(
+                    Toggle(isOn: Binding(
                         get: { eventStore.isDemoMode },
                         set: { eventStore.setDemoMode($0) }
-                    ))
+                    )) {
+                        Label("Demo Mode", systemImage: "wand.and.stars")
+                    }
                     .tint(.black)
                 }
                 #endif
-
-                Section("About") {
-                    Link(destination: URL(string: "https://apps.weichart.de")!) {
-                        HStack(spacing: 12) {
-                            Image("WeichartApps")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 28, height: 28)
-                                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text("More Apps")
-                                    .foregroundStyle(.primary)
-                                Text(verbatim: "apps.weichart.de")
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Image(systemName: "arrow.up.right")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(.tertiary)
-                        }
-                    }
-
-                    Link(destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!) {
-                        Text("Weather data provided by \(Image(systemName: "apple.logo"))\u{00a0}Weather")
-                            .foregroundStyle(.secondary)
-                            .font(.footnote)
-                    }
-                }
-
-                Section("Release") {
-                    Button("What's New") { showWhatsNew = true }
-                        .tint(.primary)
-                    LabeledContent("Version", value: Self.versionLabel)
-                }
             }
             .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
                 }
             }
-            .sheet(isPresented: $showWhatsNew) {
-                WhatsNewView(whatsNew: WhatsNewContent.latest)
-            }
         }
-    }
-
-    private static var versionLabel: String {
-        let info = Bundle.main.infoDictionary
-        let short = info?["CFBundleShortVersionString"] as? String ?? "—"
-        let build = info?["CFBundleVersion"] as? String ?? "—"
-        return "\(short) (\(build))"
     }
 
     private var calendarSummary: LocalizedStringResource {
@@ -169,14 +91,143 @@ struct SettingsView: View {
         let visible = all.filter { !eventStore.isHidden($0) }.count
         return "\(visible) / \(all.count)"
     }
+}
 
-    private var reminderSummary: LocalizedStringResource {
-        let all = eventStore.allReminderLists()
-        let visible = all.filter { !eventStore.isHidden($0) }.count
-        return "\(visible) / \(all.count)"
+// MARK: - Appearance
+
+private struct AppearanceSettingsView: View {
+    @AppStorage("appearance") private var appearanceRaw: String = SettingsView.Appearance.system.rawValue
+    @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
+    @AppStorage("preferCompactDayView") private var preferCompactDayView: Bool = false
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
+
+    var body: some View {
+        Form {
+            Section {
+                Picker("Theme", selection: $appearanceRaw) {
+                    ForEach(SettingsView.Appearance.allCases) { a in
+                        Text(a.labelResource).tag(a.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                Toggle("Simple font", isOn: $useSimpleFont)
+                    .tint(.black)
+            }
+
+            Section("Day View") {
+                Toggle("Invert swipe direction", isOn: $invertDaySwipe)
+                    .tint(.black)
+                Toggle("Prefer compact mode", isOn: $preferCompactDayView)
+                    .tint(.black)
+            }
+        }
+        .navigationTitle("Appearance")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - Units
+
+private struct UnitsSettingsView: View {
+    @AppStorage(TemperatureUnit.defaultsKey, store: AppGroup.defaults) private var temperatureUnitRaw: String = TemperatureUnit.system.rawValue
+    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults) private var timeFormatRaw: String = TimeFormat.system.rawValue
+
+    var body: some View {
+        Form {
+            Section {
+                Picker("Temperature", selection: $temperatureUnitRaw) {
+                    ForEach(TemperatureUnit.allCases) { u in
+                        Text(u.labelResource).tag(u.rawValue)
+                    }
+                }
+                Picker("Time", selection: $timeFormatRaw) {
+                    ForEach(TimeFormat.allCases) { f in
+                        Text(f.labelResource).tag(f.rawValue)
+                    }
+                }
+            }
+        }
+        .navigationTitle("Units")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - About
+
+private struct AboutSettingsView: View {
+    /// Dismisses Settings and re-opens the permissions onboarding sheet.
+    let onReviewPermissions: () -> Void
+
+    @Environment(EventStore.self) private var eventStore
+    @Environment(WeatherStore.self) private var weatherStore
+    @State private var showWhatsNew = false
+
+    var body: some View {
+        Form {
+            if hasMissingPermission {
+                Section("Permissions") {
+                    Button(action: onReviewPermissions) {
+                        LabeledContent("Review permissions") {
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .tint(.primary)
+                }
+            }
+
+            Section {
+                Link(destination: URL(string: "https://apps.weichart.de")!) {
+                    HStack(spacing: 12) {
+                        Image("WeichartApps")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 28, height: 28)
+                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("More Apps")
+                                .foregroundStyle(.primary)
+                            Text(verbatim: "apps.weichart.de")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+
+                Link(destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!) {
+                    Text("Weather data provided by \(Image(systemName: "apple.logo"))\u{00a0}Weather")
+                        .foregroundStyle(.secondary)
+                        .font(.footnote)
+                }
+            }
+
+            Section("Release") {
+                Button("What's New") { showWhatsNew = true }
+                    .tint(.primary)
+                LabeledContent("Version", value: Self.versionLabel)
+            }
+        }
+        .navigationTitle("About")
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showWhatsNew) {
+            WhatsNewView(whatsNew: WhatsNewContent.latest)
+        }
     }
 
     private var hasMissingPermission: Bool {
         !eventStore.hasCalendarAccess || !weatherStore.hasLocationAccess
+    }
+
+    private static var versionLabel: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "—"
+        let build = info?["CFBundleVersion"] as? String ?? "—"
+        return "\(short) (\(build))"
     }
 }

@@ -48,7 +48,7 @@ State flow for the three tabs lives on `ContentView`: `displayedYear/Month`, `se
 - [MonthView.swift](Hibi/Views/MonthView.swift) — single-month grid. `MonthsScrollView` (same file) implements infinite vertical month scrolling; defines `MonthKey`.
 - [StreamView.swift](Hibi/Views/StreamView.swift) — "Week" tab: infinite day-stream scroll with `ScrollPosition` + `StreamWindow` extension. Tapping a day jumps to the Day tab. Defines `DayKey` and `StreamWindow`.
 - [DayView.swift](Hibi/Views/DayView.swift) — tear-off paper-pad day view. Three stacked paper cards with progressive tints (`PaperTints`), drag gesture rips the top sheet and commits prev/next day. Schedule list below.
-- [SettingsView.swift](Hibi/Views/SettingsView.swift) — appearance picker, calendars link, DEBUG demo-mode toggle.
+- [SettingsView.swift](Hibi/Views/SettingsView.swift) — iOS-Settings-style category list (Appearance, Units, Calendars & Reminders, About) that drills into sub-pages via `NavigationLink`; DEBUG demo-mode toggle inline at root. The sub-page views (`AppearanceSettingsView`, `UnitsSettingsView`, `AboutSettingsView`) live in the same file. "Review permissions" lives on the About page but calls the sheet-level `dismiss` so ContentView can re-present onboarding.
 - [CalendarSelectionView.swift](Hibi/Views/CalendarSelectionView.swift) — hide/show individual EKCalendars (persists via `EventStore.setCalendar(_:hidden:)`).
 - [PaperTints.swift](Hibi/Views/PaperTints.swift) — dynamic (light/dark) P3 paper-stack colors + `Color.pastelized(cgColor:)` for EKCalendar tints.
 
