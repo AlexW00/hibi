@@ -51,18 +51,6 @@ struct SettingsView: View {
                     }
                 }
 
-                #if DEBUG
-                Section("Debug") {
-                    Toggle(isOn: Binding(
-                        get: { eventStore.isDemoMode },
-                        set: { eventStore.setDemoMode($0) }
-                    )) {
-                        Label("Demo Mode", systemImage: "wand.and.stars")
-                    }
-                    .tint(.black)
-                }
-                #endif
-
                 if hasMissingPermission {
                     Section("Permissions") {
                         Button {
@@ -115,6 +103,18 @@ struct SettingsView: View {
                         }
                     }
                 }
+
+                #if DEBUG
+                Section("Debug") {
+                    Toggle(isOn: Binding(
+                        get: { eventStore.isDemoMode },
+                        set: { eventStore.setDemoMode($0) }
+                    )) {
+                        Label("Demo Mode", systemImage: "wand.and.stars")
+                    }
+                    .tint(.black)
+                }
+                #endif
             }
             .navigationTitle("Settings")
             .toolbar {
