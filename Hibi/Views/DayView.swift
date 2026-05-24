@@ -72,7 +72,7 @@ struct DayView: View {
     /// Max parallax travel (pts) for the front card at full tilt. Deeper cards
     /// scale down from this, so the front drifts farther than the back and the
     /// stack reads with depth. Kept intentionally small — "very slight."
-    private let parallaxMaxOffset: CGFloat = 7
+    private let parallaxMaxOffset: CGFloat = 4
 
     // Schedule-collapse geometry. The paper stack and the "Pull to tear" hint
     // shrink toward `…Collapsed` values as scheduleProgress → 1. Drag range
