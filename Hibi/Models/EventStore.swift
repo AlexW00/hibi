@@ -391,6 +391,14 @@ final class EventStore {
 
         remindersByMonth[key] = grouped
         loadedReminderMonths.insert(key)
+
+        // Keep the Schedule widget in sync with reminder edits the same way
+        // we do for events. Only the current month's reminders feed today's
+        // snapshot, so other months don't need to rewrite it.
+        let todayComps = calendar.dateComponents([.year, .month], from: Date())
+        if todayComps.year == year && todayComps.month == month {
+            writeEventsWidgetSnapshot()
+        }
     }
 
     private func reloadAllReminders() {
@@ -608,9 +616,19 @@ final class EventStore {
             return Self.snapshotEvent(from: event, rawCGColor: rawCGColor)
         }
 
+        let todaysReminders = reminders(year: y, month: m, day: d)
+        let snapshotReminders: [WidgetEventsSnapshot.Reminder] = todaysReminders.compactMap { reminder in
+            let rawCGColor: CGColor? = {
+                guard let ek = ekStore.calendarItem(withIdentifier: reminder.reminderIdentifier) as? EKReminder else { return nil }
+                return ek.calendar?.cgColor
+            }()
+            return Self.snapshotReminder(from: reminder, rawCGColor: rawCGColor)
+        }
+
         let payload = WidgetEventsSnapshot(
             year: y, month: m, day: d,
             events: snapshotEvents,
+            reminders: snapshotReminders,
             capturedAt: now
         )
         guard let data = try? JSONEncoder().encode(payload) else { return }
@@ -635,6 +653,31 @@ final class EventStore {
             startDate: event.startDate,
             endDate: event.endDate,
             allDay: event.allDay,
+            tintRGB: .init(
+                red: Double(r), green: Double(g), blue: Double(b), alpha: Double(a)
+            )
+        )
+    }
+
+    private static func snapshotReminder(
+        from reminder: CalendarReminder,
+        rawCGColor: CGColor?
+    ) -> WidgetEventsSnapshot.Reminder {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        if let cg = rawCGColor {
+            UIColor(cgColor: cg).getRed(&r, green: &g, blue: &b, alpha: &a)
+        } else {
+            UIColor(reminder.tint).getRed(&r, green: &g, blue: &b, alpha: &a)
+        }
+        return WidgetEventsSnapshot.Reminder(
+            id: reminder.id,
+            reminderIdentifier: reminder.reminderIdentifier,
+            title: reminder.title,
+            dueDate: reminder.dueDate,
+            hasTime: reminder.hasTime,
+            isCompleted: reminder.isCompleted,
+            isOverdue: reminder.isOverdue,
+            isRecurring: reminder.isRecurring,
             tintRGB: .init(
                 red: Double(r), green: Double(g), blue: Double(b), alpha: Double(a)
             )

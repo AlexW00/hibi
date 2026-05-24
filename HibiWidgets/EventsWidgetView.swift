@@ -1,12 +1,14 @@
 import SwiftUI
 import WidgetKit
 
-/// The Schedule widget — today's events as pastel pills. Adapts to two
-/// families and five content states (empty / 1 / 2 / 3 / >3 events).
+/// The Schedule widget — today's events and reminders as pastel pills.
+/// Adapts to three families and five content states (empty / 1 / 2 / 3 / >3
+/// items), where "items" = reminders + events.
 ///
-/// Visual language follows the in-app `DayEventRow` (tint @ 0.10 base,
-/// 0.26 progress fill, 0.35 border, monospaced time + sans title) scaled
-/// down to the widget's tighter typographic footprint.
+/// Visual language follows the in-app `DayEventRow` and `ReminderRow`
+/// (tint @ 0.10 base, 0.26 progress fill, 0.35 border, monospaced time +
+/// sans title, leading checkbox column for reminders) scaled down to the
+/// widget's tighter typographic footprint.
 struct EventsWidgetView: View {
     let entry: EventsEntry
 
@@ -21,6 +23,32 @@ struct EventsWidgetView: View {
         default:
             EventsWidgetBody(entry: entry, isMedium: false)
         }
+    }
+}
+
+// MARK: - Combined schedule item
+
+/// What the widget actually renders is a unified stack: reminders first,
+/// events after. `ScheduleItem` lets pill / hero layouts iterate over both
+/// kinds with shared edge logic, the same way `DayView.scheduleEvents`
+/// stacks them in-app.
+private enum ScheduleItem: Identifiable {
+    case reminder(WidgetEventsSnapshot.Reminder)
+    case event(WidgetEventsSnapshot.Event)
+
+    var id: String {
+        switch self {
+        case .reminder(let r): return "r-\(r.id)"
+        case .event(let e): return "e-\(e.id)"
+        }
+    }
+}
+
+private extension EventsEntry {
+    /// Reminders are rendered above events to mirror the in-app schedule
+    /// stack (the Day tab puts reminders first too).
+    var items: [ScheduleItem] {
+        reminders.map(ScheduleItem.reminder) + events.map(ScheduleItem.event)
     }
 }
 
@@ -53,20 +81,33 @@ private struct EventsWidgetBody: View {
 
     var body: some View {
         let pad = WidgetMetrics.pad(isMedium: isMedium)
+        let items = entry.items
 
         Group {
-            switch entry.events.count {
+            switch items.count {
             case 0:
                 EmptyOpenPage(isMedium: isMedium)
             case 1:
-                HeroEventCard(event: entry.events[0], now: entry.date, isMedium: isMedium)
+                heroFor(items[0])
             case 2, 3:
-                FillPills(events: entry.events, now: entry.date, isMedium: isMedium)
+                FillPills(items: items, now: entry.date, isMedium: isMedium)
             default:
-                PeekPills(events: entry.events, now: entry.date, isMedium: isMedium)
+                PeekPills(items: items, now: entry.date, isMedium: isMedium)
             }
         }
         .padding(pad)
+    }
+
+    @ViewBuilder
+    private func heroFor(_ item: ScheduleItem) -> some View {
+        switch item {
+        case .event(let event):
+            DeepLink(eventID: event.id) {
+                HeroEventCard(event: event, now: entry.date, isMedium: isMedium)
+            }
+        case .reminder(let reminder):
+            HeroReminderCard(reminder: reminder, isMedium: isMedium)
+        }
     }
 }
 
@@ -77,47 +118,54 @@ private struct EventsWidgetLargeBody: View {
 
     var body: some View {
         let pad = WidgetMetrics.pad(isMedium: true)
+        let items = entry.items
 
         Group {
-            switch entry.events.count {
+            switch items.count {
             case 0:
                 EmptyOpenPage(isMedium: true)
             case 1:
-                // Single event reads as featured editorial content even at
-                // the larger 4×4 size — same Hero treatment as on medium.
-                HeroEventCard(event: entry.events[0], now: entry.date, isMedium: true)
+                switch items[0] {
+                case .event(let event):
+                    // Single event reads as featured editorial content even
+                    // at the larger 4×4 size — same Hero treatment as on
+                    // medium.
+                    DeepLink(eventID: event.id) {
+                        HeroEventCard(event: event, now: entry.date, isMedium: true)
+                    }
+                case .reminder(let reminder):
+                    HeroReminderCard(reminder: reminder, isMedium: true)
+                }
             default:
-                LargeList(events: entry.events, now: entry.date)
+                LargeList(items: items, now: entry.date)
             }
         }
         .padding(pad)
     }
 }
 
-/// The large widget's multi-event layout. Pills size to the same 48pt
-/// minimum as in-app `DayEventRow`s — no stretching to fill the widget,
-/// no compressing to a smaller fixed height. If the day's events run
-/// past the widget bottom, the overflow fades; otherwise the stack just
+/// The large widget's multi-item layout. Pills size to the same 48pt
+/// minimum as in-app rows — no stretching to fill the widget, no
+/// compressing to a smaller fixed height. If the day's items run past
+/// the widget bottom, the overflow fades; otherwise the stack just
 /// anchors to the top with empty space below.
 private struct LargeList: View {
-    let events: [WidgetEventsSnapshot.Event]
+    let items: [ScheduleItem]
     let now: Date
 
     var body: some View {
-        let last = events.count - 1
+        let last = items.count - 1
         let gap = WidgetMetrics.gap(isMedium: true, peek: true)
 
         // Conservative overflow heuristic: ~336pt usable height ÷ (48pt
         // row + 5pt gap) ≈ 6 full rows. Past that the stack pushes into
         // the bottom of the widget and the gradient mask fades it out.
-        let overflows = events.count > 6
+        let overflows = items.count > 6
 
         VStack(spacing: gap) {
-            ForEach(Array(events.enumerated()), id: \.element.id) { idx, event in
-                EventPill(
-                    event: event,
-                    now: now,
-                    isMedium: true,
+            ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
+                pill(
+                    for: item,
                     edges: EventRowEdges(
                         top: idx == 0,
                         // When the day overflows the bottom edge, no row
@@ -148,6 +196,18 @@ private struct LargeList: View {
             )
         )
     }
+
+    @ViewBuilder
+    private func pill(for item: ScheduleItem, edges: EventRowEdges) -> some View {
+        switch item {
+        case .event(let event):
+            DeepLink(eventID: event.id) {
+                EventPill(event: event, now: now, isMedium: true, edges: edges)
+            }
+        case .reminder(let reminder):
+            ReminderPill(reminder: reminder, isMedium: true, edges: edges)
+        }
+    }
 }
 
 // MARK: - Empty state ("Open page")
@@ -170,6 +230,24 @@ private struct EmptyOpenPage: View {
                 .lineLimit(2)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+// MARK: - Deep-link helper
+
+/// Wraps a pill in a `Link` that opens the tapped event in the app's
+/// editor. Per-event deep links coexist with the widget's outer
+/// `.widgetURL("hibi://today")`: Link's tap target takes priority within
+/// its bounds, so taps that miss any pill (or land on empty space) still
+/// fall through to the widget-wide URL.
+private struct DeepLink<Content: View>: View {
+    let eventID: String
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        Link(destination: URL(string: "hibi://event/\(eventID)") ?? URL(string: "hibi://today")!) {
+            content()
+        }
     }
 }
 
@@ -244,40 +322,120 @@ private struct HeroEventCard: View {
     }
 }
 
-// MARK: - Fill pills (2 or 3 events)
+// MARK: - Hero card (1 reminder)
+
+private struct HeroReminderCard: View {
+    let reminder: WidgetEventsSnapshot.Reminder
+    let isMedium: Bool
+
+    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults)
+    private var timeFormatRaw: String = TimeFormat.system.rawValue
+    @AppStorage("useSimpleFont", store: AppGroup.defaults)
+    private var useSimpleFont: Bool = false
+
+    private var timeFormat: TimeFormat {
+        TimeFormat(rawValue: timeFormatRaw) ?? .system
+    }
+
+    private var tint: Color {
+        Color.pastelized(cgColor: reminder.tintRGB.cgColor)
+    }
+
+    private var subtitle: String? {
+        var parts: [String] = []
+        if reminder.hasTime, let due = reminder.dueDate {
+            parts.append(timeFormat.string(from: due))
+        }
+        if reminder.isOverdue {
+            parts.append(String(localized: "Overdue"))
+        }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    var body: some View {
+        let shape = EventRowEdges.solo.shape(outer: WidgetMetrics.outerRadius)
+
+        HStack(alignment: .top, spacing: 0) {
+            ReminderCheckbox(
+                reminderID: reminder.reminderIdentifier,
+                isCompleted: reminder.isCompleted,
+                tint: tint,
+                isMedium: isMedium,
+                isHero: true
+            )
+
+            VStack(alignment: .leading, spacing: 0) {
+                Text(reminder.title)
+                    .font(.appSerif(size: isMedium ? 22 : 16, italic: true, simple: useSimpleFont))
+                    .foregroundStyle(.primary)
+                    .strikethrough(reminder.isCompleted)
+                    .tracking(-0.2)
+                    .lineLimit(2)
+
+                Spacer(minLength: 0)
+
+                if let subtitle, !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.system(size: isMedium ? 11 : 9.5, weight: .semibold))
+                        .foregroundStyle(reminder.isOverdue ? Color.red.opacity(0.8) : .secondary)
+                        .lineLimit(1)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(.trailing, isMedium ? 14 : 11)
+            .padding(.vertical, isMedium ? 12 : 10)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(tint.opacity(reminder.isCompleted ? 0.38 : 0.10))
+        .clipShape(shape)
+        .overlay(shape.strokeBorder(tint.opacity(0.35), lineWidth: 0.5))
+    }
+}
+
+// MARK: - Fill pills (2 or 3 items)
 
 private struct FillPills: View {
-    let events: [WidgetEventsSnapshot.Event]
+    let items: [ScheduleItem]
     let now: Date
     let isMedium: Bool
 
     var body: some View {
-        let last = events.count - 1
+        let last = items.count - 1
         VStack(spacing: WidgetMetrics.gap(isMedium: isMedium)) {
-            ForEach(Array(events.enumerated()), id: \.element.id) { idx, event in
-                EventPill(
-                    event: event,
-                    now: now,
-                    isMedium: isMedium,
+            ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
+                pill(
+                    for: item,
                     edges: EventRowEdges(top: idx == 0, bottom: idx == last)
                 )
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+
+    @ViewBuilder
+    private func pill(for item: ScheduleItem, edges: EventRowEdges) -> some View {
+        switch item {
+        case .event(let event):
+            DeepLink(eventID: event.id) {
+                EventPill(event: event, now: now, isMedium: isMedium, edges: edges)
+            }
+        case .reminder(let reminder):
+            ReminderPill(reminder: reminder, isMedium: isMedium, edges: edges)
+        }
+    }
 }
 
-// MARK: - Peek pills (>3 events)
+// MARK: - Peek pills (>3 items)
 
 private struct PeekPills: View {
-    let events: [WidgetEventsSnapshot.Event]
+    let items: [ScheduleItem]
     let now: Date
     let isMedium: Bool
 
     /// Show four rows total; the fourth fades into the widget edge to
     /// imply there's more below.
-    private var visible: [WidgetEventsSnapshot.Event] {
-        Array(events.prefix(4))
+    private var visible: [ScheduleItem] {
+        Array(items.prefix(4))
     }
 
     var body: some View {
@@ -288,14 +446,12 @@ private struct PeekPills: View {
         // mask's fade zone. The outer frame anchors top so overflow runs
         // off the bottom; the system's widget clip handles the hard edge.
         VStack(spacing: WidgetMetrics.gap(isMedium: isMedium, peek: true)) {
-            ForEach(Array(visible.enumerated()), id: \.element.id) { idx, event in
+            ForEach(Array(visible.enumerated()), id: \.element.id) { idx, item in
                 // Only the first row sits against the widget's top edge.
                 // The fourth row runs past the bottom into the mask's fade —
                 // no row is "at" the bottom edge, so all bottoms stay inner.
-                EventPill(
-                    event: event,
-                    now: now,
-                    isMedium: isMedium,
+                pill(
+                    for: item,
                     edges: EventRowEdges(top: idx == 0, bottom: false)
                 )
                 .frame(height: 32)
@@ -314,6 +470,18 @@ private struct PeekPills: View {
                 endPoint: .bottom
             )
         )
+    }
+
+    @ViewBuilder
+    private func pill(for item: ScheduleItem, edges: EventRowEdges) -> some View {
+        switch item {
+        case .event(let event):
+            DeepLink(eventID: event.id) {
+                EventPill(event: event, now: now, isMedium: isMedium, edges: edges)
+            }
+        case .reminder(let reminder):
+            ReminderPill(reminder: reminder, isMedium: isMedium, edges: edges)
+        }
     }
 }
 
@@ -401,6 +569,120 @@ private struct EventPill: View {
         .background(tint.opacity(event.allDay ? 0.38 : 0.10))
         .clipShape(shape)
         .overlay(shape.strokeBorder(tint.opacity(0.35), lineWidth: 0.5))
+    }
+}
+
+// MARK: - Reminder pill
+
+private struct ReminderPill: View {
+    let reminder: WidgetEventsSnapshot.Reminder
+    let isMedium: Bool
+    let edges: EventRowEdges
+
+    @AppStorage(TimeFormat.defaultsKey, store: AppGroup.defaults)
+    private var timeFormatRaw: String = TimeFormat.system.rawValue
+
+    private var timeFormat: TimeFormat {
+        TimeFormat(rawValue: timeFormatRaw) ?? .system
+    }
+
+    private var tint: Color {
+        Color.pastelized(cgColor: reminder.tintRGB.cgColor)
+    }
+
+    private var subtitle: String? {
+        var parts: [String] = []
+        if reminder.hasTime, let due = reminder.dueDate {
+            parts.append(timeFormat.string(from: due))
+        }
+        if reminder.isOverdue {
+            parts.append(String(localized: "Overdue"))
+        }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    var body: some View {
+        let shape = edges.shape(outer: WidgetMetrics.outerRadius)
+
+        HStack(spacing: 0) {
+            ReminderCheckbox(
+                reminderID: reminder.reminderIdentifier,
+                isCompleted: reminder.isCompleted,
+                tint: tint,
+                isMedium: isMedium,
+                isHero: false
+            )
+
+            // Tint hairline rail — matches event pill so reminders and
+            // events read as the same vertical column system.
+            Rectangle()
+                .fill(tint.opacity(0.45))
+                .frame(width: 1)
+
+            VStack(alignment: .leading, spacing: 1) {
+                HStack(spacing: 4) {
+                    Text(reminder.title)
+                        .font(.system(size: isMedium ? 11 : 10, weight: .medium))
+                        .tracking(-0.1)
+                        .strikethrough(reminder.isCompleted)
+                        .foregroundStyle(reminder.isCompleted ? .secondary : .primary)
+                        .lineLimit(1)
+                }
+
+                if isMedium, let subtitle, !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(reminder.isOverdue ? Color.red.opacity(0.8) : .secondary)
+                        .lineLimit(1)
+                }
+            }
+            .padding(.horizontal, isMedium ? 9 : 8)
+            .padding(.vertical, isMedium ? 5 : 4)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(tint.opacity(reminder.isCompleted ? 0.38 : 0.10))
+        .clipShape(shape)
+        .overlay(shape.strokeBorder(tint.opacity(0.35), lineWidth: 0.5))
+    }
+}
+
+// MARK: - Reminder checkbox button
+
+/// The single interactive primitive on a reminder row. Hosts a
+/// `Button(intent:)` that runs `ToggleReminderCompletionIntent` in the
+/// widget extension process — no app launch. The button's frame matches
+/// the event pill's leading time column so reminders + events line up
+/// visually in mixed lists.
+private struct ReminderCheckbox: View {
+    let reminderID: String
+    let isCompleted: Bool
+    let tint: Color
+    let isMedium: Bool
+    /// Hero variant uses a larger glyph and a wider hit area to match
+    /// the editorial scale of the rest of the hero card.
+    let isHero: Bool
+
+    var body: some View {
+        let width: CGFloat = {
+            if isHero { return isMedium ? 64 : 52 }
+            return isMedium ? 50 : 40
+        }()
+        let glyph: CGFloat = isHero ? (isMedium ? 22 : 18) : (isMedium ? 16 : 14)
+
+        Button(intent: ToggleReminderCompletionIntent(reminderID: reminderID)) {
+            Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
+                .font(.system(size: glyph, weight: .medium))
+                .foregroundStyle(tint.mix(with: .black, by: 0.10))
+                .contentTransition(.symbolEffect(.replace))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .buttonStyle(.plain)
+        .frame(width: width)
+        .frame(maxHeight: .infinity)
+        // Hint to the system that the visual state may briefly lag the tap
+        // while the intent + snapshot round-trip resolves.
+        .invalidatableContent()
     }
 }
 

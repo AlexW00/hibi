@@ -16,7 +16,7 @@ enum AppGroup {
 
     enum Key {
         static let snapshot = "widget.todaysPage.snapshot.v1"
-        static let eventsSnapshot = "widget.events.snapshot.v1"
+        static let eventsSnapshot = "widget.events.snapshot.v2"
         static let didMigratePrefs = "didMigratePrefsToAppGroup_v1"
     }
 

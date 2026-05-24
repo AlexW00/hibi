@@ -17,7 +17,8 @@ struct EventsTimelineProvider: AppIntentTimelineProvider {
             snapshot: nil,
             calendar: calendar,
             includeAllDay: true,
-            upcomingOnly: false
+            upcomingOnly: false,
+            showReminders: true
         )
     }
 
@@ -28,7 +29,8 @@ struct EventsTimelineProvider: AppIntentTimelineProvider {
             snapshot: snapshot,
             calendar: calendar,
             includeAllDay: config.showAllDay,
-            upcomingOnly: config.upcomingOnly
+            upcomingOnly: config.upcomingOnly,
+            showReminders: config.showReminders
         )
     }
 
@@ -39,12 +41,14 @@ struct EventsTimelineProvider: AppIntentTimelineProvider {
         let snapshot = Self.loadSnapshot()
         let now = Date()
 
-        // Build entries: now, plus each remaining event start/end boundary,
-        // plus the start of tomorrow (so the widget rolls over to the empty
-        // state if the app hasn't been opened to refresh the snapshot).
-        // Boundaries make the active row's progress fill advance — AND, if
-        // the user opted into `upcomingOnly`, drop events from the list at
-        // the moment they end.
+        // Build entries: now, plus each remaining event start/end boundary
+        // and each remaining reminder due-time boundary, plus the start of
+        // tomorrow (so the widget rolls over to the empty state if the app
+        // hasn't been opened to refresh the snapshot). Boundaries make the
+        // active row's progress fill advance, drop reminders out of the
+        // upcoming-only filter when their due time passes, AND, if the user
+        // opted into `upcomingOnly`, drop events from the list at the moment
+        // they end.
         var dates: Set<Date> = [now]
 
         if let snap = snapshot {
@@ -54,6 +58,11 @@ struct EventsTimelineProvider: AppIntentTimelineProvider {
                 }
                 if let e = ev.endDate, e > now {
                     dates.insert(e.addingTimeInterval(1))
+                }
+            }
+            for rem in snap.reminders {
+                if let due = rem.dueDate, due > now {
+                    dates.insert(due.addingTimeInterval(1))
                 }
             }
         }
@@ -73,7 +82,8 @@ struct EventsTimelineProvider: AppIntentTimelineProvider {
                 snapshot: snapshot,
                 calendar: calendar,
                 includeAllDay: config.showAllDay,
-                upcomingOnly: config.upcomingOnly
+                upcomingOnly: config.upcomingOnly,
+                showReminders: config.showReminders
             )
         }
 
@@ -90,23 +100,27 @@ struct EventsTimelineProvider: AppIntentTimelineProvider {
         return try? JSONDecoder().decode(WidgetEventsSnapshot.self, from: data)
     }
 
-    /// Build an entry for `date`. Defaults show every event on the day;
-    /// the user's per-widget toggles can drop all-day rows and/or hide
-    /// events whose end has already passed.
+    /// Build an entry for `date`. Defaults show every event and every
+    /// reminder on the day; the user's per-widget toggles can drop all-day
+    /// rows, drop reminders entirely, and/or hide items that have already
+    /// finished (events past their end, reminders marked complete).
     private static func entry(
         for date: Date,
         snapshot: WidgetEventsSnapshot?,
         calendar: Calendar,
         includeAllDay: Bool,
-        upcomingOnly: Bool
+        upcomingOnly: Bool,
+        showReminders: Bool
     ) -> EventsEntry {
         let comps = calendar.dateComponents([.year, .month, .day], from: date)
         let y = comps.year ?? 2026
         let m = comps.month ?? 1
         let d = comps.day ?? 1
 
+        let snapshotIsForToday = snapshot?.year == y && snapshot?.month == m && snapshot?.day == d
+
         let events: [WidgetEventsSnapshot.Event] = {
-            guard let s = snapshot, s.year == y, s.month == m, s.day == d else { return [] }
+            guard let s = snapshot, snapshotIsForToday else { return [] }
             return s.events.filter { ev in
                 if !includeAllDay && ev.allDay { return false }
                 if upcomingOnly {
@@ -120,6 +134,22 @@ struct EventsTimelineProvider: AppIntentTimelineProvider {
             }
         }()
 
-        return EventsEntry(date: date, day: d, month: m, year: y, events: events)
+        let reminders: [WidgetEventsSnapshot.Reminder] = {
+            guard showReminders else { return [] }
+            guard let s = snapshot, snapshotIsForToday else { return [] }
+            return s.reminders.filter { rem in
+                // Completed reminders are the reminders equivalent of a
+                // finished event — hide them in upcoming-only mode.
+                if upcomingOnly && rem.isCompleted { return false }
+                return true
+            }
+        }()
+
+        return EventsEntry(
+            date: date,
+            day: d, month: m, year: y,
+            events: events,
+            reminders: reminders
+        )
     }
 }
