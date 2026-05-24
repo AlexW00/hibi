@@ -1,5 +1,6 @@
 import Notelet
 import SwiftUI
+import UIKit
 
 /// Changelog shown on first launch after update, and re-openable from Settings.
 ///
@@ -13,9 +14,18 @@ enum WhatsNewContent {
     static var configuration: NoteletConfiguration {
         NoteletConfiguration(
             doneButtonLabel: "Continue",
-            accentColor: .primary
+            accentColor: buttonAccentColor
         )
     }
+
+    /// Notelet draws the action button with `.borderedProminent`, which always
+    /// renders the label white. `.primary` flips the fill to white in dark mode,
+    /// hiding the white label — so pin the fill to a dark tone in both schemes.
+    private static let buttonAccentColor = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 0.173, green: 0.173, blue: 0.180, alpha: 1)
+            : UIColor(red: 0.043, green: 0.043, blue: 0.051, alpha: 1)
+    })
 
     static var allNotes: [NoteletVersionNotes] {
         [latest, v1_9, v1_8, v1_7, v1_5, v1_4, v1_3, v1_2]
