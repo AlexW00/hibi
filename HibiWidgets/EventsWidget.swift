@@ -11,10 +11,13 @@ struct EventsWidget: Widget {
             provider: EventsTimelineProvider()
         ) { entry in
             EventsWidgetView(entry: entry)
-                // Matches the in-app canvas behind events (cream radial in
-                // light, near-black radial in dark) — not the paper card,
-                // which reads as a warm yellow against the widget's host.
-                .containerBackground(for: .widget) { AppBackgroundGradient() }
+                // Paper canvas — matches the Today's Page widget so the two
+                // widgets read as a set. In dark mode, the radial app
+                // gradient only sampled its outer (near-black) ring at
+                // widget dimensions, which crushed the pill tints; the flat
+                // card1 surface (cream / #242424) gives the pastel tints
+                // enough contrast to read.
+                .containerBackground(PaperTints.card1, for: .widget)
                 // TODO: per-event deep links (open the tapped event in-app).
                 // For now any tap opens the Day tab.
                 .widgetURL(URL(string: "hibi://today"))
