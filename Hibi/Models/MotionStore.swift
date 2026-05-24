@@ -39,14 +39,21 @@ final class MotionStore {
     @ObservationIgnored private var isRunning = false
 
     /// A transient of this many radians maps to the full ±1 range. Smaller =
-    /// gentler moves reach full parallax.
-    private let maxTilt: Double = 0.2
+    /// gentler moves reach full parallax. Kept low because the high-pass below
+    /// shrinks the transient (the baseline eats part of every move).
+    private let maxTilt: Double = 0.1
     /// How fast the neutral baseline drifts toward the current pose — i.e. how
-    /// quickly a held tilt returns to base. Larger = snappier return (and
-    /// demands quicker motion to register). ~0.04 ≈ settles in roughly a second.
-    private let baselineFollow: Double = 0.04
-    /// Low-pass blend per sample. Lower = smoother but laggier.
-    private let smoothing: Double = 0.12
+    /// quickly a held tilt returns to base. Larger = snappier return. ~0.1 ≈
+    /// settles in about half a second.
+    private let baselineFollow: Double = 0.1
+    /// Output low-pass blend per sample. Higher = crisper / less lag behind the
+    /// move; lower = smoother but floatier. The gravity signal is already
+    /// fusion-smoothed, so this can run high without visible jitter.
+    private let smoothing: Double = 0.35
+    /// Transients below this many radians are ignored, so sensor noise and tiny
+    /// unintentional wobbles don't register — only deliberate motion does. The
+    /// knee is soft (threshold subtracted, not a hard cut) so there's no notch.
+    private let deadzone: Double = 0.01
     /// Skip publishing sub-pixel changes so a still device doesn't redraw.
     private let epsilon: Double = 0.0008
 
@@ -100,13 +107,19 @@ final class MotionStore {
         baselineLean = bLean
         baselineRecline = bRecline
 
-        let newX = tiltX + (clampNorm(lean - bLean) - tiltX) * smoothing
-        let newY = tiltY + (clampNorm(recline - bRecline) - tiltY) * smoothing
+        let newX = tiltX + (shape(lean - bLean) - tiltX) * smoothing
+        let newY = tiltY + (shape(recline - bRecline) - tiltY) * smoothing
         if abs(newX - tiltX) > epsilon { tiltX = newX }
         if abs(newY - tiltY) > epsilon { tiltY = newY }
     }
 
-    private func clampNorm(_ radians: Double) -> Double {
-        max(-1, min(1, radians / maxTilt))
+    /// Soft dead zone + normalize to ±1: subtract the dead-zone threshold (so
+    /// the curve stays continuous from zero, no notch), then scale the
+    /// remaining range up to maxTilt.
+    private func shape(_ radians: Double) -> Double {
+        let magnitude = abs(radians) - deadzone
+        guard magnitude > 0 else { return 0 }
+        let normalized = min(1, magnitude / (maxTilt - deadzone))
+        return radians < 0 ? -normalized : normalized
     }
 }
