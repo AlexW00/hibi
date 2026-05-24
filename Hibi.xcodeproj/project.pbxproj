@@ -248,7 +248,7 @@
 			mainGroup = 4B802FC42F8F5453008F00F4;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "Notelet" */,
+				4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "notelet" */,
 				4B0451002F94C6EF009EA06E /* XCRemoteSwiftPackageReference "PermissionsKit" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -589,7 +589,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "Notelet" */ = {
+		4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "notelet" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/mykolaharmash/notelet";
 			requirement = {
@@ -610,7 +610,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		4B0450C32F94C6EF009EA06E /* Notelet */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "Notelet" */;
+			package = 4B0450C22F94C6EF009EA06E /* XCRemoteSwiftPackageReference "notelet" */;
 			productName = Notelet;
 		};
 		4B0451012F94C6EF009EA06E /* CalendarPermission */ = {
