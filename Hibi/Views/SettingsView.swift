@@ -29,6 +29,7 @@ struct SettingsView: View {
     var body: some View {
         VStack(spacing: 0) {
             HibiPlusView()
+                .background(Color(.systemGroupedBackground))
                 .zIndex(1)
             Form {
                 Section("General") {
@@ -120,7 +121,7 @@ struct SettingsView: View {
             #endif
             }
         }
-        .navigationTitle("Settings")
+        .navigationTitle(Text(verbatim: "Hibi"))
         .noteletSheet(
             notes: WhatsNewContent.allNotes,
             version: whatsNewVersion,

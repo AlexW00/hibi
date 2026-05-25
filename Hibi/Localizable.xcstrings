@@ -6513,7 +6513,7 @@
       }
     },
     "Settings" : {
-      "comment" : "Navigation title of the Settings sheet.",
+      "comment" : "Navigation title of the Settings sheet — now uses the app brand name.",
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
