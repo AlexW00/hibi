@@ -294,3 +294,60 @@ struct EarlyAccessTile: View {
         }
     }
 }
+
+// MARK: - Purchase CTA
+
+struct PlusCTA: View {
+    /// True once the success morph has played; owner drives the rest.
+    @Binding var showSuccess: Bool
+    let onPurchase: () -> Void
+
+    var body: some View {
+        Button {
+            guard !showSuccess else { return }
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { showSuccess = true }
+            onPurchase()
+        } label: {
+            Group {
+                if showSuccess {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                        Text("Thank you")
+                            .font(.system(size: 15, weight: .semibold))
+                    }
+                } else {
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text(verbatim: "$4.99")
+                            .font(.system(size: 15, weight: .medium, design: .monospaced))
+                        Text("one-time")
+                            .font(.custom(AppFont.serifItalic, size: 12.5))
+                            .opacity(0.7)
+                    }
+                }
+            }
+            .padding(.horizontal, 22)
+            .padding(.vertical, 12)
+            .foregroundStyle(showSuccess ? Color.white : PaperTints.card1)
+            .background(showSuccess ? Color(red: 0.20, green: 0.78, blue: 0.35) : Color.primary)
+            .clipShape(Capsule())
+            .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18), radius: 6, y: 2)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(showSuccess ? Text("Purchased. Thank you.") : Text("Buy Hibi Plus, $4.99 one-time"))
+    }
+}
+
+struct RestorePurchasesLink: View {
+    var body: some View {
+        Button {
+            // No-op placeholder — no real IAP yet.
+        } label: {
+            Text("Restore purchases")
+                .font(.custom(AppFont.serifItalic, size: 11.5))
+                .foregroundStyle(.tertiary)
+                .underline()
+        }
+        .buttonStyle(.plain)
+    }
+}
