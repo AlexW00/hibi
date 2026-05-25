@@ -194,3 +194,103 @@ struct AppIconCarousel: View {
         .accessibilityHidden(true)
     }
 }
+
+// MARK: - Early access tile (Widgets promo)
+
+private struct WidgetIllustration: View {
+    var body: some View {
+        RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .fill(
+                RadialGradient(
+                    colors: [Color(red: 0.83, green: 0.85, blue: 0.89),
+                             Color(red: 0.55, green: 0.59, blue: 0.69)],
+                    center: .init(x: 0.3, y: 0.2), startRadius: 0, endRadius: 92
+                )
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(PaperTints.card1)
+                    .overlay {
+                        VStack(spacing: 2) {
+                            HStack(spacing: 18) {
+                                Circle().fill(PaperTints.bindingHole).frame(width: 4, height: 4)
+                                Circle().fill(PaperTints.bindingHole).frame(width: 4, height: 4)
+                            }
+                            Text("Thursday")
+                                .font(.custom(AppFont.serifItalic, size: 8))
+                                .foregroundStyle(.secondary)
+                            Text(verbatim: "23")
+                                .font(.custom(AppFont.serifRegular, size: 38))
+                                .foregroundStyle(.primary)
+                                .overlay(alignment: .bottom) {
+                                    Rectangle().frame(width: 22, height: 1.25).foregroundStyle(.primary)
+                                }
+                        }
+                        .padding(.vertical, 6)
+                    }
+                    .padding(8)
+                    .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.10), radius: 4, y: 1)
+            }
+            .frame(width: 92, height: 92)
+            .accessibilityHidden(true)
+    }
+}
+
+struct EarlyAccessTile: View {
+    @State private var pulse = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var daysLeft: Int {
+        var cal = Calendar(identifier: .gregorian)
+        cal.locale = Locale(identifier: "de_DE")
+        let start = cal.startOfDay(for: Date())
+        let end = cal.startOfDay(for: earlyAccessEndDate)
+        return max(0, cal.dateComponents([.day], from: start, to: end).day ?? 0)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(PaperTints.sealInk)
+                    .frame(width: 5, height: 5)
+                    .opacity(pulse ? 0.5 : 1)
+                    .scaleEffect(pulse ? 0.85 : 1)
+                Text("Currently in early access")
+                    .font(.system(size: 10, weight: .semibold))
+                Spacer()
+                Text("\(daysLeft)d left")
+                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 9)
+            .overlay(alignment: .bottom) {
+                Rectangle().frame(height: 0.5).foregroundStyle(Color.black.opacity(0.08))
+            }
+
+            HStack(spacing: 10) {
+                WidgetIllustration()
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Widgets")
+                        .font(.custom(AppFont.serifRegular, size: 18))
+                    Text("On your home screen — paper, every day.")
+                        .font(.custom(AppFont.serifItalic, size: 11.5))
+                        .foregroundStyle(.tertiary)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(12)
+        }
+        .background(Color.black.opacity(0.025))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.black.opacity(0.08), lineWidth: 0.5)
+        }
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 1.8).repeatForever(autoreverses: true)) { pulse = true }
+        }
+    }
+}
