@@ -133,7 +133,7 @@ struct HibiStamp: View {
             .onDisappear { motion.stop() }
     }
 
-    private static let compositeSize: CGFloat = 186
+    private static let compositeSize: CGFloat = 310
 
     private func buildComposite() {
         guard let date else { compositeImage = nil; return }
@@ -597,13 +597,11 @@ private struct StampCardBody: View {
     var body: some View {
         VStack(spacing: 18) {
             HibiStamp(purchased: purchased, date: date,
-                      size: expanded ? 186 : 154, stampToken: stampToken)
-            if expanded {
-                Text(purchased
-                     ? "Thank you."
-                     : "Purchase Hibi Plus to receive your personalized seal.")
+                      size: expanded ? 310 : 200, stampToken: stampToken)
+            if expanded && !purchased {
+                Text("Purchase Hibi Plus to receive your personalized seal.")
                     .font(.appSerif(size: 15, italic: true, simple: useSimpleFont))
-                    .foregroundStyle(purchased ? .primary : .secondary)
+                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 240)
             }
