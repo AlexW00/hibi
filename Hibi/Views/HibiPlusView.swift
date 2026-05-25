@@ -118,3 +118,79 @@ struct HibiStamp: View {
         return f.string(from: date ?? Date())
     }
 }
+
+// MARK: - App icon carousel
+//
+// Placeholder: repeats a SwiftUI facsimile of the current app icon. The real
+// icon ships as a Liquid Glass `.icon` bundle (no usable PNG in the asset
+// catalog), so we render a facsimile that matches its design: a paper tile,
+// two faint binding dots, an italic "26".
+
+private struct AppIconTile: View {
+    var size: CGFloat = 42
+    var body: some View {
+        RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
+            .fill(PaperTints.card1)
+            .overlay {
+                RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
+                    .strokeBorder(Color.black.opacity(0.10), lineWidth: 0.5)
+            }
+            .overlay(alignment: .top) {
+                HStack {
+                    Circle().frame(width: 3, height: 3)
+                    Spacer()
+                    Circle().frame(width: 3, height: 3)
+                }
+                .foregroundStyle(.black.opacity(0.35))
+                .padding(.horizontal, 6)
+                .padding(.top, 4)
+            }
+            .overlay {
+                Text(verbatim: "26")
+                    .font(.custom(AppFont.serifItalic, size: size * 0.58))
+                    .foregroundStyle(.black)
+            }
+            .frame(width: size, height: size)
+            .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.10), radius: 4, y: 2)
+    }
+}
+
+struct AppIconCarousel: View {
+    var size: CGFloat = 42
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var offset: CGFloat = 0
+
+    private let count = 8
+    private var spacing: CGFloat { size * 0.27 }
+    private var unitWidth: CGFloat { CGFloat(count) * (size + spacing) }
+
+    var body: some View {
+        GeometryReader { _ in
+            HStack(spacing: spacing) {
+                ForEach(0..<(count * 2), id: \.self) { _ in
+                    AppIconTile(size: size)
+                }
+            }
+            .offset(x: offset)
+            .onAppear {
+                guard !reduceMotion else { return }
+                withAnimation(.linear(duration: 28).repeatForever(autoreverses: false)) {
+                    offset = -unitWidth
+                }
+            }
+        }
+        .frame(height: size)
+        .mask(
+            LinearGradient(
+                stops: [
+                    .init(color: .clear, location: 0),
+                    .init(color: .black, location: 0.14),
+                    .init(color: .black, location: 0.86),
+                    .init(color: .clear, location: 1),
+                ],
+                startPoint: .leading, endPoint: .trailing
+            )
+        )
+        .accessibilityHidden(true)
+    }
+}
