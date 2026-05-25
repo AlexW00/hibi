@@ -49,3 +49,4 @@ iOSInjectionProject/
 
 # Raw font sources (selected TTFs are copied into Hibi/Fonts/)
 new-fonts/
+.codex/config.toml
