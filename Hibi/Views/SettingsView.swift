@@ -27,15 +27,11 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        Form {
-            Section {
-                HibiPlusView()
-                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-            }
-
-            Section("General") {
+        VStack(spacing: 0) {
+            HibiPlusView()
+                .zIndex(1)
+            Form {
+                Section("General") {
                 NavigationLink {
                     AppearanceSettingsView()
                 } label: {
@@ -122,6 +118,7 @@ struct SettingsView: View {
                 .tint(.black)
             }
             #endif
+            }
         }
         .navigationTitle("Settings")
         .noteletSheet(

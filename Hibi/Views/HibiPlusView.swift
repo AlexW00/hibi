@@ -512,6 +512,7 @@ struct HibiPlusView: View {
     @State private var stampToken = 0
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
 
     private var backIndex: Int { 1 - frontIndex }
@@ -520,107 +521,140 @@ struct HibiPlusView: View {
         if index == 0 { return HPLayout.stampExpandedHeight }
         return isPlus ? HPLayout.featureExpandedHeightPurchased : HPLayout.featureExpandedHeight
     }
-    private func cardSize(_ index: Int, containerWidth: CGFloat) -> CGSize {
-        expanded[index]
-            ? CGSize(width: containerWidth, height: expandedHeight(for: index))
-            : HPLayout.collapsed
-    }
-
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
-            let frontSize = cardSize(frontIndex, containerWidth: w)
+            let frontW = expanded[frontIndex] ? w : HPLayout.collapsed.width
+            let frontH = expanded[frontIndex] ? expandedHeight(for: frontIndex) : HPLayout.collapsed.height
+            let backW = expanded[backIndex] ? w : HPLayout.collapsed.width
+            let backH = expanded[backIndex] ? expandedHeight(for: backIndex) : HPLayout.collapsed.height
+            let stackW = lerp(frontW, backW, cardShift)
+            let stackH = lerp(frontH, backH, cardShift)
             VStack(spacing: 0) {
-                stack(containerWidth: w, frontSize: frontSize)
-                    .frame(width: frontSize.width, height: frontSize.height)
-                    .frame(maxWidth: .infinity)   // center the (possibly narrower) stack
+                stack(containerWidth: w, stackWidth: stackW, stackHeight: stackH)
+                    .frame(maxWidth: .infinity)
                     .sensoryFeedback(.impact(weight: .medium), trigger: commitCount)
                 hint.padding(.top, 14)
             }
             .frame(width: w)
-            .animation(HPLayout.collapseSpring, value: frontIndex)
         }
         .frame(height: totalHeight)
         .animation(HPLayout.collapseSpring, value: expanded)
         .animation(HPLayout.collapseSpring, value: isPlus)
     }
 
-    /// Drives the Form row height. Front card height + hint + spacing.
     private var totalHeight: CGFloat {
-        let h = expanded[frontIndex] ? expandedHeight(for: frontIndex) : HPLayout.collapsed.height
-        return h + 14 + HPLayout.hintHeight // hint top padding + hint line
+        let frontH = expanded[frontIndex] ? expandedHeight(for: frontIndex) : HPLayout.collapsed.height
+        let backH = expanded[backIndex] ? expandedHeight(for: backIndex) : HPLayout.collapsed.height
+        let h = lerp(frontH, backH, cardShift)
+        return h + 14 + HPLayout.hintHeight
     }
 
     @ViewBuilder
-    private func stack(containerWidth w: CGFloat, frontSize: CGSize) -> some View {
-        let backSize = cardSize(backIndex, containerWidth: w)
-        ZStack {
-            // BACK card — the other card, peeking. During a swipe it rises into
-            // the front slot (cardShift 0→1).
-            cardChrome(index: backIndex, isFront: false, containerWidth: w)
-                .frame(
-                    width: lerp(HPLayout.collapsed.width - 2 * HPLayout.side, backSize.width, cardShift),
-                    height: lerp(HPLayout.collapsed.height, backSize.height, cardShift)
-                )
-                .offset(y: lerp(HPLayout.peek, 0, cardShift))
-                .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18 * Double(cardShift)),
-                        radius: 22, y: 18)
-                .zIndex(1)
+    private func stack(containerWidth w: CGFloat, stackWidth: CGFloat, stackHeight: CGFloat) -> some View {
+        let side = HPLayout.side
+        let peek = HPLayout.peek
 
-            // NEW-BACK placeholder — fades into the back slot during a swipe so
-            // the stack still has a second card after reset (the departing
-            // card's content).
+        ZStack(alignment: .top) {
+            // New-back placeholder — fades in during swipe so the stack still
+            // has a back card after the departing front resets into the back slot.
             if isAnimating {
-                cardChrome(index: frontIndex, isFront: false, containerWidth: w)
-                    .frame(width: HPLayout.collapsed.width - 2 * HPLayout.side,
-                           height: HPLayout.collapsed.height)
-                    .offset(y: HPLayout.peek)
-                    .opacity(Double(cardShift))
-                    .zIndex(0)
+                paperCard(
+                    index: frontIndex,
+                    baseFill: PaperTints.card2,
+                    overlayFill: PaperTints.card2, overlayOpacity: 0,
+                    horizontalInset: side, bottomPeek: 0,
+                    shadowAmount: 0, chromeAmount: 0
+                )
+                .opacity(Double(cardShift))
+                .zIndex(0)
             }
 
-            // FRONT card — draggable; slides off in the drag direction on commit.
-            cardChrome(index: frontIndex, isFront: true, containerWidth: w)
-                .frame(width: frontSize.width, height: frontSize.height)
-                .offset(y: dragY)
-                .rotationEffect(.degrees(Double(dragY * 0.02)),
-                                anchor: dragY > 0 ? .top : .bottom)
-                .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18),
-                        radius: 22, y: 18)
-                .opacity(1 - min(Double(abs(dragY)) / 400, 0.6))
-                .zIndex(2)
-                // High priority so a vertical swipe wins over the enclosing Form's scroll. minimumDistance keeps button taps (CTA/restore) from being swallowed. Verify on device.
-                .highPriorityGesture(dragGesture)
-                .onTapGesture { toggleExpand() }
-                .accessibilityElement(children: .contain)
-                .accessibilityLabel(Text("Hibi Plus"))
-                .accessibilityValue(expanded[frontIndex] ? Text("Expanded") : Text("Collapsed"))
-                .accessibilityActions {
-                    Button("Next page") { commitSwipe(direction: 1) }
-                    Button("Previous page") { commitSwipe(direction: -1) }
-                    Button(expanded[frontIndex] ? "Collapse" : "Expand") { toggleExpand() }
-                }
+            // Back card — peeks behind the front. During a swipe it rises
+            // into the front slot (cardShift 0→1): inset narrows, peek
+            // grows, shadow and chrome fade in, fill shifts card2→card1.
+            paperCard(
+                index: backIndex,
+                baseFill: PaperTints.card2,
+                overlayFill: PaperTints.card1, overlayOpacity: cardShift,
+                horizontalInset: lerp(side, 0, cardShift),
+                bottomPeek: lerp(0, peek, cardShift),
+                shadowAmount: Double(cardShift),
+                chromeAmount: Double(cardShift)
+            )
+            .zIndex(1)
+
+            // Front card — draggable; slides off in the drag direction on commit.
+            paperCard(
+                index: frontIndex,
+                baseFill: PaperTints.card1,
+                overlayFill: PaperTints.card1, overlayOpacity: 0,
+                horizontalInset: 0, bottomPeek: peek,
+                shadowAmount: 1, chromeAmount: 1
+            )
+            .offset(y: dragY)
+            .rotationEffect(.degrees(Double(dragY * 0.02)),
+                            anchor: dragY > 0 ? .top : .bottom)
+            .opacity(1 - min(Double(abs(dragY)) / 400, 0.6))
+            .zIndex(2)
+            .highPriorityGesture(dragGesture)
+            .onTapGesture { toggleExpand() }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(Text("Hibi Plus"))
+            .accessibilityValue(expanded[frontIndex] ? Text("Expanded") : Text("Collapsed"))
+            .accessibilityActions {
+                Button("Next page") { commitSwipe(direction: 1) }
+                Button("Previous page") { commitSwipe(direction: -1) }
+                Button(expanded[frontIndex] ? "Collapse" : "Expand") { toggleExpand() }
+            }
         }
+        .frame(width: stackWidth, height: stackHeight)
     }
 
-    /// One card with its paper chrome (fill, border, perforation if front).
+    /// Paper card following the DayView pattern: same frame for all cards,
+    /// depth illusion via padding-based insets, content always rendered.
     @ViewBuilder
-    private func cardChrome(index: Int, isFront: Bool, containerWidth: CGFloat) -> some View {
+    private func paperCard(
+        index: Int,
+        baseFill: Color,
+        overlayFill: Color, overlayOpacity: CGFloat,
+        horizontalInset: CGFloat, bottomPeek: CGFloat,
+        shadowAmount: Double, chromeAmount: Double
+    ) -> some View {
         let shape = RoundedRectangle(cornerRadius: HPLayout.corner, style: .continuous)
-        ZStack {
-            shape.fill(isFront ? PaperTints.card1 : PaperTints.card2)
-            if !isFront {
-                shape.strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
+        let edgeHighlight = 1 - chromeAmount
+        let borderColor: Color = colorScheme == .dark
+            ? .white.opacity(0.12) : .black.opacity(0.08)
+
+        shape.fill(baseFill)
+            .overlay { shape.fill(overlayFill).opacity(overlayOpacity) }
+            .overlay {
+                shape.strokeBorder(borderColor, lineWidth: 1)
+                    .opacity(edgeHighlight)
             }
-            // Body only on the visually-front card.
-            if isFront {
-                VStack(spacing: 0) {
-                    cardBody(index: index)
-                    PerforationEdge().padding(.bottom, 6)
+            .overlay(alignment: .top) {
+                if chromeAmount > 0 { BindingHoles().opacity(chromeAmount) }
+            }
+            .overlay {
+                cardBody(index: index)
+                    .allowsHitTesting(chromeAmount >= 1)
+            }
+            .overlay(alignment: .bottom) {
+                if chromeAmount > 0 {
+                    PerforationEdge().padding(.bottom, 6).opacity(chromeAmount)
                 }
             }
-        }
-        .clipShape(shape)
+            .clipShape(shape)
+            .shadow(
+                color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18 * shadowAmount),
+                radius: 22, x: 0, y: 18
+            )
+            .shadow(
+                color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.08 * shadowAmount),
+                radius: 4, x: 0, y: 2
+            )
+            .padding(.horizontal, horizontalInset)
+            .padding(.bottom, bottomPeek)
     }
 
     @ViewBuilder
