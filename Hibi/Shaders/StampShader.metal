@@ -105,8 +105,13 @@ float worley(float2 p, uint seedOffset) {
     pressure = 0.15 + pressure * 0.85;
 
     // 2. Worley bald spots — discrete missing patches.
-    float w = worley(uv * 1.0, seedU + 100u);
-    float bald = smoothstep(0.12, 0.45, w);
+    float2 warpedUV = uv + float2(
+        fbm(uv * 5.0, 2, seedU + 300u) * 0.08,
+        fbm(uv * 5.0, 2, seedU + 400u) * 0.08
+    );
+    float w = worley(warpedUV * 1.0, seedU + 100u);
+    w += fbm(uv * 10.0, 2, seedU + 500u) * 0.10;
+    float bald = smoothstep(0.18, 0.23, w);
 
     // 3. Coverage-aware edge erosion.
     float erosionNoise = fbm(uv * 6.0, 2, seedU + 200u);
