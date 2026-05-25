@@ -5,7 +5,7 @@ import SwiftUI
 private enum HPLayout {
     static let collapsed = CGSize(width: 280, height: 280)
     static let stampExpandedHeight: CGFloat = 420
-    static let featureExpandedHeight: CGFloat = 510
+    static let featureExpandedHeight: CGFloat = 540
     static let featureExpandedHeightPurchased: CGFloat = 450
     static let peek: CGFloat = 9
     static let side: CGFloat = 14
@@ -162,34 +162,33 @@ private struct AppIconTile: View {
 struct AppIconCarousel: View {
     var size: CGFloat = 42
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var offset: CGFloat = 0
 
     private let count = 8
     private var spacing: CGFloat { size * 0.27 }
     private var unitWidth: CGFloat { CGFloat(count) * (size + spacing) }
+    private var speed: CGFloat { unitWidth / 28 }
 
     var body: some View {
-        GeometryReader { _ in
+        TimelineView(.animation(paused: reduceMotion)) { context in
+            let elapsed = context.date.timeIntervalSinceReferenceDate
+            let raw = CGFloat(elapsed) * speed
+            let offset = -(raw.truncatingRemainder(dividingBy: unitWidth))
             HStack(spacing: spacing) {
-                ForEach(0..<(count * 2), id: \.self) { _ in
+                ForEach(0..<(count * 3), id: \.self) { _ in
                     AppIconTile(size: size)
                 }
             }
             .offset(x: offset)
-            .onAppear {
-                guard !reduceMotion else { return }
-                withAnimation(.linear(duration: 28).repeatForever(autoreverses: false)) {
-                    offset = -unitWidth
-                }
-            }
         }
         .frame(height: size)
+        .frame(maxWidth: .infinity)
+        .clipShape(Rectangle())
         .mask(
             LinearGradient(
                 stops: [
                     .init(color: .clear, location: 0),
-                    .init(color: .black, location: 0.14),
-                    .init(color: .black, location: 0.86),
+                    .init(color: .black, location: 0.12),
+                    .init(color: .black, location: 0.88),
                     .init(color: .clear, location: 1),
                 ],
                 startPoint: .leading, endPoint: .trailing
@@ -235,7 +234,7 @@ private struct WidgetIllustration: View {
                     .padding(8)
                     .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.10), radius: 4, y: 1)
             }
-            .frame(width: 92, height: 92)
+            .frame(width: 76, height: 76)
             .accessibilityHidden(true)
     }
 }
@@ -256,7 +255,7 @@ struct EarlyAccessTile: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
                 Circle()
-                    .fill(PaperTints.sealInk)
+                    .fill(Color(red: 0.20, green: 0.78, blue: 0.35))
                     .frame(width: 5, height: 5)
                     .opacity(pulse ? 0.5 : 1)
                     .scaleEffect(pulse ? 0.85 : 1)
@@ -360,6 +359,7 @@ struct RestorePurchasesLink: View {
 
 private struct PlusHeader: View {
     var deck: LocalizedStringKey?
+    var showDeck: Bool = false
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
     var body: some View {
         VStack(spacing: 4) {
@@ -376,6 +376,9 @@ private struct PlusHeader: View {
                     .foregroundStyle(.tertiary)
                     .multilineTextAlignment(.center)
                     .padding(.top, 2)
+                    .opacity(showDeck ? 1 : 0)
+                    .frame(height: showDeck ? nil : 0)
+                    .clipped()
             }
         }
     }
@@ -418,57 +421,70 @@ private struct FeatureCardBody: View {
     let onPurchase: () -> Void
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
 
+    private var chromeFade: Double { expanded ? 1 : 0 }
+
     var body: some View {
-        if expanded { expandedBody } else { collapsedBody }
-    }
-
-    private var collapsedBody: some View {
-        VStack(spacing: 14) {
-            PlusHeader().padding(.top, 14)
-            AppIconCarousel(size: 42).padding(.horizontal, -22)
-            Text("Tap to see what's inside.")
-                .font(.appSerif(size: 11.5, italic: true, simple: useSimpleFont))
-                .foregroundStyle(.tertiary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.vertical, 8)
-    }
-
-    private var expandedBody: some View {
         VStack(spacing: 0) {
-            PlusHeader(deck: "Your support matters a lot.")
+            PlusHeader(deck: "Your support matters a lot.", showDeck: expanded)
+                .padding(.top, 14)
 
-            // hairline rule with center dot
+            // hairline rule with center dot — expanded only
             HStack(spacing: 8) {
                 Rectangle().frame(height: 0.5).foregroundStyle(.quaternary)
                 Text(verbatim: "·").foregroundStyle(.tertiary)
                 Rectangle().frame(height: 0.5).foregroundStyle(.quaternary)
             }
-            .frame(width: 180)
-            .padding(.top, 16).padding(.bottom, 12)
+            .frame(width: 180, height: expanded ? nil : 0)
+            .opacity(chromeFade)
+            .padding(.top, expanded ? 16 : 0).padding(.bottom, expanded ? 12 : 0)
 
-            AppIconCarousel(size: 42).padding(.horizontal, -22).padding(.bottom, 14)
+            if !expanded { Spacer(minLength: 0) }
 
+            AppIconCarousel(size: 42)
+                .padding(.bottom, expanded ? 14 : 0)
+
+            if !expanded { Spacer(minLength: 0) }
+
+            // perks — expanded only
             HStack(spacing: 12) {
                 perk(rule: "App icons", title: "Dress Hibi up.")
                 perk(rule: "Early access", title: "Try features first.")
             }
-            .padding(.bottom, 12)
+            .frame(height: expanded ? nil : 0)
+            .opacity(chromeFade)
+            .clipped()
+            .padding(.bottom, expanded ? 12 : 0)
 
-            EarlyAccessTile().padding(.bottom, 14)
+            EarlyAccessTile()
+                .frame(height: expanded ? nil : 0)
+                .opacity(chromeFade)
+                .clipped()
+                .padding(.bottom, expanded ? 14 : 0)
 
-            Spacer(minLength: 0)
+            if !expanded { Spacer(minLength: 0) }
 
             if !purchased {
                 VStack(spacing: 8) {
                     PlusCTA(showSuccess: $ctaSuccess, onPurchase: onPurchase)
                     RestorePurchasesLink()
                 }
-                .padding(.bottom, 14)
+                .frame(height: expanded ? nil : 0)
+                .opacity(chromeFade)
+                .clipped()
+                .padding(.bottom, expanded ? 26 : 0)
             }
+
+            // collapsed hint — sits at the bottom, above the perforation
+            Text("Tap to see what's inside.")
+                .font(.appSerif(size: 11.5, italic: true, simple: useSimpleFont))
+                .foregroundStyle(.tertiary)
+                .frame(height: expanded ? 0 : nil)
+                .opacity(1 - chromeFade)
+                .clipped()
+                .padding(.bottom, expanded ? 0 : 22)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.horizontal, 22)
+        .padding(.horizontal, expanded ? 16 : 0)
         .padding(.top, 8)
     }
 
@@ -499,7 +515,7 @@ private struct FeatureCardBody: View {
 struct HibiPlusView: View {
     // 0 = stamp card, 1 = feature card
     @State private var frontIndex = 0
-    @State private var expanded: [Bool] = [false, false]
+    @State private var expanded = false
     @State private var isPlus = false
     @State private var purchaseDate: Date?
 
@@ -524,10 +540,10 @@ struct HibiPlusView: View {
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
-            let frontW = expanded[frontIndex] ? w : HPLayout.collapsed.width
-            let frontH = expanded[frontIndex] ? expandedHeight(for: frontIndex) : HPLayout.collapsed.height
-            let backW = expanded[backIndex] ? w : HPLayout.collapsed.width
-            let backH = expanded[backIndex] ? expandedHeight(for: backIndex) : HPLayout.collapsed.height
+            let frontW = expanded ? w - 32 : HPLayout.collapsed.width
+            let frontH = expanded ? expandedHeight(for: frontIndex) : HPLayout.collapsed.height
+            let backW = expanded ? w - 32 : HPLayout.collapsed.width
+            let backH = expanded ? expandedHeight(for: backIndex) : HPLayout.collapsed.height
             let stackW = lerp(frontW, backW, cardShift)
             let stackH = lerp(frontH, backH, cardShift)
             VStack(spacing: 0) {
@@ -544,8 +560,8 @@ struct HibiPlusView: View {
     }
 
     private var totalHeight: CGFloat {
-        let frontH = expanded[frontIndex] ? expandedHeight(for: frontIndex) : HPLayout.collapsed.height
-        let backH = expanded[backIndex] ? expandedHeight(for: backIndex) : HPLayout.collapsed.height
+        let frontH = expanded ? expandedHeight(for: frontIndex) : HPLayout.collapsed.height
+        let backH = expanded ? expandedHeight(for: backIndex) : HPLayout.collapsed.height
         let h = lerp(frontH, backH, cardShift)
         return h + 14 + HPLayout.hintHeight
     }
@@ -601,11 +617,11 @@ struct HibiPlusView: View {
             .onTapGesture { toggleExpand() }
             .accessibilityElement(children: .contain)
             .accessibilityLabel(Text("Hibi Plus"))
-            .accessibilityValue(expanded[frontIndex] ? Text("Expanded") : Text("Collapsed"))
+            .accessibilityValue(expanded ? Text("Expanded") : Text("Collapsed"))
             .accessibilityActions {
                 Button("Next page") { commitSwipe(direction: 1) }
                 Button("Previous page") { commitSwipe(direction: -1) }
-                Button(expanded[frontIndex] ? "Collapse" : "Expand") { toggleExpand() }
+                Button(expanded ? "Collapse" : "Expand") { toggleExpand() }
             }
         }
         .frame(width: stackWidth, height: stackHeight)
@@ -661,9 +677,9 @@ struct HibiPlusView: View {
     private func cardBody(index: Int) -> some View {
         if index == 0 {
             StampCardBody(purchased: isPlus, date: purchaseDate,
-                          expanded: expanded[0], stampToken: stampToken)
+                          expanded: expanded, stampToken: stampToken)
         } else {
-            FeatureCardBody(purchased: isPlus, expanded: expanded[1],
+            FeatureCardBody(purchased: isPlus, expanded: expanded,
                             ctaSuccess: $ctaSuccess, onPurchase: purchase)
         }
     }
@@ -694,7 +710,7 @@ struct HibiPlusView: View {
 
     private func toggleExpand() {
         guard !isAnimating else { return }
-        withAnimation(HPLayout.collapseSpring) { expanded[frontIndex].toggle() }
+        withAnimation(HPLayout.collapseSpring) { expanded.toggle() }
     }
 
     /// Flip to the other card, sliding the front off in `direction`
@@ -722,34 +738,35 @@ struct HibiPlusView: View {
     /// CTA tapped: success morph has already started (PlusCTA set ctaSuccess).
     /// After a beat, set Plus state, flip to the stamp card, and stamp the seal.
     private func purchase() {
-        // 1) brief success dwell so the checkmark reads
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+        // 1) let the green checkmark read for a moment
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             isPlus = true
             purchaseDate = Date()
 
-            // 2) flip to the stamp card (collapsed) using the swipe animation
-            //    so the motion matches manual navigation. Stamp card is index 0.
+            // 2) flip to the stamp card (collapsed)
             if frontIndex != 0 {
-                // animate a downward flip back to card 0
                 isAnimating = true
-                withAnimation(.easeIn(duration: 0.28)) { dragY = HPLayout.offScreen }
-                withAnimation(.easeOut(duration: 0.28)) { cardShift = 1 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.30) {
+                withAnimation(.easeIn(duration: 0.32)) { dragY = HPLayout.offScreen }
+                withAnimation(.easeOut(duration: 0.32)) { cardShift = 1 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                     var t = Transaction(); t.disablesAnimations = true
                     withTransaction(t) {
                         frontIndex = 0
                         dragY = 0; cardShift = 0; isAnimating = false
-                        expanded[1] = false   // reset feature card to collapsed
+                        expanded = false
                     }
-                    // 3) place the seal
-                    stampToken &+= 1
-                    // reset CTA morph for correctness (card is now hidden)
                     ctaSuccess = false
+                    // 3) stamp the seal after the card has settled
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                        stampToken &+= 1
+                    }
                 }
             } else {
-                stampToken &+= 1
+                expanded = false
                 ctaSuccess = false
-                expanded[1] = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                    stampToken &+= 1
+                }
             }
         }
     }
