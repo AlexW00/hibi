@@ -1095,7 +1095,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Íconos de app"
+            "value": "Iconos de app"
           }
         },
         "it": {
@@ -1981,7 +1981,7 @@
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Runtuhkan"
+            "value": "Lipat"
           }
         },
         "pt-BR": {
@@ -2052,7 +2052,7 @@
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Diruntuhkan"
+            "value": "Dilipat"
           }
         },
         "pt-BR": {
@@ -7094,19 +7094,19 @@
         "zh-Hans-CN": {
           "stringUnit": {
             "state": "translated",
-            "value": "已购买。感谢。"
+            "value": "已购买。谢谢。"
           }
         },
         "zh-Hant-HK": {
           "stringUnit": {
             "state": "translated",
-            "value": "已購買。感謝。"
+            "value": "已購買。謝謝。"
           }
         },
         "zh-Hant-TW": {
           "stringUnit": {
             "state": "translated",
-            "value": "已購買。感謝。"
+            "value": "已購買。謝謝。"
           }
         }
       }
@@ -8967,19 +8967,19 @@
         "zh-Hans-CN": {
           "stringUnit": {
             "state": "translated",
-            "value": "感谢"
+            "value": "谢谢"
           }
         },
         "zh-Hant-HK": {
           "stringUnit": {
             "state": "translated",
-            "value": "感謝"
+            "value": "謝謝"
           }
         },
         "zh-Hant-TW": {
           "stringUnit": {
             "state": "translated",
-            "value": "感謝"
+            "value": "謝謝"
           }
         }
       }
@@ -9038,19 +9038,19 @@
         "zh-Hans-CN": {
           "stringUnit": {
             "state": "translated",
-            "value": "感谢。"
+            "value": "谢谢。"
           }
         },
         "zh-Hant-HK": {
           "stringUnit": {
             "state": "translated",
-            "value": "感謝。"
+            "value": "謝謝。"
           }
         },
         "zh-Hant-TW": {
           "stringUnit": {
             "state": "translated",
-            "value": "感謝。"
+            "value": "謝謝。"
           }
         }
       }
