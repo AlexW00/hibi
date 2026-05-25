@@ -165,6 +165,8 @@ struct AppIconCarousel: View {
 
     private let count = 8
     private var spacing: CGFloat { size * 0.27 }
+    private var shadowPadding: CGFloat { max(8, size * 0.20) }
+    private var stripHeight: CGFloat { size + shadowPadding * 2 }
     private var unitWidth: CGFloat { CGFloat(count) * (size + spacing) }
     private var speed: CGFloat { unitWidth / 28 }
 
@@ -184,7 +186,7 @@ struct AppIconCarousel: View {
                 }
                 .clipped()
         }
-        .frame(height: size)
+        .frame(height: stripHeight)
         .mask(
             LinearGradient(
                 stops: [
@@ -201,6 +203,49 @@ struct AppIconCarousel: View {
 }
 
 // MARK: - Early access tile (Widgets promo)
+
+private struct RadarPingIndicator: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private let size: CGFloat = 16
+    private let dotSize: CGFloat = 5
+    private let cycle: TimeInterval = 1.8
+    private let green = Color(red: 0.20, green: 0.78, blue: 0.35)
+
+    var body: some View {
+        TimelineView(.animation(paused: reduceMotion)) { context in
+            let elapsed = context.date.timeIntervalSinceReferenceDate
+            let phase = reduceMotion ? 0 : elapsed.truncatingRemainder(dividingBy: cycle) / cycle
+
+            ZStack {
+                if reduceMotion {
+                    Circle()
+                        .strokeBorder(green.opacity(0.24), lineWidth: 1)
+                        .frame(width: 10, height: 10)
+                } else {
+                    pingRing(phase: CGFloat(phase))
+                    pingRing(phase: CGFloat((phase + 0.52).truncatingRemainder(dividingBy: 1)))
+                }
+
+                Circle()
+                    .fill(green)
+                    .frame(width: dotSize, height: dotSize)
+                    .shadow(color: green.opacity(0.32), radius: 3, y: 1)
+            }
+            .frame(width: size, height: size)
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func pingRing(phase: CGFloat) -> some View {
+        let ringSize = dotSize + (size - dotSize) * phase
+        let opacity = Double((1 - phase) * 0.38)
+
+        return Circle()
+            .stroke(green.opacity(opacity), lineWidth: 1.1)
+            .frame(width: ringSize, height: ringSize)
+    }
+}
 
 private struct WidgetIllustration: View {
     var body: some View {
@@ -242,9 +287,6 @@ private struct WidgetIllustration: View {
 }
 
 struct EarlyAccessTile: View {
-    @State private var pulse = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
     private var daysLeft: Int {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(identifier: "Europe/Berlin") ?? cal.timeZone
@@ -256,11 +298,7 @@ struct EarlyAccessTile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
-                Circle()
-                    .fill(Color(red: 0.20, green: 0.78, blue: 0.35))
-                    .frame(width: 5, height: 5)
-                    .opacity(pulse ? 0.5 : 1)
-                    .scaleEffect(pulse ? 0.85 : 1)
+                RadarPingIndicator()
                 Text("Currently in early access")
                     .font(.system(size: 10, weight: .semibold))
                 Spacer()
@@ -292,10 +330,6 @@ struct EarlyAccessTile: View {
         .overlay {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .strokeBorder(Color.primary.opacity(0.10), lineWidth: 0.5)
-        }
-        .onAppear {
-            guard !reduceMotion else { return }
-            withAnimation(.easeInOut(duration: 1.8).repeatForever(autoreverses: true)) { pulse = true }
         }
     }
 }
