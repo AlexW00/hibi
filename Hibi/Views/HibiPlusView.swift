@@ -23,12 +23,7 @@ private let earlyAccessEndDate: Date = {
     return cal.date(from: c) ?? Date()
 }()
 
-// MARK: - Stamp (placeholder seal)
-//
-// PLACEHOLDER. The seal is intentionally drawn with plain SwiftUI shapes/Text
-// so the inner rendering can later be replaced by a custom Metal shader
-// (.colorEffect / .layerEffect on the `sealBody`). Keep `sealBody` isolated so
-// the swap is localized to this view.
+// MARK: - Stamp (Metal seal)
 
 struct HibiStamp: View {
     let purchased: Bool
@@ -39,8 +34,15 @@ struct HibiStamp: View {
     var stampToken: Int = 0
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.displayScale) private var displayScale
     @State private var pressScale: CGFloat = 1
     @State private var appeared = false
+
+    // Metal stamp state
+    @State private var compositeImage: CGImage?
+    @State private var motion = MotionStore()
+    @State private var animationStart: Date?
+    @State private var isLowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
 
     var body: some View {
         Group {
@@ -59,7 +61,15 @@ struct HibiStamp: View {
         }
         .frame(width: size, height: size)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(purchased ? Text("Hibi Plus seal") : Text("Awaiting your seal"))
+        .accessibilityLabel(purchased ? accessibilityDateLabel : Text("Awaiting your seal"))
+    }
+
+    private var accessibilityDateLabel: Text {
+        if let date {
+            let formatted = date.formatted(.dateTime.year().month().day())
+            return Text("Hibi Plus seal, dated \(formatted)")
+        }
+        return Text("Hibi Plus seal")
     }
 
     private func runStampIn() {
@@ -67,31 +77,95 @@ struct HibiStamp: View {
         withAnimation(.easeOut(duration: 0.28)) { appeared = true }
         withAnimation(.spring(response: 0.34, dampingFraction: 0.6)) { pressScale = 0.96 }
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7).delay(0.12)) { pressScale = 1 }
+        if !isLowPower { animationStart = Date() }
     }
 
-    // The replaceable seal artwork.
+    private static let wetDryDuration: TimeInterval = 3.0
+
     private var sealBody: some View {
-        ZStack {
-            Circle()
-                .fill(PaperTints.sealInk.opacity(0.06))
-                .padding(4)
-            Circle()
-                .strokeBorder(PaperTints.sealInk.opacity(0.94), lineWidth: size * 0.045)
-                .padding(6)
-            VStack(spacing: size * 0.04) {
-                Text(verbatim: "HIBI · PLUS")
-                    .font(.system(size: size * 0.10, weight: .medium))
-                    .tracking(size * 0.04)
-                    .foregroundStyle(PaperTints.sealInk.opacity(0.92))
-                Text(verbatim: "日々")
-                    .font(.custom(AppFont.serifItalic, size: size * 0.42))
-                    .foregroundStyle(PaperTints.sealInk.opacity(0.96))
-                Text(verbatim: Self.format(date))
-                    .font(.system(size: size * 0.085, design: .monospaced))
-                    .tracking(size * 0.012)
-                    .foregroundStyle(PaperTints.sealInk.opacity(0.86))
+        Group {
+            if let compositeImage {
+                if reduceMotion || isLowPower {
+                    staticStamp(image: compositeImage)
+                } else {
+                    liveStamp(image: compositeImage)
+                }
+            } else {
+                Circle().fill(PaperTints.sealInk.opacity(0.06))
             }
         }
+        .onAppear { buildComposite() }
+        .onChange(of: date) { _, _ in buildComposite() }
+        .onChange(of: stampToken) { _, _ in
+            buildComposite()
+            if !reduceMotion && !isLowPower {
+                animationStart = Date()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
+            isLowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
+        }
+    }
+
+    private func staticStamp(image: CGImage) -> some View {
+        return Image(decorative: image, scale: displayScale)
+            .resizable()
+            .frame(width: size, height: size)
+            .layerEffect(
+                ShaderLibrary.stampEffect(
+                    .float2(Float(size), Float(size)),
+                    .float(Float(StampConfig.seed(from: date ?? Date()))),
+                    .float(0),
+                    .float2(0, 0),
+                    .color(PaperTints.sealInk)
+                ),
+                maxSampleOffset: CGSize(width: 2, height: 2)
+            )
+    }
+
+    private func liveStamp(image: CGImage) -> some View {
+        return TimelineView(.animation(minimumInterval: nil, paused: animationPaused)) { context in
+            let wetness = currentWetness(at: context.date)
+            Image(decorative: image, scale: displayScale)
+                .resizable()
+                .frame(width: size, height: size)
+                .layerEffect(
+                    ShaderLibrary.stampEffect(
+                        .float2(Float(size), Float(size)),
+                        .float(Float(StampConfig.seed(from: date ?? Date()))),
+                        .float(Float(wetness)),
+                        .float2(Float(motion.tiltX), Float(motion.tiltY)),
+                        .color(PaperTints.sealInk)
+                    ),
+                    maxSampleOffset: CGSize(width: 2, height: 2)
+                )
+        }
+        .onAppear { motion.start() }
+        .onDisappear { motion.stop() }
+    }
+
+    private var animationPaused: Bool {
+        false
+    }
+
+    private func currentWetness(at now: Date) -> Double {
+        guard let start = animationStart else { return 0 }
+        let elapsed = now.timeIntervalSince(start)
+        return max(0, 1 - elapsed / Self.wetDryDuration)
+    }
+
+    private static let compositeSize: CGFloat = 186
+
+    private func buildComposite() {
+        guard let date else { compositeImage = nil; return }
+        let seed = StampConfig.seed(from: date)
+        guard let def = StampConfig.definition(for: seed) else { compositeImage = nil; return }
+        compositeImage = StampCompositor.composite(
+            definition: def,
+            date: date,
+            outputSize: Self.compositeSize,
+            scale: displayScale
+        )
     }
 
     private var slotBody: some View {
@@ -109,17 +183,6 @@ struct HibiStamp: View {
                         .foregroundStyle(.tertiary)
                 }
             }
-    }
-
-    private static let sealFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "de_DE")
-        f.dateFormat = "dd · MM · yyyy"
-        return f
-    }()
-
-    private static func format(_ date: Date?) -> String {
-        sealFormatter.string(from: date ?? Date())
     }
 }
 
