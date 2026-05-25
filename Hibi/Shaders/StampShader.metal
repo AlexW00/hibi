@@ -90,14 +90,14 @@ float fbm(float2 p, int octaves, uint seedOffset) {
     }
 
     // --- Ink color ---
-    half3 currentInk = inkColor.rgb * 0.70h;
+    half3 currentInk = inkColor.rgb * 0.86h;
 
     // --- Specular highlight (gyro-driven) ---
     float2 specCenter = float2(0.5 + tilt.x * 0.3, 0.5 + tilt.y * 0.3);
     float d = distance(uv, specCenter);
     float hotspot = exp(-d * d * 6.0);
-    float specStrength = hotspot * 0.30;
-    half3 specular = half3(1.0h) * half(specStrength);
+    float specStrength = hotspot * 0.10;
+    half3 specular = inkColor.rgb * half(specStrength);
 
     // --- Bump effect ---
     // Sample neighbors with a wider offset to smooth across text edges.
@@ -107,10 +107,10 @@ float fbm(float2 p, int octaves, uint seedOffset) {
     float dy = below - coverage;
     float2 lightDir = normalize(float2(-0.7 + tilt.x * 0.3, -0.7 + tilt.y * 0.3));
     float bumpLight = clamp(dx * lightDir.x + dy * lightDir.y, -1.0, 1.0);
-    half bumpAmount = half(bumpLight * 0.40);
+    half bumpAmount = half(bumpLight * 0.18);
 
     // --- Final composite ---
-    half3 finalColor = currentInk + specular + bumpAmount;
+    half3 finalColor = clamp(currentInk + specular + bumpAmount, half3(0.0h), half3(1.0h));
     half  alpha = half(coverage);
 
     // Premultiply

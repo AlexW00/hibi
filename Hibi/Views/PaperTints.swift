@@ -27,7 +27,7 @@ enum PaperTints {
     )
 
     /// Vermillion (shu-iro) ink for the Hibi Plus seal. Same in light + dark.
-    static let sealInk = Color(uiColor: UIColor(displayP3Red: 0.784, green: 0.212, blue: 0.165, alpha: 1)) // #c8362a
+    static let sealInk = Color(uiColor: UIColor(displayP3Red: 0.910, green: 0.224, blue: 0.161, alpha: 1)) // #e83929
 
     private static func dynamic(
         light: (CGFloat, CGFloat, CGFloat),
