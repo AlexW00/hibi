@@ -173,16 +173,18 @@ struct AppIconCarousel: View {
             let elapsed = context.date.timeIntervalSinceReferenceDate
             let raw = CGFloat(elapsed) * speed
             let offset = -(raw.truncatingRemainder(dividingBy: unitWidth))
-            HStack(spacing: spacing) {
-                ForEach(0..<(count * 3), id: \.self) { _ in
-                    AppIconTile(size: size)
+            Color.clear
+                .overlay {
+                    HStack(spacing: spacing) {
+                        ForEach(0..<(count * 3), id: \.self) { _ in
+                            AppIconTile(size: size)
+                        }
+                    }
+                    .offset(x: offset)
                 }
-            }
-            .offset(x: offset)
+                .clipped()
         }
         .frame(height: size)
-        .frame(maxWidth: .infinity)
-        .clipShape(Rectangle())
         .mask(
             LinearGradient(
                 stops: [
@@ -484,7 +486,7 @@ private struct FeatureCardBody: View {
                 .padding(.bottom, expanded ? 0 : 22)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.horizontal, expanded ? 16 : 0)
+        .padding(.horizontal, 16)
         .padding(.top, 8)
     }
 
