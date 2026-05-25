@@ -42,7 +42,6 @@ struct HibiStamp: View {
     // Metal stamp state
     @State private var compositeImage: CGImage?
     @State private var motion = MotionStore()
-    @State private var animationStart: Date?
     @State private var isLowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
 
     var body: some View {
@@ -78,10 +77,7 @@ struct HibiStamp: View {
         withAnimation(.easeOut(duration: 0.28)) { appeared = true }
         withAnimation(.spring(response: 0.34, dampingFraction: 0.6)) { pressScale = 0.96 }
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7).delay(0.12)) { pressScale = 1 }
-        if !isLowPower { animationStart = Date() }
     }
-
-    private static let wetDryDuration: TimeInterval = 3.0
 
     private var sealBody: some View {
         Group {
@@ -99,9 +95,6 @@ struct HibiStamp: View {
         .onChange(of: date) { _, _ in buildComposite() }
         .onChange(of: stampToken) { _, _ in
             buildComposite()
-            if !reduceMotion && !isLowPower {
-                animationStart = Date()
-            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
             isLowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
@@ -116,7 +109,6 @@ struct HibiStamp: View {
                 ShaderLibrary.stampEffect(
                     .float2(Float(size), Float(size)),
                     .float(Float(StampConfig.seed(from: date ?? Date()))),
-                    .float(0),
                     .float2(0, 0),
                     .color(PaperTints.sealInk)
                 ),
@@ -125,34 +117,20 @@ struct HibiStamp: View {
     }
 
     private func liveStamp(image: CGImage) -> some View {
-        return TimelineView(.animation(minimumInterval: nil, paused: animationPaused)) { context in
-            let wetness = currentWetness(at: context.date)
-            Image(decorative: image, scale: displayScale)
-                .resizable()
-                .frame(width: size, height: size)
-                .layerEffect(
-                    ShaderLibrary.stampEffect(
-                        .float2(Float(size), Float(size)),
-                        .float(Float(StampConfig.seed(from: date ?? Date()))),
-                        .float(Float(wetness)),
-                        .float2(Float(motion.tiltX), Float(motion.tiltY)),
-                        .color(PaperTints.sealInk)
-                    ),
-                    maxSampleOffset: CGSize(width: 2, height: 2)
-                )
-        }
-        .onAppear { motion.start() }
-        .onDisappear { motion.stop() }
-    }
-
-    private var animationPaused: Bool {
-        false
-    }
-
-    private func currentWetness(at now: Date) -> Double {
-        guard let start = animationStart else { return 0 }
-        let elapsed = now.timeIntervalSince(start)
-        return max(0, 1 - elapsed / Self.wetDryDuration)
+        return Image(decorative: image, scale: displayScale)
+            .resizable()
+            .frame(width: size, height: size)
+            .layerEffect(
+                ShaderLibrary.stampEffect(
+                    .float2(Float(size), Float(size)),
+                    .float(Float(StampConfig.seed(from: date ?? Date()))),
+                    .float2(Float(motion.tiltX), Float(motion.tiltY)),
+                    .color(PaperTints.sealInk)
+                ),
+                maxSampleOffset: CGSize(width: 2, height: 2)
+            )
+            .onAppear { motion.start() }
+            .onDisappear { motion.stop() }
     }
 
     private static let compositeSize: CGFloat = 186

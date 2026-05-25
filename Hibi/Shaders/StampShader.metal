@@ -57,7 +57,6 @@ float fbm(float2 p, int octaves, uint seedOffset) {
 // Arguments after (position, layer):
 //   float2 size       — view size in points
 //   float  seed       — deterministic seed for noise (cast from UInt64)
-//   float  wetness    — 1.0 = wet/glossy, 0.0 = dry/matte
 //   float2 tilt       — (tiltX, tiltY) from MotionStore, range ~-1..1
 //   half4  inkColor   — the vermillion ink color (premultiplied)
 
@@ -66,7 +65,6 @@ float fbm(float2 p, int octaves, uint seedOffset) {
     SwiftUI::Layer layer,
     float2 size,
     float  seed,
-    float  wetness,
     float2 tilt,
     half4  inkColor
 ) {
@@ -83,8 +81,7 @@ float fbm(float2 p, int octaves, uint seedOffset) {
     // distress baked in, so we only add low-frequency unevenness.
     uint seedU = uint(seed);
     float pressure = fbm(uv * 4.0, 3, seedU);
-    // Map from ~0..1 to ~0.7..1.0 — subtle variation, not erasure
-    pressure = 0.70 + pressure * 0.30;
+    pressure = 0.55 + pressure * 0.45;
     coverage *= pressure;
 
     // Threshold: below a certain coverage, treat as transparent
@@ -93,37 +90,24 @@ float fbm(float2 p, int octaves, uint seedOffset) {
     }
 
     // --- Ink color ---
-    half3 ink = inkColor.rgb;
-
-    // --- Wetness ---
-    // Wet ink is slightly darker and more saturated.
-    // As it dries (wetness → 0), it lightens to the base ink color.
-    half3 wetInk = ink * 0.82h; // darker when wet
-    half3 dryInk = ink;
-    half3 currentInk = mix(dryInk, wetInk, half(wetness));
+    half3 currentInk = inkColor.rgb * 0.70h;
 
     // --- Specular highlight (gyro-driven) ---
-    // A soft Gaussian hotspot that follows tilt. Simulates light
-    // catching the slightly raised ink surface.
     float2 specCenter = float2(0.5 + tilt.x * 0.3, 0.5 + tilt.y * 0.3);
     float d = distance(uv, specCenter);
-    float hotspot = exp(-d * d * 8.0);
-    // Specular is stronger when wet (fresh ink is glossy)
-    float specStrength = hotspot * (0.08 + 0.18 * wetness);
+    float hotspot = exp(-d * d * 6.0);
+    float specStrength = hotspot * 0.45;
     half3 specular = half3(1.0h) * half(specStrength);
 
     // --- Bump effect ---
-    // Sample neighbors to create a subtle emboss from the coverage map.
-    // This gives the ink a slightly raised appearance.
-    float right = float(layer.sample(position + float2(1.0, 0.0)).r) * pressure;
-    float below = float(layer.sample(position + float2(0.0, 1.0)).r) * pressure;
+    // Sample neighbors with a wider offset to smooth across text edges.
+    float right = float(layer.sample(position + float2(2.0, 0.0)).r) * pressure;
+    float below = float(layer.sample(position + float2(0.0, 2.0)).r) * pressure;
     float dx = right - coverage;
     float dy = below - coverage;
-    // Light direction influenced by tilt
     float2 lightDir = normalize(float2(-0.7 + tilt.x * 0.3, -0.7 + tilt.y * 0.3));
     float bumpLight = clamp(dx * lightDir.x + dy * lightDir.y, -1.0, 1.0);
-    // Subtle — just enough to read as relief, not 3D
-    half bumpAmount = half(bumpLight * 0.06 * (1.0 + wetness * 0.5));
+    half bumpAmount = half(bumpLight * 0.30);
 
     // --- Final composite ---
     half3 finalColor = currentInk + specular + bumpAmount;
