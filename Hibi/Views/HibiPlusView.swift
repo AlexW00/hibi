@@ -61,7 +61,15 @@ struct HibiStamp: View {
         }
         .frame(width: size, height: size)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(purchased ? Text("Hibi Plus seal") : Text("Awaiting your seal"))
+        .accessibilityLabel(purchased ? accessibilityDateLabel : Text("Awaiting your seal"))
+    }
+
+    private var accessibilityDateLabel: Text {
+        if let date {
+            let formatted = date.formatted(.dateTime.year().month().day())
+            return Text("Hibi Plus seal, dated \(formatted)")
+        }
+        return Text("Hibi Plus seal")
     }
 
     private func runStampIn() {

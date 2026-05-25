@@ -9870,6 +9870,17 @@
         }
       }
     },
+    "Hibi Plus seal, dated %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi Plus seal, dated %@"
+          }
+        }
+      }
+    },
     "Next page" : {
       "extractionState" : "manual",
       "localizations" : {
