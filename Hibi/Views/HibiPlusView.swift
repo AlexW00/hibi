@@ -19,6 +19,7 @@ private enum HPLayout {
 private let earlyAccessEndDate: Date = {
     var c = DateComponents(); c.year = 2026; c.month = 6; c.day = 30
     var cal = Calendar(identifier: .gregorian)
+    cal.timeZone = TimeZone(identifier: "Europe/Berlin") ?? cal.timeZone
     return cal.date(from: c) ?? Date()
 }()
 
@@ -136,7 +137,7 @@ private struct AppIconTile: View {
             .fill(PaperTints.card1)
             .overlay {
                 RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
-                    .strokeBorder(Color.black.opacity(0.10), lineWidth: 0.5)
+                    .strokeBorder(Color.primary.opacity(0.12), lineWidth: 0.5)
             }
             .overlay(alignment: .top) {
                 HStack {
@@ -144,14 +145,14 @@ private struct AppIconTile: View {
                     Spacer()
                     Circle().frame(width: 3, height: 3)
                 }
-                .foregroundStyle(.black.opacity(0.35))
+                .foregroundStyle(.primary.opacity(0.35))
                 .padding(.horizontal, 6)
                 .padding(.top, 4)
             }
             .overlay {
                 Text(verbatim: "26")
                     .font(.custom(AppFont.serifItalic, size: size * 0.58))
-                    .foregroundStyle(.black)
+                    .foregroundStyle(.primary)
             }
             .frame(width: size, height: size)
             .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.10), radius: 4, y: 2)
@@ -245,6 +246,7 @@ struct EarlyAccessTile: View {
 
     private var daysLeft: Int {
         var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "Europe/Berlin") ?? cal.timeZone
         let start = cal.startOfDay(for: Date())
         let end = cal.startOfDay(for: earlyAccessEndDate)
         return max(0, cal.dateComponents([.day], from: start, to: end).day ?? 0)
@@ -268,7 +270,7 @@ struct EarlyAccessTile: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 9)
             .overlay(alignment: .bottom) {
-                Rectangle().frame(height: 0.5).foregroundStyle(Color.black.opacity(0.08))
+                Rectangle().frame(height: 0.5).foregroundStyle(Color.primary.opacity(0.10))
             }
 
             HStack(spacing: 10) {
@@ -284,11 +286,11 @@ struct EarlyAccessTile: View {
             }
             .padding(12)
         }
-        .background(Color.black.opacity(0.025))
+        .background(Color.primary.opacity(0.04))
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(Color.black.opacity(0.08), lineWidth: 0.5)
+                .strokeBorder(Color.primary.opacity(0.10), lineWidth: 0.5)
         }
         .onAppear {
             guard !reduceMotion else { return }
@@ -483,11 +485,11 @@ private struct FeatureCardBody: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(10)
-        .background(Color.white.opacity(0.5))
+        .background(Color.primary.opacity(0.04))
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(Color.black.opacity(0.08), lineWidth: 0.5)
+                .strokeBorder(Color.primary.opacity(0.10), lineWidth: 0.5)
         }
     }
 }
@@ -608,7 +610,7 @@ struct HibiPlusView: View {
         ZStack {
             shape.fill(isFront ? PaperTints.card1 : PaperTints.card2)
             if !isFront {
-                shape.strokeBorder(Color.black.opacity(0.08), lineWidth: 1)
+                shape.strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
             }
             // Body only on the visually-front card.
             if isFront {
