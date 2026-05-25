@@ -96,6 +96,7 @@ enum AppFont {
     /// Noto CJK ships no italic; callers that want italic in a CJK locale get
     /// synthesized skew via `Font.italic()`.
     static let serifJP = "NotoSerifJP-Regular"
+    static let serifJPBlack = "NotoSerifJP-Black"
 
     /// True when the user's preferred UI language resolves to a CJK language.
     /// Read from `Locale.preferredLanguages` (what the app actually renders
@@ -122,6 +123,7 @@ enum AppFont {
             ("InstrumentSerif-Regular", "ttf"),
             ("InstrumentSerif-Italic", "ttf"),
             ("NotoSerifJP-Regular", "otf"),
+            ("NotoSerifJP-Black", "otf"),
         ]
         for font in fonts {
             guard let url = Bundle.main.url(forResource: font.name, withExtension: font.ext) else {

@@ -60,6 +60,7 @@
 			membershipExceptions = (
 				"Fonts/InstrumentSerif-Italic.ttf",
 				"Fonts/InstrumentSerif-Regular.ttf",
+				"Fonts/NotoSerifJP-Black.otf",
 				"Fonts/NotoSerifJP-Regular.otf",
 				Localizable.xcstrings,
 				Models/AppGroup.swift,
