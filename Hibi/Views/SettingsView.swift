@@ -120,6 +120,15 @@ struct SettingsView: View {
             }
             #endif
             }
+            .overlay(alignment: .top) {
+                LinearGradient(
+                    colors: [Color(.systemGroupedBackground),
+                             Color(.systemGroupedBackground).opacity(0)],
+                    startPoint: .top, endPoint: .bottom
+                )
+                .frame(height: 24)
+                .allowsHitTesting(false)
+            }
         }
         .navigationTitle(Text(verbatim: "Hibi"))
         .noteletSheet(
