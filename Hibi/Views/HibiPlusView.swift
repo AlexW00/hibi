@@ -681,11 +681,39 @@ struct HibiPlusView: View {
         }
     }
 
-    // MARK: purchase (finished in a later task)
-
+    /// CTA tapped: success morph has already started (PlusCTA set ctaSuccess).
+    /// After a beat, set Plus state, flip to the stamp card, and stamp the seal.
     private func purchase() {
-        isPlus = true
-        purchaseDate = Date()
+        // 1) brief success dwell so the checkmark reads
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+            isPlus = true
+            purchaseDate = Date()
+
+            // 2) flip to the stamp card (collapsed) using the swipe animation
+            //    so the motion matches manual navigation. Stamp card is index 0.
+            if frontIndex != 0 {
+                // animate a downward flip back to card 0
+                swipeDir = -1
+                isAnimating = true
+                withAnimation(.easeIn(duration: 0.28)) { dragY = HPLayout.offScreen }
+                withAnimation(.easeOut(duration: 0.28)) { cardShift = 1 }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.30) {
+                    var t = Transaction(); t.disablesAnimations = true
+                    withTransaction(t) {
+                        frontIndex = 0
+                        dragY = 0; cardShift = 0; isAnimating = false
+                        expanded[1] = false   // reset feature card to collapsed
+                    }
+                    // 3) place the seal
+                    stampToken &+= 1
+                    // reset CTA morph for correctness (card is now hidden)
+                    ctaSuccess = false
+                }
+            } else {
+                stampToken &+= 1
+                ctaSuccess = false
+            }
+        }
     }
 
     private func lerp(_ a: CGFloat, _ b: CGFloat, _ t: CGFloat) -> CGFloat { a + (b - a) * t }
