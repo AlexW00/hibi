@@ -97,28 +97,30 @@ float worley(float2 p, uint seedOffset) {
     float2 uv = position / size;
 
     // --- Ink-transfer imperfections ---
+    // Smooth fBm controls WHERE ink is present (broad pressure).
+    // Fine-grain hash creates the JAGGED dropout texture (like paper fiber).
     uint seedU = uint(seed);
 
-    // 1. Pressure field — broad ink-density variation.
-    float pressure = fbm(uv * 3.5, 3, seedU);
-    pressure = smoothstep(0.0, 1.0, pressure);
-    pressure = 0.15 + pressure * 0.85;
+    // Broad pressure field — smooth, determines ink density regions.
+    float broad = fbm(uv * 2.5, 3, seedU);
 
-    // 2. Worley bald spots — discrete missing patches.
-    float2 warpedUV = uv + float2(
-        fbm(uv * 5.0, 2, seedU + 300u) * 0.08,
-        fbm(uv * 5.0, 2, seedU + 400u) * 0.08
-    );
-    float w = worley(warpedUV * 1.0, seedU + 100u);
-    w += fbm(uv * 10.0, 2, seedU + 500u) * 0.10;
-    float bald = smoothstep(0.18, 0.23, w);
+    // Ink strength: pressure + local coverage → S-curve for sharp falloff.
+    // Solid well-inked areas → ~1.0 (almost all grain survives).
+    // Low pressure or thin features → ~0.0 (most grain drops out, jagged edge).
+    float inkStrength = smoothstep(0.15, 0.55, broad) * 0.7 + coverage * 0.3;
+    inkStrength = smoothstep(0.20, 0.70, inkStrength);
 
-    // 3. Coverage-aware edge erosion.
-    float erosionNoise = fbm(uv * 6.0, 2, seedU + 200u);
-    float erosionThreshold = 0.15 + erosionNoise * 0.45;
-    float edgeSurvival = smoothstep(erosionThreshold - 0.05, erosionThreshold + 0.05, coverage);
+    // Fine-grain hash — ~150 cells across stamp, each cell ~4px at 3x.
+    // Small enough that grid is invisible; creates grain-like jagged texture.
+    float2 grainCell = floor(uv * 150.0);
+    float grain = hash01(uint3(uint(grainCell.x), uint(grainCell.y), seedU + 100u));
 
-    coverage *= pressure * bald * edgeSurvival;
+    // Binary dropout: grain must exceed threshold to survive.
+    float inkSurvival = step(1.0 - inkStrength, grain);
+
+    coverage *= inkSurvival;
+
+    float pressure = 0.4 + broad * 0.7;
 
     if (coverage < 0.01) {
         return half4(0.0h);
@@ -128,24 +130,25 @@ float worley(float2 p, uint seedOffset) {
     half3 currentInk = inkColor.rgb * 0.82h;
 
     // --- Specular highlight (gyro-driven) ---
-    float2 specCenter = float2(0.5 + tilt.x * 0.3, 0.5 + tilt.y * 0.3);
+    float2 specCenter = float2(0.5 + tilt.x * 0.5, 0.5 + tilt.y * 0.5);
     float d = distance(uv, specCenter);
-    float hotspot = exp(-d * d * 6.0);
-    float specStrength = hotspot * 0.22;
+    float hotspot = exp(-d * d * 8.0);
+    float specStrength = hotspot * 0.45;
     half3 specular = inkColor.rgb * half(specStrength);
 
     // --- Bump effect ---
-    // Sample neighbors with a wider offset to smooth across text edges.
+    // Use raw coverage for both sides so dropout doesn't break the gradient.
+    float rawCov = float(raw.r) * pressure;
     float right = float(layer.sample(position + float2(2.0, 0.0)).r) * pressure;
     float below = float(layer.sample(position + float2(0.0, 2.0)).r) * pressure;
-    float dx = right - coverage;
-    float dy = below - coverage;
-    float2 lightDir = normalize(float2(-0.7 + tilt.x * 0.3, -0.7 + tilt.y * 0.3));
+    float dx = right - rawCov;
+    float dy = below - rawCov;
+    float2 lightDir = normalize(float2(-0.7 + tilt.x * 0.6, -0.7 + tilt.y * 0.6));
     float bumpLight = clamp(dx * lightDir.x + dy * lightDir.y, -1.0, 1.0);
     half bump = half(bumpLight);
     half positiveBump = max(bump, 0.0h);
     half negativeBump = min(bump, 0.0h);
-    half3 bumpColor = inkColor.rgb * (positiveBump * 0.34h) + half3(negativeBump * 0.26h);
+    half3 bumpColor = inkColor.rgb * (positiveBump * 0.55h) + half3(negativeBump * 0.45h);
 
     // --- Final composite ---
     half3 finalColor = clamp(currentInk + specular + bumpColor, half3(0.0h), half3(1.0h));
