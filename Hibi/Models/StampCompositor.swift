@@ -50,9 +50,8 @@ enum StampCompositor {
     }
 
     private static func loadMask(stampId: String) -> CGImage? {
-        // Try folder reference first, then flat bundle
         let url = Bundle.main.url(forResource: stampId, withExtension: "png", subdirectory: "StampMasks")
-                ?? Bundle.main.url(forResource: "StampMasks/\(stampId)", withExtension: "png")
+                ?? Bundle.main.url(forResource: stampId, withExtension: "png")
         guard let url, let provider = CGDataProvider(url: url as CFURL) else { return nil }
         return CGImage(
             pngDataProviderSource: provider,
