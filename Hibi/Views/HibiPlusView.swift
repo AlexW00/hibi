@@ -6,7 +6,7 @@ private enum HPLayout {
     static let collapsed = CGSize(width: 280, height: 280)
     static let stampExpandedHeight: CGFloat = 420
     static let featureExpandedHeight: CGFloat = 540
-    static let featureExpandedHeightPurchased: CGFloat = 450
+    static let featureExpandedHeightPurchased: CGFloat = 480
     static let peek: CGFloat = 9
     static let side: CGFloat = 14
     static let corner: CGFloat = 18
@@ -670,7 +670,18 @@ private struct FeatureCardBody: View {
                 .frame(height: expanded ? nil : 0)
                 .opacity(chromeFade)
                 .clipped()
-                .padding(.bottom, expanded ? 14 : 0)
+                .padding(.bottom, expanded ? (purchased ? 10 : 14) : 0)
+
+            if purchased {
+                Text("Thank you for supporting Hibi.")
+                    .font(.appSerif(size: 11.5, italic: true, simple: useSimpleFont))
+                    .foregroundStyle(.tertiary)
+                    .multilineTextAlignment(.center)
+                    .frame(height: expanded ? nil : 0)
+                    .opacity(chromeFade)
+                    .clipped()
+                    .padding(.bottom, expanded ? 30 : 0)
+            }
 
             if !expanded { Spacer(minLength: 0) }
 

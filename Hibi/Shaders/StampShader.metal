@@ -49,6 +49,27 @@ float fbm(float2 p, int octaves, uint seedOffset) {
     return value;
 }
 
+float worley(float2 p, uint seedOffset) {
+    float2 i = floor(p);
+    float2 f = fract(p);
+    float minDist = 1.0;
+
+    for (int y = -1; y <= 1; ++y) {
+        for (int x = -1; x <= 1; ++x) {
+            float2 neighbor = float2(float(x), float(y));
+            uint3 cellSeed = uint3(uint(i.x + float(x)),
+                                   uint(i.y + float(y)),
+                                   seedOffset);
+            uint3 h = pcg3d(cellSeed);
+            float2 point = float2(float(h.x), float(h.y)) / float(0xFFFFFFFFu);
+            float2 diff = neighbor + point - f;
+            float d = dot(diff, diff);
+            minDist = min(minDist, d);
+        }
+    }
+    return sqrt(minDist);
+}
+
 // --- Stamp shader ---
 //
 // Applied as a layerEffect to the pre-composited mask+text image.
@@ -75,28 +96,37 @@ float fbm(float2 p, int octaves, uint seedOffset) {
     // UV in 0..1
     float2 uv = position / size;
 
-    // --- Pressure noise ---
-    // Low-frequency fBm driven by seed. Modulates ink density to simulate
-    // uneven rubber-stamp pressure. The masks already have high-frequency
-    // distress baked in, so we only add low-frequency unevenness.
+    // --- Ink-transfer imperfections ---
     uint seedU = uint(seed);
-    float pressure = fbm(uv * 4.0, 3, seedU);
-    pressure = 0.55 + pressure * 0.45;
-    coverage *= pressure;
 
-    // Threshold: below a certain coverage, treat as transparent
+    // 1. Pressure field — broad ink-density variation.
+    float pressure = fbm(uv * 3.5, 3, seedU);
+    pressure = smoothstep(0.0, 1.0, pressure);
+    pressure = 0.15 + pressure * 0.85;
+
+    // 2. Worley bald spots — discrete missing patches.
+    float w = worley(uv * 1.0, seedU + 100u);
+    float bald = smoothstep(0.12, 0.45, w);
+
+    // 3. Coverage-aware edge erosion.
+    float erosionNoise = fbm(uv * 6.0, 2, seedU + 200u);
+    float erosionThreshold = 0.15 + erosionNoise * 0.45;
+    float edgeSurvival = smoothstep(erosionThreshold - 0.05, erosionThreshold + 0.05, coverage);
+
+    coverage *= pressure * bald * edgeSurvival;
+
     if (coverage < 0.01) {
         return half4(0.0h);
     }
 
     // --- Ink color ---
-    half3 currentInk = inkColor.rgb * 0.86h;
+    half3 currentInk = inkColor.rgb * 0.82h;
 
     // --- Specular highlight (gyro-driven) ---
     float2 specCenter = float2(0.5 + tilt.x * 0.3, 0.5 + tilt.y * 0.3);
     float d = distance(uv, specCenter);
     float hotspot = exp(-d * d * 6.0);
-    float specStrength = hotspot * 0.10;
+    float specStrength = hotspot * 0.22;
     half3 specular = inkColor.rgb * half(specStrength);
 
     // --- Bump effect ---
@@ -107,10 +137,13 @@ float fbm(float2 p, int octaves, uint seedOffset) {
     float dy = below - coverage;
     float2 lightDir = normalize(float2(-0.7 + tilt.x * 0.3, -0.7 + tilt.y * 0.3));
     float bumpLight = clamp(dx * lightDir.x + dy * lightDir.y, -1.0, 1.0);
-    half bumpAmount = half(bumpLight * 0.18);
+    half bump = half(bumpLight);
+    half positiveBump = max(bump, 0.0h);
+    half negativeBump = min(bump, 0.0h);
+    half3 bumpColor = inkColor.rgb * (positiveBump * 0.34h) + half3(negativeBump * 0.26h);
 
     // --- Final composite ---
-    half3 finalColor = clamp(currentInk + specular + bumpAmount, half3(0.0h), half3(1.0h));
+    half3 finalColor = clamp(currentInk + specular + bumpColor, half3(0.0h), half3(1.0h));
     half  alpha = half(coverage);
 
     // Premultiply
