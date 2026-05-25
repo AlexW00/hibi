@@ -97,26 +97,26 @@ float worley(float2 p, uint seedOffset) {
     float2 uv = position / size;
 
     // --- Ink-transfer imperfections ---
-    // Smooth fBm controls WHERE ink is present (broad pressure).
-    // Fine-grain hash creates the JAGGED dropout texture (like paper fiber).
+    // fBm shapes WHERE ink drops out (organic contours).
+    // Fine hash perturbs the threshold so edges are grainy, not smooth.
     uint seedU = uint(seed);
 
-    // Broad pressure field — smooth, determines ink density regions.
+    // Broad pressure — large-scale ink density.
     float broad = fbm(uv * 2.5, 3, seedU);
+    float pressureMap = smoothstep(0.05, 0.40, broad);
 
-    // Ink strength: pressure + local coverage → S-curve for sharp falloff.
-    // Solid well-inked areas → ~1.0 (almost all grain survives).
-    // Low pressure or thin features → ~0.0 (most grain drops out, jagged edge).
-    float inkStrength = smoothstep(0.15, 0.55, broad) * 0.7 + coverage * 0.3;
-    inkStrength = smoothstep(0.20, 0.70, inkStrength);
+    // Ink strength: pressure + coverage.
+    float inkStrength = pressureMap * 0.65 + coverage * 0.35;
 
-    // Fine-grain hash — ~150 cells across stamp, each cell ~4px at 3x.
-    // Small enough that grid is invisible; creates grain-like jagged texture.
-    float2 grainCell = floor(uv * 150.0);
-    float grain = hash01(uint3(uint(grainCell.x), uint(grainCell.y), seedU + 100u));
+    // Medium-scale organic wobble — makes boundary shape irregular.
+    float wobble = (fbm(uv * 15.0, 2, seedU + 100u) - 0.4) * 0.18;
 
-    // Binary dropout: grain must exceed threshold to survive.
-    float inkSurvival = step(1.0 - inkStrength, grain);
+    // Fine grain — near-pixel hash (~2px cells) roughens the boundary edge.
+    // Only affects pixels near the threshold; solid/empty areas are unchanged.
+    float2 grainCell = floor(uv * 300.0);
+    float grain = (hash01(uint3(uint(grainCell.x), uint(grainCell.y), seedU + 200u)) - 0.5) * 0.10;
+
+    float inkSurvival = step(0.45, inkStrength + wobble + grain);
 
     coverage *= inkSurvival;
 
