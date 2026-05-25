@@ -18,6 +18,10 @@ Not a backend-backed product. No account, no sync beyond the system calendar dat
 - **Bundle id:** `com.weichart.hibi`. Entitlements: WeatherKit only.
 - **No tests target.** No package dependencies. Pure Xcode project (`Hibi.xcodeproj`).
 
+## Verification limits
+
+This laptop is resource-constrained. Agents may build the project, but must not boot, run, install to, inspect, or otherwise use an iOS Simulator. Do not call simulator-oriented tools or commands such as `build_run_sim`, `boot_sim`, `open_sim`, `xcrun simctl`, or Xcode "Run" workflows. Prefer build-only verification, e.g. `xcodebuild ... -destination 'generic/platform=iOS Simulator' build`, and clearly state when runtime or visual verification is left to the user.
+
 ## Architecture
 
 Two `@Observable` `@MainActor` stores own all non-view state. Views are passed them via `.environment(...)` from `ContentView`.
@@ -87,3 +91,5 @@ Most work here falls into:
 - **EventKit / WeatherKit / CoreLocation integration** → `axiom-integration` (+ `axiom-location` for CL specifics)
 - **Concurrency questions (nonisolated delegates, Task hops)** → `axiom-concurrency`
 - **Build failures** → `axiom-build` before touching code
+
+## Imported Claude Cowork project instructions
