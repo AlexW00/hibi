@@ -108,13 +108,12 @@ struct HibiStamp: View {
     }
 
     private func staticStamp(image: CGImage) -> some View {
-        let s = Self.compositeSize
         return Image(decorative: image, scale: displayScale)
             .resizable()
             .frame(width: size, height: size)
             .layerEffect(
                 ShaderLibrary.stampEffect(
-                    .float2(Float(s), Float(s)),
+                    .float2(Float(size), Float(size)),
                     .float(Float(StampConfig.seed(from: date ?? Date()))),
                     .float(0),
                     .float2(0, 0),
@@ -125,7 +124,6 @@ struct HibiStamp: View {
     }
 
     private func liveStamp(image: CGImage) -> some View {
-        let s = Self.compositeSize
         return TimelineView(.animation(minimumInterval: nil, paused: animationPaused)) { context in
             let wetness = currentWetness(at: context.date)
             Image(decorative: image, scale: displayScale)
@@ -133,7 +131,7 @@ struct HibiStamp: View {
                 .frame(width: size, height: size)
                 .layerEffect(
                     ShaderLibrary.stampEffect(
-                        .float2(Float(s), Float(s)),
+                        .float2(Float(size), Float(size)),
                         .float(Float(StampConfig.seed(from: date ?? Date()))),
                         .float(Float(wetness)),
                         .float2(Float(motion.tiltX), Float(motion.tiltY)),
