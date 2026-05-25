@@ -489,3 +489,204 @@ private struct FeatureCardBody: View {
         }
     }
 }
+
+// MARK: - The stack
+
+struct HibiPlusView: View {
+    // 0 = stamp card, 1 = feature card
+    @State private var frontIndex = 0
+    @State private var expanded: [Bool] = [false, false]
+    @State private var isPlus = false
+    @State private var purchaseDate: Date?
+
+    // animation state
+    @State private var dragY: CGFloat = 0
+    @State private var isAnimating = false
+    @State private var cardShift: CGFloat = 0          // 0…1, back rises to front
+    @State private var swipeDir = 1                    // +1 drag up, -1 drag down
+    @State private var commitCount = 0                 // haptic
+    @State private var ctaSuccess = false
+    @State private var stampToken = 0
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
+
+    private var backIndex: Int { 1 - frontIndex }
+
+    private func expandedHeight(for index: Int) -> CGFloat {
+        if index == 0 { return HPLayout.stampExpandedHeight }
+        return isPlus ? HPLayout.featureExpandedHeightPurchased : HPLayout.featureExpandedHeight
+    }
+    private func cardSize(_ index: Int, containerWidth: CGFloat) -> CGSize {
+        expanded[index]
+            ? CGSize(width: containerWidth, height: expandedHeight(for: index))
+            : HPLayout.collapsed
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let frontSize = cardSize(frontIndex, containerWidth: w)
+            VStack(spacing: 0) {
+                stack(containerWidth: w, frontSize: frontSize)
+                    .frame(width: frontSize.width, height: frontSize.height)
+                    .frame(maxWidth: .infinity)   // center the (possibly narrower) stack
+                    .sensoryFeedback(.impact(weight: .medium), trigger: commitCount)
+                hint.padding(.top, 14)
+            }
+            .frame(width: w)
+            .animation(HPLayout.collapseSpring, value: expanded)
+            .animation(HPLayout.collapseSpring, value: frontIndex)
+        }
+        .frame(height: totalHeight)
+        .animation(HPLayout.collapseSpring, value: expanded)
+        .animation(HPLayout.collapseSpring, value: isPlus)
+    }
+
+    /// Drives the Form row height. Front card height + hint + spacing.
+    private var totalHeight: CGFloat {
+        let h = expanded[frontIndex] ? expandedHeight(for: frontIndex) : HPLayout.collapsed.height
+        return h + 14 + 18 // hint top padding + hint line
+    }
+
+    @ViewBuilder
+    private func stack(containerWidth w: CGFloat, frontSize: CGSize) -> some View {
+        ZStack {
+            // BACK card — the other card, peeking. During a swipe it rises into
+            // the front slot (cardShift 0→1).
+            cardChrome(index: backIndex, isFront: false, containerWidth: w)
+                .frame(
+                    width: lerp(HPLayout.collapsed.width - 2 * HPLayout.side, frontSize.width, cardShift),
+                    height: lerp(HPLayout.collapsed.height, frontSize.height, cardShift)
+                )
+                .offset(y: lerp(HPLayout.peek, 0, cardShift))
+                .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18 * Double(cardShift)),
+                        radius: 22, y: 18)
+                .zIndex(1)
+
+            // NEW-BACK placeholder — fades into the back slot during a swipe so
+            // the stack still has a second card after reset (the departing
+            // card's content).
+            if isAnimating {
+                cardChrome(index: frontIndex, isFront: false, containerWidth: w)
+                    .frame(width: HPLayout.collapsed.width - 2 * HPLayout.side,
+                           height: HPLayout.collapsed.height)
+                    .offset(y: HPLayout.peek)
+                    .opacity(Double(cardShift))
+                    .zIndex(0)
+            }
+
+            // FRONT card — draggable; slides off in the drag direction on commit.
+            cardChrome(index: frontIndex, isFront: true, containerWidth: w)
+                .frame(width: frontSize.width, height: frontSize.height)
+                .offset(y: dragY)
+                .rotationEffect(.degrees(Double(dragY * 0.02)),
+                                anchor: dragY > 0 ? .top : .bottom)
+                .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18),
+                        radius: 22, y: 18)
+                .opacity(1 - min(Double(abs(dragY)) / 400, 0.6))
+                .zIndex(2)
+                .highPriorityGesture(dragGesture)
+                .onTapGesture { toggleExpand() }
+                .accessibilityElement(children: .contain)
+                .accessibilityActions {
+                    Button("Next page") { commitSwipe(direction: 1) }
+                    Button("Previous page") { commitSwipe(direction: -1) }
+                    Button(expanded[frontIndex] ? "Collapse" : "Expand") { toggleExpand() }
+                }
+        }
+    }
+
+    /// One card with its paper chrome (fill, border, perforation if front).
+    @ViewBuilder
+    private func cardChrome(index: Int, isFront: Bool, containerWidth: CGFloat) -> some View {
+        let shape = RoundedRectangle(cornerRadius: HPLayout.corner, style: .continuous)
+        ZStack {
+            shape.fill(isFront ? PaperTints.card1 : PaperTints.card2)
+            if !isFront {
+                shape.strokeBorder(Color.black.opacity(0.08), lineWidth: 1)
+            }
+            // Body only on the visually-front card.
+            if isFront {
+                VStack(spacing: 0) {
+                    cardBody(index: index)
+                    PerforationEdge().padding(.bottom, 6)
+                }
+            }
+        }
+        .clipShape(shape)
+    }
+
+    @ViewBuilder
+    private func cardBody(index: Int) -> some View {
+        if index == 0 {
+            StampCardBody(purchased: isPlus, date: purchaseDate,
+                          expanded: expanded[0], stampToken: stampToken)
+        } else {
+            FeatureCardBody(purchased: isPlus, expanded: expanded[1],
+                            ctaSuccess: $ctaSuccess, onPurchase: purchase)
+        }
+    }
+
+    private var hint: some View {
+        Text("Pull to tear · ↑ Next · ↓ Prev")
+            .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
+            .foregroundStyle(.tertiary)
+            .frame(maxWidth: .infinity)
+    }
+
+    // MARK: gestures
+
+    private var dragGesture: some Gesture {
+        DragGesture(minimumDistance: 6)
+            .onChanged { g in
+                guard !isAnimating else { return }
+                dragY = g.translation.height
+                if abs(g.translation.height) > 2 { swipeDir = g.translation.height < 0 ? 1 : -1 }
+            }
+            .onEnded { _ in
+                if abs(dragY) > HPLayout.tearThreshold {
+                    commitSwipe(direction: dragY < 0 ? 1 : -1)
+                } else {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { dragY = 0 }
+                }
+            }
+    }
+
+    private func toggleExpand() {
+        guard !isAnimating else { return }
+        withAnimation(HPLayout.collapseSpring) { expanded[frontIndex].toggle() }
+    }
+
+    /// Flip to the other card, sliding the front off in `direction`
+    /// (+1 = up/off-top, -1 = down/off-bottom). Symmetric + infinite.
+    private func commitSwipe(direction: Int) {
+        guard !isAnimating else { return }
+        swipeDir = direction
+        commitCount &+= 1
+        isAnimating = true
+        let dest = direction == 1 ? -HPLayout.offScreen : HPLayout.offScreen
+
+        withAnimation(.easeIn(duration: 0.28)) { dragY = dest }
+        withAnimation(.easeOut(duration: 0.28)) { cardShift = 1 }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.30) {
+            var t = Transaction(); t.disablesAnimations = true
+            withTransaction(t) {
+                frontIndex = backIndex
+                dragY = 0
+                cardShift = 0
+                isAnimating = false
+            }
+        }
+    }
+
+    // MARK: purchase (finished in a later task)
+
+    private func purchase() {
+        isPlus = true
+        purchaseDate = Date()
+    }
+
+    private func lerp(_ a: CGFloat, _ b: CGFloat, _ t: CGFloat) -> CGFloat { a + (b - a) * t }
+}
