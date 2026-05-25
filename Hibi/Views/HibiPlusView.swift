@@ -14,6 +14,7 @@ private enum HPLayout {
     static let offScreen: CGFloat = 700
     static let collapseSpring = Animation.spring(response: 0.38, dampingFraction: 0.86)
     static let hintHeight: CGFloat = 18
+    static let backBottomContentProtection: CGFloat = 56
 }
 
 private let earlyAccessEndDate: Date = {
@@ -822,7 +823,9 @@ struct HibiPlusView: View {
                     baseFill: PaperTints.card2,
                     overlayFill: PaperTints.card2, overlayOpacity: 0,
                     horizontalInset: side, bottomPeek: 0,
-                    shadowAmount: 0, chromeAmount: 0
+                    shadowAmount: 0, chromeAmount: 0,
+                    bottomContentProtection: HPLayout.backBottomContentProtection,
+                    bottomChromeAmount: 1
                 )
                 .opacity(Double(cardShift))
                 .zIndex(0)
@@ -838,7 +841,9 @@ struct HibiPlusView: View {
                 horizontalInset: lerp(side, 0, cardShift),
                 bottomPeek: lerp(0, peek, cardShift),
                 shadowAmount: Double(cardShift),
-                chromeAmount: Double(cardShift)
+                chromeAmount: Double(cardShift),
+                bottomContentProtection: lerp(HPLayout.backBottomContentProtection, 0, cardShift),
+                bottomChromeAmount: 1
             )
             .zIndex(1)
 
@@ -877,10 +882,13 @@ struct HibiPlusView: View {
         baseFill: Color,
         overlayFill: Color, overlayOpacity: CGFloat,
         horizontalInset: CGFloat, bottomPeek: CGFloat,
-        shadowAmount: Double, chromeAmount: Double
+        shadowAmount: Double, chromeAmount: Double,
+        bottomContentProtection: CGFloat = 0,
+        bottomChromeAmount: Double = 0
     ) -> some View {
         let shape = RoundedRectangle(cornerRadius: HPLayout.corner, style: .continuous)
         let edgeHighlight = 1 - chromeAmount
+        let bottomChromeOpacity = max(chromeAmount, bottomChromeAmount)
         let borderColor: Color = colorScheme == .dark
             ? .white.opacity(0.12) : .black.opacity(0.08)
 
@@ -894,12 +902,23 @@ struct HibiPlusView: View {
                 if chromeAmount > 0 { BindingHoles().opacity(chromeAmount) }
             }
             .overlay {
-                cardBody(index: index)
-                    .allowsHitTesting(chromeAmount >= 1)
+                GeometryReader { proxy in
+                    cardBody(index: index)
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                        .allowsHitTesting(chromeAmount >= 1)
+                        .mask(alignment: .top) {
+                            VStack(spacing: 0) {
+                                Rectangle()
+                                    .frame(height: max(0, proxy.size.height - bottomContentProtection))
+                                Spacer(minLength: 0)
+                            }
+                            .frame(width: proxy.size.width, height: proxy.size.height)
+                        }
+                    }
             }
             .overlay(alignment: .bottom) {
-                if chromeAmount > 0 {
-                    PerforationEdge().padding(.bottom, 6).opacity(chromeAmount)
+                if bottomChromeOpacity > 0 {
+                    PerforationEdge().padding(.bottom, 6).opacity(bottomChromeOpacity)
                 }
             }
             .clipShape(shape)
