@@ -13,12 +13,12 @@ private enum HPLayout {
     static let tearThreshold: CGFloat = 70
     static let offScreen: CGFloat = 700
     static let collapseSpring = Animation.spring(response: 0.38, dampingFraction: 0.86)
+    static let hintHeight: CGFloat = 18
 }
 
 private let earlyAccessEndDate: Date = {
     var c = DateComponents(); c.year = 2026; c.month = 6; c.day = 30
     var cal = Calendar(identifier: .gregorian)
-    cal.locale = Locale(identifier: "de_DE")
     return cal.date(from: c) ?? Date()
 }()
 
@@ -110,11 +110,15 @@ struct HibiStamp: View {
             }
     }
 
-    private static func format(_ date: Date?) -> String {
+    private static let sealFormatter: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "de_DE")
         f.dateFormat = "dd · MM · yyyy"
-        return f.string(from: date ?? Date())
+        return f
+    }()
+
+    private static func format(_ date: Date?) -> String {
+        sealFormatter.string(from: date ?? Date())
     }
 }
 
@@ -241,7 +245,6 @@ struct EarlyAccessTile: View {
 
     private var daysLeft: Int {
         var cal = Calendar(identifier: .gregorian)
-        cal.locale = Locale(identifier: "de_DE")
         let start = cal.startOfDay(for: Date())
         let end = cal.startOfDay(for: earlyAccessEndDate)
         return max(0, cal.dateComponents([.day], from: start, to: end).day ?? 0)
@@ -533,7 +536,6 @@ struct HibiPlusView: View {
                 hint.padding(.top, 14)
             }
             .frame(width: w)
-            .animation(HPLayout.collapseSpring, value: expanded)
             .animation(HPLayout.collapseSpring, value: frontIndex)
         }
         .frame(height: totalHeight)
@@ -544,18 +546,19 @@ struct HibiPlusView: View {
     /// Drives the Form row height. Front card height + hint + spacing.
     private var totalHeight: CGFloat {
         let h = expanded[frontIndex] ? expandedHeight(for: frontIndex) : HPLayout.collapsed.height
-        return h + 14 + 18 // hint top padding + hint line
+        return h + 14 + HPLayout.hintHeight // hint top padding + hint line
     }
 
     @ViewBuilder
     private func stack(containerWidth w: CGFloat, frontSize: CGSize) -> some View {
+        let backSize = cardSize(backIndex, containerWidth: w)
         ZStack {
             // BACK card — the other card, peeking. During a swipe it rises into
             // the front slot (cardShift 0→1).
             cardChrome(index: backIndex, isFront: false, containerWidth: w)
                 .frame(
-                    width: lerp(HPLayout.collapsed.width - 2 * HPLayout.side, frontSize.width, cardShift),
-                    height: lerp(HPLayout.collapsed.height, frontSize.height, cardShift)
+                    width: lerp(HPLayout.collapsed.width - 2 * HPLayout.side, backSize.width, cardShift),
+                    height: lerp(HPLayout.collapsed.height, backSize.height, cardShift)
                 )
                 .offset(y: lerp(HPLayout.peek, 0, cardShift))
                 .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18 * Double(cardShift)),
@@ -584,6 +587,7 @@ struct HibiPlusView: View {
                         radius: 22, y: 18)
                 .opacity(1 - min(Double(abs(dragY)) / 400, 0.6))
                 .zIndex(2)
+                // High priority so a vertical swipe wins over the enclosing Form's scroll. minimumDistance keeps button taps (CTA/restore) from being swallowed. Verify on device.
                 .highPriorityGesture(dragGesture)
                 .onTapGesture { toggleExpand() }
                 .accessibilityElement(children: .contain)
@@ -638,7 +642,7 @@ struct HibiPlusView: View {
     // MARK: gestures
 
     private var dragGesture: some Gesture {
-        DragGesture(minimumDistance: 6)
+        DragGesture(minimumDistance: 10)
             .onChanged { g in
                 guard !isAnimating else { return }
                 dragY = g.translation.height
@@ -709,6 +713,7 @@ struct HibiPlusView: View {
             } else {
                 stampToken &+= 1
                 ctaSuccess = false
+                expanded[1] = false
             }
         }
     }
