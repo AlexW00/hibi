@@ -351,3 +351,141 @@ struct RestorePurchasesLink: View {
         .buttonStyle(.plain)
     }
 }
+
+// MARK: - Shared header (collapsed + expanded feature card)
+
+private struct PlusHeader: View {
+    var deck: LocalizedStringKey?
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
+    var body: some View {
+        VStack(spacing: 4) {
+            Text(verbatim: "日々")
+                .font(.system(size: 9.5, weight: .semibold))
+                .tracking(2.0)
+                .foregroundStyle(.secondary)
+            Text("Hibi Plus")
+                .font(.appSerif(size: 36, italic: true, simple: useSimpleFont))
+                .foregroundStyle(.primary)
+            if let deck {
+                Text(deck)
+                    .font(.appSerif(size: 13.5, italic: true, simple: useSimpleFont))
+                    .foregroundStyle(.tertiary)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 2)
+            }
+        }
+    }
+}
+
+// Card 1 — stamp
+
+private struct StampCardBody: View {
+    let purchased: Bool
+    let date: Date?
+    let expanded: Bool
+    let stampToken: Int
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
+
+    var body: some View {
+        VStack(spacing: 18) {
+            HibiStamp(purchased: purchased, date: date,
+                      size: expanded ? 186 : 154, stampToken: stampToken)
+            if expanded {
+                Text(purchased
+                     ? "Thank you."
+                     : "Purchase Hibi Plus to receive your personalized seal.")
+                    .font(.appSerif(size: 15, italic: true, simple: useSimpleFont))
+                    .foregroundStyle(purchased ? .primary : .secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 240)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, 16)
+    }
+}
+
+// Card 2 — feature card
+
+private struct FeatureCardBody: View {
+    let purchased: Bool
+    let expanded: Bool
+    @Binding var ctaSuccess: Bool
+    let onPurchase: () -> Void
+    @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
+
+    var body: some View {
+        if expanded { expandedBody } else { collapsedBody }
+    }
+
+    private var collapsedBody: some View {
+        VStack(spacing: 14) {
+            PlusHeader().padding(.top, 14)
+            AppIconCarousel(size: 42).padding(.horizontal, -22)
+            Text("Tap to see what's inside.")
+                .font(.appSerif(size: 11.5, italic: true, simple: useSimpleFont))
+                .foregroundStyle(.tertiary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.vertical, 8)
+    }
+
+    private var expandedBody: some View {
+        VStack(spacing: 0) {
+            PlusHeader(deck: "Your support matters a lot.")
+
+            // hairline rule with center dot
+            HStack(spacing: 8) {
+                Rectangle().frame(height: 0.5).foregroundStyle(.quaternary)
+                Text(verbatim: "·").foregroundStyle(.tertiary)
+                Rectangle().frame(height: 0.5).foregroundStyle(.quaternary)
+            }
+            .frame(width: 180)
+            .padding(.top, 16).padding(.bottom, 12)
+
+            AppIconCarousel(size: 42).padding(.horizontal, -22).padding(.bottom, 14)
+
+            HStack(spacing: 12) {
+                perk(rule: "App icons", title: "Dress Hibi up.")
+                perk(rule: "Early access", title: "Try features first.")
+            }
+            .padding(.bottom, 12)
+
+            EarlyAccessTile().padding(.bottom, 14)
+
+            Spacer(minLength: 0)
+
+            if !purchased {
+                VStack(spacing: 8) {
+                    PlusCTA(showSuccess: $ctaSuccess, onPurchase: onPurchase)
+                    RestorePurchasesLink()
+                }
+                .padding(.bottom, 14)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, 22)
+        .padding(.top, 8)
+    }
+
+    private func perk(rule: LocalizedStringKey, title: LocalizedStringKey) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(rule)
+                .font(.system(size: 9, weight: .semibold))
+                .tracking(1.6)
+                .textCase(.uppercase)
+                .foregroundStyle(.tertiary)
+            Text(title)
+                .font(.appSerif(size: 16, italic: true, simple: useSimpleFont))
+                .foregroundStyle(.primary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(10)
+        .background(Color.white.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.black.opacity(0.08), lineWidth: 0.5)
+        }
+    }
+}
