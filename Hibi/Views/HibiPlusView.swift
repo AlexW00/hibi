@@ -202,6 +202,129 @@ struct AppIconCarousel: View {
     }
 }
 
+// MARK: - Perk tile visuals
+
+private struct MiniIconTile: View {
+    var size: CGFloat = 26
+    var background: Color
+    var foreground: Color
+    var glyph: String
+    var italic: Bool = true
+    var dotColor: Color = .primary
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
+            .fill(background)
+            .overlay {
+                RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.10), lineWidth: 0.5)
+            }
+            .overlay(alignment: .top) {
+                HStack {
+                    Circle().frame(width: 2, height: 2)
+                    Spacer()
+                    Circle().frame(width: 2, height: 2)
+                }
+                .foregroundStyle(dotColor.opacity(0.35))
+                .padding(.horizontal, size * 0.14)
+                .padding(.top, size * 0.10)
+            }
+            .overlay {
+                Text(verbatim: glyph)
+                    .font(.custom(italic ? AppFont.serifItalic : AppFont.serifRegular,
+                                  size: size * 0.58))
+                    .foregroundStyle(foreground)
+            }
+            .frame(width: size, height: size)
+    }
+}
+
+private struct IconFan: View {
+    @Environment(\.colorScheme) private var colorScheme
+    var body: some View {
+        ZStack {
+            MiniIconTile(
+                background: PaperTints.card1,
+                foreground: .primary,
+                glyph: "26",
+                dotColor: .primary
+            )
+            .rotationEffect(.degrees(-12))
+            .offset(x: -8, y: 1)
+
+            MiniIconTile(
+                background: Color(red: 0.04, green: 0.04, blue: 0.04),
+                foreground: Color(red: 0.984, green: 0.980, blue: 0.969),
+                glyph: "日",
+                italic: false,
+                dotColor: .white
+            )
+            .zIndex(1)
+
+            MiniIconTile(
+                background: Color(red: 0.784, green: 0.212, blue: 0.165),
+                foreground: Color(red: 1, green: 0.98, blue: 0.94),
+                glyph: "26",
+                dotColor: Color(red: 1, green: 0.98, blue: 0.94)
+            )
+            .rotationEffect(.degrees(12))
+            .offset(x: 8, y: 1)
+        }
+        .frame(width: 44, height: 38)
+        .accessibilityHidden(true)
+    }
+}
+
+private struct MiniPaperCard: View {
+    var body: some View {
+        RoundedRectangle(cornerRadius: 5, style: .continuous)
+            .fill(PaperTints.card1)
+            .overlay {
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.12), lineWidth: 0.5)
+            }
+            .overlay(alignment: .top) {
+                HStack(spacing: 11) {
+                    Circle()
+                        .fill(PaperTints.bindingHole)
+                        .overlay {
+                            Circle().strokeBorder(Color.primary.opacity(0.18), lineWidth: 0.5)
+                        }
+                        .frame(width: 2.5, height: 2.5)
+                    Circle()
+                        .fill(PaperTints.bindingHole)
+                        .overlay {
+                            Circle().strokeBorder(Color.primary.opacity(0.18), lineWidth: 0.5)
+                        }
+                        .frame(width: 2.5, height: 2.5)
+                }
+                .padding(.top, 3)
+            }
+            .overlay {
+                Text(verbatim: "23")
+                    .font(.custom(AppFont.serifItalic, size: 19))
+                    .foregroundStyle(.primary)
+                    .offset(y: 2)
+            }
+            .overlay(alignment: .bottom) {
+                HStack(spacing: 2) {
+                    ForEach(0..<8, id: \.self) { _ in
+                        RoundedRectangle(cornerRadius: 0.5)
+                            .fill(Color.primary.opacity(0.22))
+                            .frame(height: 2)
+                    }
+                }
+                .padding(.horizontal, 4)
+                .padding(.bottom, 2)
+            }
+            .frame(width: 38, height: 38)
+            .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18),
+                    radius: 2, y: 1)
+            .rotationEffect(.degrees(-3))
+            .accessibilityHidden(true)
+    }
+}
+
 // MARK: - Early access tile (Widgets promo)
 
 private struct RadarPingIndicator: View {
@@ -483,8 +606,20 @@ private struct FeatureCardBody: View {
 
             // perks — expanded only
             HStack(spacing: 12) {
-                perk(rule: "App icons", title: "Dress Hibi up.")
-                perk(rule: "Early access", title: "Try features first.")
+                perkTile {
+                    IconFan()
+                } rule: {
+                    Text("App icons")
+                } title: {
+                    Text("Dress Hibi up.")
+                }
+                perkTile {
+                    MiniPaperCard()
+                } rule: {
+                    Text("Early access")
+                } title: {
+                    Text("Try features first.")
+                }
             }
             .frame(height: expanded ? nil : 0)
             .opacity(chromeFade)
@@ -524,19 +659,27 @@ private struct FeatureCardBody: View {
         .padding(.top, 8)
     }
 
-    private func perk(rule: LocalizedStringKey, title: LocalizedStringKey) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(rule)
-                .font(.system(size: 9, weight: .semibold))
-                .tracking(1.6)
-                .textCase(.uppercase)
-                .foregroundStyle(.tertiary)
-            Text(title)
-                .font(.appSerif(size: 16, italic: true, simple: useSimpleFont))
-                .foregroundStyle(.primary)
+    private func perkTile<V: View, R: View, T: View>(
+        @ViewBuilder visual: () -> V,
+        @ViewBuilder rule: () -> R,
+        @ViewBuilder title: () -> T
+    ) -> some View {
+        HStack(spacing: 10) {
+            visual()
+            VStack(alignment: .leading, spacing: 3) {
+                rule()
+                    .font(.system(size: 9, weight: .semibold))
+                    .tracking(1.6)
+                    .foregroundStyle(.tertiary)
+                title()
+                    .font(.appSerif(size: 14, italic: true, simple: useSimpleFont))
+                    .foregroundStyle(.primary)
+                    .lineSpacing(-1)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(10)
+        .padding(.horizontal, 11)
+        .padding(.vertical, 10)
         .background(Color.primary.opacity(0.04))
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .overlay {
