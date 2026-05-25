@@ -50,6 +50,11 @@ enum StampCompositor {
             imageSize: CGFloat(px)
         )
 
+        // Apply fine grain to all inked pixels.
+        // Mask PNGs already have some texture; this adds matching grain to
+        // the clean CoreText-rendered date text.
+        applyGrain(ctx: ctx, width: px, height: px)
+
         return ctx.makeImage()
     }
 
@@ -121,6 +126,30 @@ enum StampCompositor {
         }
 
         ctx.restoreGState()
+    }
+
+    private static func applyGrain(ctx: CGContext, width: Int, height: Int) {
+        guard let data = ctx.data else { return }
+        let buf = data.assumingMemoryBound(to: UInt8.self)
+        let rowBytes = ctx.bytesPerRow
+
+        for y in 0..<height {
+            for x in 0..<width {
+                let i = y * rowBytes + x * 4
+                let r = buf[i]
+                guard r > 10 else { continue }
+
+                var h = UInt32(truncatingIfNeeded: x &* 374761393 &+ y &* 668265263)
+                h = (h ^ (h >> 13)) &* 1274126177
+                h = h ^ (h >> 16)
+                let t = Float(h & 0xFFFF) / 65535.0
+
+                let v = UInt8(Float(r) * (0.82 + t * 0.18))
+                buf[i] = v
+                buf[i + 1] = v
+                buf[i + 2] = v
+            }
+        }
     }
 
     /// Draws a single line of text centered horizontally at (centerX, centerY),

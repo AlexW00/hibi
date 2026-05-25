@@ -74,10 +74,7 @@ enum StampConfig {
     /// represents integers exactly up to 2^24. We hash through a Wang hash
     /// and mask to 24 bits so the value round-trips through `.float()` losslessly.
     static func seed(from date: Date) -> UInt64 {
-        let comps = Calendar(identifier: .gregorian).dateComponents([.year, .month, .day], from: date)
-        let packed = UInt64(comps.year ?? 2026) * 10000
-                   + UInt64(comps.month ?? 1) * 100
-                   + UInt64(comps.day ?? 1)
+        let packed = UInt64(date.timeIntervalSince1970)
         // Wang hash — decorrelates sequential dates, keeps range ≤ 2^24
         var s = UInt32(packed & 0xFFFFFFFF)
         s = (s ^ 61) ^ (s >> 16)
