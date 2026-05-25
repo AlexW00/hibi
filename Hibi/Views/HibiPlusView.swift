@@ -78,7 +78,7 @@ struct HibiStamp: View {
                 .strokeBorder(PaperTints.sealInk.opacity(0.94), lineWidth: size * 0.045)
                 .padding(6)
             VStack(spacing: size * 0.04) {
-                Text("HIBI · PLUS")
+                Text(verbatim: "HIBI · PLUS")
                     .font(.system(size: size * 0.10, weight: .medium))
                     .tracking(size * 0.04)
                     .foregroundStyle(PaperTints.sealInk.opacity(0.92))
@@ -219,7 +219,7 @@ private struct WidgetIllustration: View {
                                 Circle().fill(PaperTints.bindingHole).frame(width: 4, height: 4)
                                 Circle().fill(PaperTints.bindingHole).frame(width: 4, height: 4)
                             }
-                            Text("Thursday")
+                            Text(verbatim: "Thursday")
                                 .font(.custom(AppFont.serifItalic, size: 8))
                                 .foregroundStyle(.secondary)
                             Text(verbatim: "23")
@@ -261,7 +261,7 @@ struct EarlyAccessTile: View {
                 Text("Currently in early access")
                     .font(.system(size: 10, weight: .semibold))
                 Spacer()
-                Text("\(daysLeft)d left")
+                Text("\(daysLeft) days left")
                     .font(.system(size: 10, weight: .medium, design: .monospaced))
                     .foregroundStyle(.tertiary)
             }
