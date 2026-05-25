@@ -1,0 +1,142 @@
+[
+  {
+    "stampId": "7",
+    "dateRegion": {
+      "center": [
+        0.501,
+        0.443
+      ],
+      "size": [
+        0.6,
+        0.08
+      ],
+      "rotation": 0,
+      "fontStyle": "noto-serif",
+      "fontWeight": 900,
+      "fontSize": 0.073,
+      "letterSpacing": 0,
+      "lineSpacing": 0,
+      "format": "{era}\n{year}年{month}月{day}日"
+    }
+  },
+  {
+    "stampId": "4",
+    "dateRegion": {
+      "center": [
+        0.499,
+        0.76
+      ],
+      "size": [
+        0.6,
+        0.08
+      ],
+      "rotation": 0,
+      "fontStyle": "noto-serif",
+      "fontWeight": 900,
+      "fontSize": 0.06,
+      "letterSpacing": 0,
+      "lineSpacing": 0,
+      "format": "{era}\n{year}年{month}月{day}日"
+    }
+  },
+  {
+    "stampId": "5",
+    "dateRegion": {
+      "center": [
+        0.486,
+        0.502
+      ],
+      "size": [
+        0.6,
+        0.08
+      ],
+      "rotation": 0,
+      "fontStyle": "noto-serif",
+      "fontWeight": 900,
+      "fontSize": 0.087,
+      "letterSpacing": 0,
+      "lineSpacing": 0,
+      "format": "{era}{year}年{month}月{day}日"
+    }
+  },
+  {
+    "stampId": "8",
+    "dateRegion": {
+      "center": [
+        0.498,
+        0.71
+      ],
+      "size": [
+        0.6,
+        0.08
+      ],
+      "rotation": 0,
+      "fontStyle": "noto-serif",
+      "fontWeight": 900,
+      "fontSize": 0.07,
+      "letterSpacing": 0,
+      "lineSpacing": 0,
+      "format": "{era}{year}年{month}月{day}日"
+    }
+  },
+  {
+    "stampId": "2",
+    "dateRegion": {
+      "center": [
+        0.5,
+        0.875
+      ],
+      "size": [
+        0.6,
+        0.08
+      ],
+      "rotation": 0,
+      "fontStyle": "noto-serif",
+      "fontWeight": 900,
+      "fontSize": 0.055,
+      "letterSpacing": 0,
+      "lineSpacing": 0,
+      "format": "{era}{year}年{month}月{day}日"
+    }
+  },
+  {
+    "stampId": "6",
+    "dateRegion": {
+      "center": [
+        0.49,
+        0.615
+      ],
+      "size": [
+        0.6,
+        0.08
+      ],
+      "rotation": 0,
+      "fontStyle": "noto-serif",
+      "fontWeight": 900,
+      "fontSize": 0.082,
+      "letterSpacing": 0,
+      "lineSpacing": 0,
+      "format": "{era}{year}年{month}月{day}日"
+    }
+  },
+  {
+    "stampId": "3",
+    "dateRegion": {
+      "center": [
+        0.494,
+        0.513
+      ],
+      "size": [
+        0.6,
+        0.08
+      ],
+      "rotation": 0,
+      "fontStyle": "noto-serif",
+      "fontWeight": 900,
+      "fontSize": 0.088,
+      "letterSpacing": 0,
+      "lineSpacing": 0,
+      "format": "{era}{year}年{month}月{day}日"
+    }
+  }
+]
