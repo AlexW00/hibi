@@ -35,9 +35,12 @@ enum StampCompositor {
         ctx.translateBy(x: 0, y: CGFloat(px))
         ctx.scaleBy(x: 1, y: -1)
 
-        // UIImage.draw is CTM-aware — renders right-side-up in our y-flipped context.
-        // CGContext.draw would flip the mask because it uses CG's bottom-left-origin convention.
+        // Push ctx onto UIKit's stack so UIImage.draw can find it.
+        // UIImage.draw is CTM-aware and renders right-side-up in our y-flipped context.
+        // Raw CGContext.draw would flip the mask (CG's bottom-left-origin convention).
+        UIGraphicsPushContext(ctx)
         UIImage(cgImage: maskImage).draw(in: CGRect(x: 0, y: 0, width: px, height: px))
+        UIGraphicsPopContext()
 
         // Draw date text on top
         drawDateText(
