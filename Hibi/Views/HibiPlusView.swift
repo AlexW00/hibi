@@ -48,8 +48,7 @@ struct HibiStamp: View {
                     .rotationEffect(.degrees(rotation))
                     .scaleEffect(appeared ? pressScale : 1.18)
                     .opacity(appeared ? 1 : 0)
-                    .onAppear { runStampIn() }
-                    .onChange(of: stampToken) { _, _ in
+                    .onChange(of: stampToken, initial: true) { _, _ in
                         appeared = false
                         runStampIn()
                     }
@@ -503,7 +502,6 @@ struct HibiPlusView: View {
     @State private var dragY: CGFloat = 0
     @State private var isAnimating = false
     @State private var cardShift: CGFloat = 0          // 0…1, back rises to front
-    @State private var swipeDir = 1                    // +1 drag up, -1 drag down
     @State private var commitCount = 0                 // haptic
     @State private var ctaSuccess = false
     @State private var stampToken = 0
@@ -589,6 +587,8 @@ struct HibiPlusView: View {
                 .highPriorityGesture(dragGesture)
                 .onTapGesture { toggleExpand() }
                 .accessibilityElement(children: .contain)
+                .accessibilityLabel(Text("Hibi Plus"))
+                .accessibilityValue(expanded[frontIndex] ? Text("Expanded") : Text("Collapsed"))
                 .accessibilityActions {
                     Button("Next page") { commitSwipe(direction: 1) }
                     Button("Previous page") { commitSwipe(direction: -1) }
@@ -642,7 +642,6 @@ struct HibiPlusView: View {
             .onChanged { g in
                 guard !isAnimating else { return }
                 dragY = g.translation.height
-                if abs(g.translation.height) > 2 { swipeDir = g.translation.height < 0 ? 1 : -1 }
             }
             .onEnded { _ in
                 if abs(dragY) > HPLayout.tearThreshold {
@@ -662,7 +661,6 @@ struct HibiPlusView: View {
     /// (+1 = up/off-top, -1 = down/off-bottom). Symmetric + infinite.
     private func commitSwipe(direction: Int) {
         guard !isAnimating else { return }
-        swipeDir = direction
         commitCount &+= 1
         isAnimating = true
         let dest = direction == 1 ? -HPLayout.offScreen : HPLayout.offScreen
@@ -693,7 +691,6 @@ struct HibiPlusView: View {
             //    so the motion matches manual navigation. Stamp card is index 0.
             if frontIndex != 0 {
                 // animate a downward flip back to card 0
-                swipeDir = -1
                 isAnimating = true
                 withAnimation(.easeIn(duration: 0.28)) { dragY = HPLayout.offScreen }
                 withAnimation(.easeOut(duration: 0.28)) { cardShift = 1 }
