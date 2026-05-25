@@ -35,8 +35,9 @@ enum StampCompositor {
         ctx.translateBy(x: 0, y: CGFloat(px))
         ctx.scaleBy(x: 1, y: -1)
 
-        // Draw mask, stretched to fill the square
-        ctx.draw(maskImage, in: CGRect(x: 0, y: 0, width: px, height: px))
+        // UIImage.draw is CTM-aware — renders right-side-up in our y-flipped context.
+        // CGContext.draw would flip the mask because it uses CG's bottom-left-origin convention.
+        UIImage(cgImage: maskImage).draw(in: CGRect(x: 0, y: 0, width: px, height: px))
 
         // Draw date text on top
         drawDateText(
