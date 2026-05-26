@@ -117,6 +117,12 @@ struct SettingsView: View {
                     Label("Demo Mode", systemImage: "wand.and.stars")
                 }
                 .tint(.black)
+
+                NavigationLink {
+                    StampNoiseDebugView()
+                } label: {
+                    Label("Stamp Noise", systemImage: "drop")
+                }
             }
             #endif
             }
@@ -192,6 +198,83 @@ private struct AppearanceSettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 }
+
+// MARK: - Stamp Noise (DEBUG)
+
+#if DEBUG
+private struct StampNoiseDebugView: View {
+    @AppStorage(StampNoise.valuesKey) private var raw = StampNoise.defaultRaw
+    @AppStorage(StampNoise.presetKey) private var presetID = StampNoise.defaultPreset.rawValue
+    @State private var values: [Float] = StampNoise.defaultValues
+
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    Spacer()
+                    HibiStamp(purchased: true, date: Date(), size: 200)
+                        .padding(.vertical, 8)
+                    Spacer()
+                }
+            }
+
+            Section("Preset") {
+                Picker("Preset", selection: $presetID) {
+                    ForEach(StampNoise.Preset.allCases) { preset in
+                        Text(preset.label).tag(preset.rawValue)
+                    }
+                    if presetID == StampNoise.customPresetID {
+                        Text(verbatim: "Custom").tag(StampNoise.customPresetID)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: presetID) { _, newValue in
+                    guard let preset = StampNoise.Preset(rawValue: newValue) else { return }
+                    values = preset.values
+                    persist()
+                }
+            }
+
+            Section("Parameters") {
+                ForEach(StampNoise.Param.allCases) { param in
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Text(verbatim: param.label)
+                                .font(.subheadline)
+                            Spacer()
+                            Text(verbatim: String(format: "%.2f", Double(values[param.rawValue])))
+                                .font(.subheadline.monospacedDigit())
+                                .foregroundStyle(.secondary)
+                        }
+                        Slider(value: binding(for: param),
+                               in: Double(param.range.lowerBound)...Double(param.range.upperBound))
+                            .tint(.black)
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+        }
+        .navigationTitle(Text(verbatim: "Stamp Noise"))
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { values = StampNoise.decode(raw) }
+    }
+
+    private func binding(for param: StampNoise.Param) -> Binding<Double> {
+        Binding(
+            get: { Double(values[param.rawValue]) },
+            set: { newValue in
+                values[param.rawValue] = Float(newValue)
+                presetID = StampNoise.customPresetID
+                persist()
+            }
+        )
+    }
+
+    private func persist() {
+        raw = StampNoise.encode(values)
+    }
+}
+#endif
 
 // MARK: - Units
 

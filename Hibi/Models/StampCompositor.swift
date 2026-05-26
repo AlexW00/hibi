@@ -50,10 +50,11 @@ enum StampCompositor {
             imageSize: CGFloat(px)
         )
 
-        // Apply fine grain to all inked pixels.
-        // Mask PNGs already have some texture; this adds matching grain to
-        // the clean CoreText-rendered date text.
-        applyGrain(ctx: ctx, width: px, height: px)
+        // Bake a signed distance field into the green channel. The stamp
+        // shader reads it to drive edge effects (rim darkening, bleed,
+        // boundary roughness). R stays raw coverage; the SDF is computed from
+        // the final mask+text coverage so text edges get stamped too.
+        bakeSDF(ctx: ctx, width: px, height: px)
 
         return ctx.makeImage()
     }
@@ -128,27 +129,94 @@ enum StampCompositor {
         ctx.restoreGState()
     }
 
-    private static func applyGrain(ctx: CGContext, width: Int, height: Int) {
+    /// Normalized half-range used to encode the SDF into the green channel.
+    /// MUST match `SDF_RANGE` in StampShader.metal. The shader decodes
+    /// `sd = (g - 0.5) * 2 * sdfRange` as a fraction of the image dimension.
+    static let sdfRange: Float = 0.06
+
+    /// Computes a signed distance field from the R-channel coverage and writes
+    /// it into the G channel (inside > 0.5, boundary = 0.5, outside < 0.5).
+    private static func bakeSDF(ctx: CGContext, width: Int, height: Int) {
         guard let data = ctx.data else { return }
         let buf = data.assumingMemoryBound(to: UInt8.self)
         let rowBytes = ctx.bytesPerRow
+        let n = width * height
 
+        var inside = [Bool](repeating: false, count: n)
         for y in 0..<height {
             for x in 0..<width {
-                let i = y * rowBytes + x * 4
-                let r = buf[i]
-                guard r > 10 else { continue }
-
-                var h = UInt32(truncatingIfNeeded: x &* 374761393 &+ y &* 668265263)
-                h = (h ^ (h >> 13)) &* 1274126177
-                h = h ^ (h >> 16)
-                let t = Float(h & 0xFFFF) / 65535.0
-
-                let v = UInt8(Float(r) * (0.82 + t * 0.18))
-                buf[i] = v
-                buf[i + 1] = v
-                buf[i + 2] = v
+                inside[y * width + x] = buf[y * rowBytes + x * 4] >= 128
             }
+        }
+
+        let distToPaper = edt2d(mask: inside, width: width, height: height, target: false)
+        let distToInk = edt2d(mask: inside, width: width, height: height, target: true)
+
+        let maxDim = Float(max(width, height))
+        let denom = 2.0 * sdfRange
+        for y in 0..<height {
+            for x in 0..<width {
+                let idx = y * width + x
+                let sdPx = inside[idx] ? distToPaper[idx] : -distToInk[idx]
+                let g = max(0.0, min(1.0, 0.5 + (sdPx / maxDim) / denom))
+                buf[y * rowBytes + x * 4 + 1] = UInt8(g * 255.0)
+            }
+        }
+    }
+
+    /// Exact Euclidean distance (in pixels) to the nearest pixel whose
+    /// `inside` flag equals `target`, via separable Felzenszwalb–Huttenlocher.
+    private static func edt2d(mask: [Bool], width w: Int, height h: Int, target: Bool) -> [Float] {
+        let inf: Float = 1e20
+        var f = [Float](repeating: 0, count: w * h)
+        for i in f.indices { f[i] = (mask[i] == target) ? 0 : inf }
+
+        let maxLen = max(w, h)
+        var line = [Float](repeating: 0, count: maxLen)
+        var d = [Float](repeating: 0, count: maxLen)
+        var v = [Int](repeating: 0, count: maxLen)
+        var z = [Float](repeating: 0, count: maxLen + 1)
+
+        for x in 0..<w {
+            for y in 0..<h { line[y] = f[y * w + x] }
+            dt1d(line, h, &d, &v, &z)
+            for y in 0..<h { f[y * w + x] = d[y] }
+        }
+        for y in 0..<h {
+            let base = y * w
+            for x in 0..<w { line[x] = f[base + x] }
+            dt1d(line, w, &d, &v, &z)
+            for x in 0..<w { f[base + x] = d[x] }
+        }
+        for i in f.indices { f[i] = f[i].squareRoot() }
+        return f
+    }
+
+    /// 1D squared-distance transform of `f[0..<n]`, result written to `d`.
+    /// `v` and `z` are reusable scratch buffers.
+    private static func dt1d(_ f: [Float], _ n: Int,
+                             _ d: inout [Float], _ v: inout [Int], _ z: inout [Float]) {
+        let inf: Float = 1e20
+        var k = 0
+        v[0] = 0
+        z[0] = -inf
+        z[1] = inf
+        for q in 1..<n {
+            var s = ((f[q] + Float(q * q)) - (f[v[k]] + Float(v[k] * v[k]))) / Float(2 * q - 2 * v[k])
+            while s <= z[k] {
+                k -= 1
+                s = ((f[q] + Float(q * q)) - (f[v[k]] + Float(v[k] * v[k]))) / Float(2 * q - 2 * v[k])
+            }
+            k += 1
+            v[k] = q
+            z[k] = s
+            z[k + 1] = inf
+        }
+        k = 0
+        for q in 0..<n {
+            while z[k + 1] < Float(q) { k += 1 }
+            let dq = Float(q - v[k])
+            d[q] = dq * dq + f[v[k]]
         }
     }
 
