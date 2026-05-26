@@ -12,11 +12,12 @@ struct SettingsView: View {
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
     @State private var whatsNewVersion: NoteletPresentedVersion?
+    @State private var settingsDestination: SettingsDestination?
+    @State private var collapseProgress: CGFloat = 1
 
     enum Appearance: String, CaseIterable, Identifiable {
         case system, light, dark
         var id: String { rawValue }
-        /// Deferred-lookup resource so SwiftUI re-resolves when the locale changes.
         var labelResource: LocalizedStringResource {
             switch self {
             case .system: "System"
@@ -26,54 +27,113 @@ struct SettingsView: View {
         }
     }
 
+    enum SettingsDestination: String, Hashable, Identifiable {
+        case appearance, units, calendars
+        #if DEBUG
+        case stampNoise
+        #endif
+        var id: String { rawValue }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            HibiPlusView()
+            HibiPlusView(collapseProgress: $collapseProgress)
                 .background(Color(.systemGroupedBackground))
                 .zIndex(1)
-            Form {
-                Section("General") {
-                NavigationLink {
-                    AppearanceSettingsView()
-                } label: {
-                    Label("Appearance", systemImage: "paintbrush")
-                }
-                NavigationLink {
-                    UnitsSettingsView()
-                } label: {
-                    Label("Units", systemImage: "ruler")
-                }
-                NavigationLink {
-                    CalendarSelectionView()
-                } label: {
-                    LabeledContent {
-                        Text(calendarSummary)
-                            .foregroundStyle(.secondary)
-                    } label: {
-                        Label("Calendars & Reminders", systemImage: "calendar")
+
+            HStack(spacing: 10) {
+                Rectangle().fill(.quaternary).frame(height: 0.5)
+                Capsule()
+                    .fill(.tertiary)
+                    .frame(width: 36, height: 5)
+                Rectangle().fill(.quaternary).frame(height: 0.5)
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 20)
+
+            HijackingScrollView(
+                progress: $collapseProgress,
+                collapseDistance: 200
+            ) {
+                settingsFormContent
+            }
+            .overlay(alignment: .top) {
+                LinearGradient(
+                    colors: [Color(.systemGroupedBackground),
+                             Color(.systemGroupedBackground).opacity(0)],
+                    startPoint: .top, endPoint: .bottom
+                )
+                .frame(height: 24)
+                .allowsHitTesting(false)
+            }
+        }
+        .background(Color(.systemGroupedBackground))
+        .ignoresSafeArea(edges: .bottom)
+        .navigationTitle(Text(verbatim: "Hibi"))
+        .navigationDestination(item: $settingsDestination) { destination in
+            switch destination {
+            case .appearance: AppearanceSettingsView()
+            case .units: UnitsSettingsView()
+            case .calendars: CalendarSelectionView()
+            #if DEBUG
+            case .stampNoise: StampNoiseDebugView()
+            #endif
+            }
+        }
+        .noteletSheet(
+            notes: WhatsNewContent.allNotes,
+            version: whatsNewVersion,
+            onDismiss: { whatsNewVersion = nil },
+            configuration: WhatsNewContent.configuration
+        )
+    }
+
+    // MARK: - Settings form content
+
+    private var settingsFormContent: some View {
+        VStack(spacing: 28) {
+            settingsSection("General") {
+                settingsNavRow("Appearance", systemImage: "paintbrush",
+                               destination: .appearance)
+                settingsDivider
+                settingsNavRow("Units", systemImage: "ruler",
+                               destination: .units)
+                settingsDivider
+                settingsRow(action: { settingsDestination = .calendars }) {
+                    HStack {
+                        LabeledContent {
+                            Text(calendarSummary)
+                                .foregroundStyle(.secondary)
+                        } label: {
+                            Label("Calendars & Reminders", systemImage: "calendar")
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.tertiary)
                     }
                 }
             }
 
             if hasMissingPermission {
-                Section("Permissions") {
-                    Button {
+                settingsSection("Permissions") {
+                    settingsRow(action: {
                         onReopenPermissions()
                         dismiss()
-                    } label: {
-                        LabeledContent {
+                    }) {
+                        HStack {
+                            Label("Review permissions",
+                                  systemImage: "exclamationmark.triangle")
+                            Spacer()
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(.tertiary)
-                        } label: {
-                            Label("Review permissions", systemImage: "exclamationmark.triangle")
                         }
                     }
-                    .tint(.primary)
                 }
             }
 
-            Section("About") {
+            settingsSection("About") {
                 Button {
                     whatsNewVersion = .v(WhatsNewContent.version)
                 } label: {
@@ -83,8 +143,14 @@ struct SettingsView: View {
                     } label: {
                         Text("What's New")
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .contentShape(Rectangle())
                 }
-                .tint(.primary)
+                .buttonStyle(.plain)
+
+                settingsDivider
 
                 Link(destination: URL(string: "https://apps.weichart.de")!) {
                     HStack(spacing: 12) {
@@ -92,7 +158,8 @@ struct SettingsView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 28, height: 28)
-                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: 6,
+                                                         style: .continuous))
                         VStack(alignment: .leading, spacing: 1) {
                             Text("More Apps")
                                 .foregroundStyle(.primary)
@@ -105,11 +172,13 @@ struct SettingsView: View {
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(.tertiary)
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
                 }
             }
 
             #if DEBUG
-            Section("Debug") {
+            settingsSection("Debug") {
                 Toggle(isOn: Binding(
                     get: { eventStore.isDemoMode },
                     set: { eventStore.setDemoMode($0) }
@@ -117,33 +186,84 @@ struct SettingsView: View {
                     Label("Demo Mode", systemImage: "wand.and.stars")
                 }
                 .tint(.black)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
 
-                NavigationLink {
-                    StampNoiseDebugView()
-                } label: {
-                    Label("Stamp Noise", systemImage: "drop")
+                settingsDivider
+
+                settingsRow(action: { settingsDestination = .stampNoise }) {
+                    HStack {
+                        Label("Stamp Noise", systemImage: "drop")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                    }
                 }
             }
             #endif
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 28)
+        .padding(.bottom, 140)
+    }
+
+    // MARK: - Styled Form replacements
+
+    private func settingsSection(
+        _ title: LocalizedStringKey? = nil,
+        @ViewBuilder content: () -> some View
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if let title {
+                Text(title)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                    .padding(.horizontal, 4)
+                    .padding(.bottom, 8)
             }
-            .overlay(alignment: .top) {
-                LinearGradient(
-                    colors: [Color(.systemGroupedBackground),
-                             Color(.systemGroupedBackground).opacity(0)],
-                    startPoint: .top, endPoint: .bottom
-                )
-                .frame(height: 24)
-                .allowsHitTesting(false)
+            VStack(spacing: 0) { content() }
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        }
+    }
+
+    private func settingsRow<Label: View>(
+        action: @escaping () -> Void,
+        @ViewBuilder label: () -> Label
+    ) -> some View {
+        Button(action: action) {
+            label()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var settingsDivider: some View {
+        Divider().padding(.leading, 16)
+    }
+
+    private func settingsNavRow(
+        _ titleKey: LocalizedStringKey,
+        systemImage: String,
+        destination: SettingsDestination
+    ) -> some View {
+        settingsRow(action: { settingsDestination = destination }) {
+            HStack {
+                Label(titleKey, systemImage: systemImage)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.tertiary)
             }
         }
-        .navigationTitle(Text(verbatim: "Hibi"))
-        .noteletSheet(
-            notes: WhatsNewContent.allNotes,
-            version: whatsNewVersion,
-            onDismiss: { whatsNewVersion = nil },
-            configuration: WhatsNewContent.configuration
-        )
     }
+
+    // MARK: - Helpers
 
     private var calendarSummary: LocalizedStringResource {
         if eventStore.isDemoMode { return "Demo" }
