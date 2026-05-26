@@ -267,14 +267,48 @@ private struct IconFan: View {
 }
 
 private struct MiniPaperCard: View {
-    private let size: CGFloat = 38
-
     var body: some View {
-        Image("AppIconPreview-Leatherbag")
-            .resizable()
-            .scaledToFit()
-            .frame(width: size, height: size)
-            .clipShape(RoundedRectangle(cornerRadius: size * 0.23, style: .continuous))
+        RoundedRectangle(cornerRadius: 5, style: .continuous)
+            .fill(PaperTints.card1)
+            .overlay {
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.12), lineWidth: 0.5)
+            }
+            .overlay(alignment: .top) {
+                HStack(spacing: 11) {
+                    Circle()
+                        .fill(PaperTints.bindingHole)
+                        .overlay {
+                            Circle().strokeBorder(Color.primary.opacity(0.18), lineWidth: 0.5)
+                        }
+                        .frame(width: 2.5, height: 2.5)
+                    Circle()
+                        .fill(PaperTints.bindingHole)
+                        .overlay {
+                            Circle().strokeBorder(Color.primary.opacity(0.18), lineWidth: 0.5)
+                        }
+                        .frame(width: 2.5, height: 2.5)
+                }
+                .padding(.top, 3)
+            }
+            .overlay {
+                Text(verbatim: "23")
+                    .font(.custom(AppFont.serifItalic, size: 19))
+                    .foregroundStyle(.primary)
+                    .offset(y: 2)
+            }
+            .overlay(alignment: .bottom) {
+                HStack(spacing: 2) {
+                    ForEach(0..<8, id: \.self) { _ in
+                        RoundedRectangle(cornerRadius: 0.5)
+                            .fill(Color.primary.opacity(0.22))
+                            .frame(height: 2)
+                    }
+                }
+                .padding(.horizontal, 4)
+                .padding(.bottom, 2)
+            }
+            .frame(width: 38, height: 38)
             .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18),
                     radius: 2, y: 1)
             .rotationEffect(.degrees(-3))
@@ -329,12 +363,39 @@ private struct RadarPingIndicator: View {
 
 private struct WidgetIllustration: View {
     var body: some View {
-        Image("AppIconPreview-PixelSun")
-            .resizable()
-            .scaledToFit()
-            .frame(width: 62, height: 62)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.10), radius: 4, y: 1)
+        RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .fill(
+                RadialGradient(
+                    colors: [Color(red: 0.83, green: 0.85, blue: 0.89),
+                             Color(red: 0.55, green: 0.59, blue: 0.69)],
+                    center: .init(x: 0.3, y: 0.2), startRadius: 0, endRadius: 92
+                )
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(PaperTints.card1)
+                    .overlay {
+                        VStack(spacing: 2) {
+                            HStack(spacing: 18) {
+                                Circle().fill(PaperTints.bindingHole).frame(width: 4, height: 4)
+                                Circle().fill(PaperTints.bindingHole).frame(width: 4, height: 4)
+                            }
+                            Text(verbatim: "Thursday")
+                                .font(.custom(AppFont.serifItalic, size: 8))
+                                .foregroundStyle(.secondary)
+                            Text(verbatim: "23")
+                                .font(.custom(AppFont.serifRegular, size: 38))
+                                .foregroundStyle(.primary)
+                                .overlay(alignment: .bottom) {
+                                    Rectangle().frame(width: 22, height: 1.25).foregroundStyle(.primary)
+                                }
+                        }
+                        .padding(.vertical, 6)
+                    }
+                    .padding(8)
+                    .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.10), radius: 4, y: 1)
+            }
+            .frame(width: 76, height: 76)
             .accessibilityHidden(true)
     }
 }
