@@ -757,9 +757,6 @@ struct HibiPlusView: View {
     // 0 = stamp card, 1 = feature card
     @State private var frontIndex = 0
     @Binding var collapseProgress: CGFloat
-    init(collapseProgress: Binding<CGFloat> = .constant(1)) {
-        self._collapseProgress = collapseProgress
-    }
     private var expanded: Bool { collapseProgress < 0.5 }
     private var chromeFade: Double {
         Double(max(0, 1 - collapseProgress * 1.25))
