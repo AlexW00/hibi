@@ -20,6 +20,18 @@ final class PlusEntitlementStoreTests: XCTestCase {
         let store = PlusEntitlementStore(defaults: freshDefaults())
         XCTAssertFalse(store.isPlus)
         XCTAssertNil(store.purchaseDate)
+        XCTAssertNil(store.seedUUID)
+    }
+
+    func testPersistsAndClearsSeedUUID() {
+        let defaults = freshDefaults()
+        let uuid = UUID()
+
+        PlusEntitlementStore(defaults: defaults).setSeedUUID(uuid)
+        XCTAssertEqual(PlusEntitlementStore(defaults: defaults).seedUUID, uuid)
+
+        PlusEntitlementStore(defaults: defaults).setSeedUUID(nil)
+        XCTAssertNil(PlusEntitlementStore(defaults: defaults).seedUUID)
     }
 
     func testPersistsEntitlementAcrossInstances() {
@@ -47,8 +59,10 @@ final class PlusEntitlementStoreTests: XCTestCase {
         XCTAssertFalse(store.isPlus)
         store.setIsPlus(true)            // must not crash
         store.setPurchaseDate(Date())    // must not crash
+        store.setSeedUUID(UUID())        // must not crash
         XCTAssertFalse(store.isPlus)
         XCTAssertNil(store.purchaseDate)
+        XCTAssertNil(store.seedUUID)
     }
 
     func testProductIdentifierContract() {

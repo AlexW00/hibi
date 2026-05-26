@@ -22,6 +22,7 @@ enum PlusProduct {
 struct PlusEntitlementStore {
     static let entitledKey = "hibiPlusEntitled.v1"
     static let purchaseDateKey = "hibiPlusPurchaseDate.v1"
+    static let seedUUIDKey = "hibiPlusStampSeedUUID.v1"
 
     let defaults: UserDefaults?
 
@@ -33,11 +34,19 @@ struct PlusEntitlementStore {
         defaults?.bool(forKey: Self.entitledKey) ?? false
     }
 
-    /// The date the entitlement was first granted. Used to seed the stamp so
-    /// it renders identically across launches (the stamp art is derived from
-    /// this date). `nil` until a purchase is recorded.
+    /// The date the entitlement was first granted. Shown as the dated text on
+    /// the stamp. `nil` until a purchase is recorded.
     var purchaseDate: Date? {
         defaults?.object(forKey: Self.purchaseDateKey) as? Date
+    }
+
+    /// Stable UUID that seeds the stamp's design and ink noise (the StoreKit
+    /// transaction's `appAccountToken`, or a deterministic fallback). Cached
+    /// here so the stamp renders identically across launches without
+    /// re-querying StoreKit. `nil` until a purchase is recorded.
+    var seedUUID: UUID? {
+        guard let raw = defaults?.string(forKey: Self.seedUUIDKey) else { return nil }
+        return UUID(uuidString: raw)
     }
 
     func setIsPlus(_ value: Bool) {
@@ -49,6 +58,14 @@ struct PlusEntitlementStore {
             defaults?.set(date, forKey: Self.purchaseDateKey)
         } else {
             defaults?.removeObject(forKey: Self.purchaseDateKey)
+        }
+    }
+
+    func setSeedUUID(_ uuid: UUID?) {
+        if let uuid {
+            defaults?.set(uuid.uuidString, forKey: Self.seedUUIDKey)
+        } else {
+            defaults?.removeObject(forKey: Self.seedUUIDKey)
         }
     }
 }

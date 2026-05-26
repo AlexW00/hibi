@@ -356,7 +356,7 @@ private struct StampNoiseDebugView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Sticky preview — always visible while the parameters scroll.
-            HibiStamp(purchased: true, date: previewDate, size: 180)
+            HibiStamp(purchased: true, seed: StampConfig.seed(from: previewDate), date: previewDate, size: 180)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(Color(.systemGroupedBackground))

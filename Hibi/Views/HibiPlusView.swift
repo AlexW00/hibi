@@ -22,6 +22,10 @@ private enum HPLayout {
 
 struct HibiStamp: View {
     let purchased: Bool
+    /// Drives the stamp design choice and the shader's ink noise. Derived from
+    /// the purchase UUID (stable), independent of the displayed `date`.
+    let seed: UInt64
+    /// The purchase date, rendered as the dated text on the stamp.
     let date: Date?
     var size: CGFloat = 154
     var rotation: Double = -6
@@ -93,6 +97,7 @@ struct HibiStamp: View {
         }
         .onAppear { buildComposite() }
         .onChange(of: date) { _, _ in buildComposite() }
+        .onChange(of: seed) { _, _ in buildComposite() }
         .onChange(of: stampToken) { _, _ in
             appeared = false
             buildComposite()
@@ -109,7 +114,7 @@ struct HibiStamp: View {
             .layerEffect(
                 ShaderLibrary.stampEffect(
                     .float2(Float(size), Float(size)),
-                    .float(Float(StampConfig.seed(from: date ?? Date()))),
+                    .float(Float(seed)),
                     .float2(0, 0),
                     .color(PaperTints.sealInk),
                     .floatArray(noiseValues)
@@ -125,7 +130,7 @@ struct HibiStamp: View {
             .layerEffect(
                 ShaderLibrary.stampEffect(
                     .float2(Float(size), Float(size)),
-                    .float(Float(StampConfig.seed(from: date ?? Date()))),
+                    .float(Float(seed)),
                     .float2(Float(motion.tiltX), Float(motion.tiltY)),
                     .color(PaperTints.sealInk),
                     .floatArray(noiseValues)
@@ -141,7 +146,6 @@ struct HibiStamp: View {
     private func buildComposite() {
         compositeTask?.cancel()
         guard let date else { compositeImage = nil; return }
-        let seed = StampConfig.seed(from: date)
         guard let def = StampConfig.definition(for: seed) else { compositeImage = nil; return }
         let scale = displayScale
         let compositeSize = Self.compositeSize
@@ -494,6 +498,7 @@ private struct PlusHeader: View {
 
 private struct StampCardBody: View {
     let purchased: Bool
+    let seed: UInt64
     let date: Date?
     let expandFraction: CGFloat
     let chromeFade: Double
@@ -505,7 +510,7 @@ private struct StampCardBody: View {
             + (HPLayout.stampExpandedHeight - HPLayout.collapsed.height) * expandFraction
 
         ZStack {
-            HibiStamp(purchased: purchased, date: date,
+            HibiStamp(purchased: purchased, seed: seed, date: date,
                       size: 200 + 110 * expandFraction, stampToken: stampToken)
                 .frame(maxWidth: .infinity)
 
@@ -657,6 +662,13 @@ struct HibiPlusView: View {
     @Environment(PlusStore.self) private var plusStore
     private var isPlus: Bool { plusStore.isPlus }
     private var purchaseDate: Date? { plusStore.purchaseDate }
+    /// Stamp randomness seed: derived from the cached purchase UUID, falling
+    /// back to the date only if no UUID has been recorded yet.
+    private var stampSeed: UInt64 {
+        if let uuid = plusStore.seedUUID { return StampConfig.seed(from: uuid) }
+        if let date = purchaseDate { return StampConfig.seed(from: date) }
+        return 0
+    }
 
     // animation state
     @State private var dragY: CGFloat = 0
@@ -863,7 +875,7 @@ struct HibiPlusView: View {
     @ViewBuilder
     private func cardBody(index: Int) -> some View {
         if index == 0 {
-            StampCardBody(purchased: isPlus, date: purchaseDate,
+            StampCardBody(purchased: isPlus, seed: stampSeed, date: purchaseDate,
                           expandFraction: 1 - collapseProgress,
                           chromeFade: chromeFade, stampToken: stampToken)
         } else {
@@ -959,7 +971,7 @@ struct HibiPlusView: View {
     private func beginStampReveal() {
         let date = purchaseDate ?? Date()
         let scale = displayScale
-        let def = StampConfig.definition(for: StampConfig.seed(from: date))
+        let def = StampConfig.definition(for: stampSeed)
         let compositeSize = HibiStamp.compositeSize
 
         generationTask?.cancel()
