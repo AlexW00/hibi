@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "AppIconPreview-PixelSun.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

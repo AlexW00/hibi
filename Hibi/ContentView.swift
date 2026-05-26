@@ -36,6 +36,7 @@ struct ContentView: View {
     @State private var eventStore = EventStore()
     @State private var weatherStore = WeatherStore()
     @State private var clock = Clock()
+    @State private var appIconManager = AppIconManager()
     @State private var editorMode: EventEditorSheet.Mode?
     @State private var showOnboarding = false
     @State private var needsOnboarding = false
@@ -238,6 +239,7 @@ struct ContentView: View {
         .environment(eventStore)
         .environment(weatherStore)
         .environment(clock)
+        .environment(appIconManager)
         .onOpenURL { url in
             guard url.scheme == "hibi" else { return }
             switch url.host {

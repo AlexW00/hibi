@@ -227,37 +227,17 @@ struct HibiStamp: View {
 }
 
 // MARK: - App icon carousel
-//
-// Placeholder: repeats a SwiftUI facsimile of the current app icon. The real
-// icon ships as a Liquid Glass `.icon` bundle (no usable PNG in the asset
-// catalog), so we render a facsimile that matches its design: a paper tile,
-// two faint binding dots, an italic "26".
 
 private struct AppIconTile: View {
+    let assetName: String
     var size: CGFloat = 42
+
     var body: some View {
-        RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
-            .fill(PaperTints.card1)
-            .overlay {
-                RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.12), lineWidth: 0.5)
-            }
-            .overlay(alignment: .top) {
-                HStack {
-                    Circle().frame(width: 3, height: 3)
-                    Spacer()
-                    Circle().frame(width: 3, height: 3)
-                }
-                .foregroundStyle(.primary.opacity(0.35))
-                .padding(.horizontal, 6)
-                .padding(.top, 4)
-            }
-            .overlay {
-                Text(verbatim: "26")
-                    .font(.custom(AppFont.serifItalic, size: size * 0.58))
-                    .foregroundStyle(.primary)
-            }
+        Image(assetName)
+            .resizable()
+            .scaledToFit()
             .frame(width: size, height: size)
+            .clipShape(RoundedRectangle(cornerRadius: size * 0.23, style: .continuous))
             .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.10), radius: 4, y: 2)
     }
 }
@@ -266,7 +246,8 @@ struct AppIconCarousel: View {
     var size: CGFloat = 42
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private let count = 8
+    private static let assets = AppIconManager.icons.map(\.previewAssetName)
+    private var count: Int { Self.assets.count }
     private var spacing: CGFloat { size * 0.27 }
     private var shadowPadding: CGFloat { max(8, size * 0.20) }
     private var stripHeight: CGFloat { size + shadowPadding * 2 }
@@ -281,8 +262,8 @@ struct AppIconCarousel: View {
             Color.clear
                 .overlay {
                     HStack(spacing: spacing) {
-                        ForEach(0..<(count * 3), id: \.self) { _ in
-                            AppIconTile(size: size)
+                        ForEach(0..<(count * 3), id: \.self) { i in
+                            AppIconTile(assetName: Self.assets[i % count], size: size)
                         }
                     }
                     .offset(x: offset)
@@ -307,74 +288,31 @@ struct AppIconCarousel: View {
 
 // MARK: - Perk tile visuals
 
-private struct MiniIconTile: View {
-    var size: CGFloat = 26
-    var background: Color
-    var foreground: Color
-    var glyph: String
-    var italic: Bool = true
-    var dotColor: Color = .primary
-
-    var body: some View {
-        RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
-            .fill(background)
-            .overlay {
-                RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.10), lineWidth: 0.5)
-            }
-            .overlay(alignment: .top) {
-                HStack {
-                    Circle().frame(width: 2, height: 2)
-                    Spacer()
-                    Circle().frame(width: 2, height: 2)
-                }
-                .foregroundStyle(dotColor.opacity(0.35))
-                .padding(.horizontal, size * 0.14)
-                .padding(.top, size * 0.10)
-            }
-            .overlay {
-                Text(verbatim: glyph)
-                    .font(.custom(italic ? AppFont.serifItalic : AppFont.serifRegular,
-                                  size: size * 0.58))
-                    .foregroundStyle(foreground)
-            }
-            .frame(width: size, height: size)
-    }
-}
-
 private struct IconFan: View {
-    @Environment(\.colorScheme) private var colorScheme
+    private let size: CGFloat = 26
+    private let icons = ["AppIconPreview-Porcelain", "AppIconPreview-Default", "AppIconPreview-DiscoBalloon"]
+
     var body: some View {
         ZStack {
-            MiniIconTile(
-                background: PaperTints.card1,
-                foreground: .primary,
-                glyph: "26",
-                dotColor: .primary
-            )
-            .rotationEffect(.degrees(-12))
-            .offset(x: -8, y: 1)
-
-            MiniIconTile(
-                background: Color(red: 0.04, green: 0.04, blue: 0.04),
-                foreground: Color(red: 0.984, green: 0.980, blue: 0.969),
-                glyph: "日",
-                italic: false,
-                dotColor: .white
-            )
-            .zIndex(1)
-
-            MiniIconTile(
-                background: Color(red: 0.784, green: 0.212, blue: 0.165),
-                foreground: Color(red: 1, green: 0.98, blue: 0.94),
-                glyph: "26",
-                dotColor: Color(red: 1, green: 0.98, blue: 0.94)
-            )
-            .rotationEffect(.degrees(12))
-            .offset(x: 8, y: 1)
+            miniIcon(icons[0])
+                .rotationEffect(.degrees(-12))
+                .offset(x: -8, y: 1)
+            miniIcon(icons[1])
+                .zIndex(1)
+            miniIcon(icons[2])
+                .rotationEffect(.degrees(12))
+                .offset(x: 8, y: 1)
         }
         .frame(width: 44, height: 38)
         .accessibilityHidden(true)
+    }
+
+    private func miniIcon(_ asset: String) -> some View {
+        Image(asset)
+            .resizable()
+            .scaledToFit()
+            .frame(width: size, height: size)
+            .clipShape(RoundedRectangle(cornerRadius: size * 0.23, style: .continuous))
     }
 }
 
@@ -527,10 +465,13 @@ struct EarlyAccessTile: View {
                 RadarPingIndicator()
                 Text("Currently in early access")
                     .font(.system(size: 10, weight: .semibold))
+                    .lineLimit(1)
                 Spacer()
                 Text("\(daysLeft) days left")
                     .font(.system(size: 10, weight: .medium, design: .monospaced))
                     .foregroundStyle(.tertiary)
+                    .lineLimit(1)
+                    .layoutPriority(1)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 9)
@@ -543,9 +484,11 @@ struct EarlyAccessTile: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Widgets")
                         .font(.custom(AppFont.serifRegular, size: 18))
+                        .lineLimit(1)
                     Text("On your home screen — paper, every day.")
                         .font(.custom(AppFont.serifItalic, size: 11.5))
                         .foregroundStyle(.tertiary)
+                        .lineLimit(1)
                 }
                 Spacer(minLength: 0)
             }
@@ -636,7 +579,7 @@ struct RestorePurchasesLink: View {
 
 private struct PlusHeader: View {
     var deck: LocalizedStringKey?
-    var showDeck: Bool = false
+    var deckFade: Double = 0
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
     var body: some View {
         VStack(spacing: 4) {
@@ -651,11 +594,9 @@ private struct PlusHeader: View {
                 Text(deck)
                     .font(.appSerif(size: 13.5, italic: true, simple: useSimpleFont))
                     .foregroundStyle(.tertiary)
-                    .multilineTextAlignment(.center)
+                    .lineLimit(1)
                     .padding(.top, 2)
-                    .opacity(showDeck ? 1 : 0)
-                    .frame(height: showDeck ? nil : 0)
-                    .clipped()
+                    .opacity(deckFade)
             }
         }
     }
@@ -666,23 +607,24 @@ private struct PlusHeader: View {
 private struct StampCardBody: View {
     let purchased: Bool
     let date: Date?
-    let expanded: Bool
+    let expandFraction: CGFloat
+    let chromeFade: Double
     let stampToken: Int
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
 
     var body: some View {
         VStack(spacing: 18) {
             HibiStamp(purchased: purchased, date: date,
-                      size: expanded ? 310 : 200, stampToken: stampToken)
-            if expanded && !purchased {
+                      size: 200 + 110 * expandFraction, stampToken: stampToken)
+            if !purchased {
                 Text("Purchase Hibi Plus to receive your personalized seal.")
                     .font(.appSerif(size: 15, italic: true, simple: useSimpleFont))
                     .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: 240)
+                    .lineLimit(1)
+                    .opacity(chromeFade)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity)
         .padding(.horizontal, 16)
     }
 }
@@ -691,100 +633,81 @@ private struct StampCardBody: View {
 
 private struct FeatureCardBody: View {
     let purchased: Bool
-    let expanded: Bool
+    let chromeFade: Double
     @Binding var ctaSuccess: Bool
     var isGenerating: Bool = false
     let onPurchase: () -> Void
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
 
-    private var chromeFade: Double { expanded ? 1 : 0 }
-
     var body: some View {
-        VStack(spacing: 0) {
-            PlusHeader(deck: "Your support matters a lot.", showDeck: expanded)
-                .padding(.top, 14)
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                PlusHeader(deck: "Your support matters a lot.", deckFade: chromeFade)
+                    .padding(.top, 14)
 
-            // hairline rule with center dot — expanded only
-            HStack(spacing: 8) {
-                Rectangle().frame(height: 0.5).foregroundStyle(.quaternary)
-                Text(verbatim: "·").foregroundStyle(.tertiary)
-                Rectangle().frame(height: 0.5).foregroundStyle(.quaternary)
-            }
-            .frame(width: 180, height: expanded ? nil : 0)
-            .opacity(chromeFade)
-            .padding(.top, expanded ? 16 : 0).padding(.bottom, expanded ? 12 : 0)
-
-            if !expanded { Spacer(minLength: 0) }
-
-            AppIconCarousel(size: 42)
-                .padding(.bottom, expanded ? 14 : 0)
-
-            if !expanded { Spacer(minLength: 0) }
-
-            // perks — expanded only
-            HStack(spacing: 12) {
-                perkTile {
-                    IconFan()
-                } rule: {
-                    Text("App icons")
-                } title: {
-                    Text("Dress Hibi up.")
+                HStack(spacing: 8) {
+                    Rectangle().frame(height: 0.5).foregroundStyle(.quaternary)
+                    Text(verbatim: "·").foregroundStyle(.tertiary)
+                    Rectangle().frame(height: 0.5).foregroundStyle(.quaternary)
                 }
-                perkTile {
-                    MiniPaperCard()
-                } rule: {
-                    Text("Early access")
-                } title: {
-                    Text("Try features first.")
-                }
-            }
-            .frame(height: expanded ? nil : 0)
-            .opacity(chromeFade)
-            .clipped()
-            .padding(.bottom, expanded ? 12 : 0)
-
-            EarlyAccessTile()
-                .frame(height: expanded ? nil : 0)
+                .frame(width: 180)
                 .opacity(chromeFade)
-                .clipped()
-                .padding(.bottom, expanded ? (purchased ? 10 : 14) : 0)
+                .padding(.top, 16 * chromeFade).padding(.bottom, 12 * chromeFade)
 
-            if purchased {
-                Text("Thank you for supporting Hibi.")
-                    .font(.appSerif(size: 11.5, italic: true, simple: useSimpleFont))
-                    .foregroundStyle(.tertiary)
-                    .multilineTextAlignment(.center)
-                    .frame(height: expanded ? nil : 0)
+                AppIconCarousel(size: 42)
+                    .padding(.bottom, 14 * chromeFade)
+
+                HStack(spacing: 12) {
+                    perkTile {
+                        IconFan()
+                    } rule: {
+                        Text("App icons")
+                    } title: {
+                        Text("Dress Hibi up.")
+                    }
+                    perkTile {
+                        MiniPaperCard()
+                    } rule: {
+                        Text("Early access")
+                    } title: {
+                        Text("Try features first.")
+                    }
+                }
+                .opacity(chromeFade)
+                .padding(.bottom, 12 * chromeFade)
+
+                EarlyAccessTile()
                     .opacity(chromeFade)
-                    .clipped()
-                    .padding(.bottom, expanded ? 30 : 0)
-            }
+                    .padding(.bottom, (purchased ? 10 : 14) * chromeFade)
 
-            if !expanded { Spacer(minLength: 0) }
-
-            if !purchased {
-                VStack(spacing: 8) {
-                    PlusCTA(showSuccess: $ctaSuccess, isGenerating: isGenerating, onPurchase: onPurchase)
-                    RestorePurchasesLink()
+                if purchased {
+                    Text("Thank you for supporting Hibi.")
+                        .font(.appSerif(size: 11.5, italic: true, simple: useSimpleFont))
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                        .opacity(chromeFade)
+                        .padding(.bottom, 30 * chromeFade)
                 }
-                .frame(height: expanded ? nil : 0)
-                .opacity(chromeFade)
-                .clipped()
-                .padding(.bottom, expanded ? 26 : 0)
-            }
 
-            // collapsed hint — sits at the bottom, above the perforation
+                if !purchased {
+                    VStack(spacing: 8) {
+                        PlusCTA(showSuccess: $ctaSuccess, isGenerating: isGenerating, onPurchase: onPurchase)
+                        RestorePurchasesLink()
+                    }
+                    .opacity(chromeFade)
+                    .padding(.bottom, 26 * chromeFade)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+
             Text("Tap to see what's inside.")
                 .font(.appSerif(size: 11.5, italic: true, simple: useSimpleFont))
                 .foregroundStyle(.tertiary)
-                .frame(height: expanded ? 0 : nil)
                 .opacity(1 - chromeFade)
-                .clipped()
-                .padding(.bottom, expanded ? 0 : 22)
+                .padding(.bottom, 22)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
     }
 
     private func perkTile<V: View, R: View, T: View>(
@@ -799,10 +722,12 @@ private struct FeatureCardBody: View {
                     .font(.system(size: 9, weight: .semibold))
                     .tracking(1.6)
                     .foregroundStyle(.tertiary)
+                    .lineLimit(1)
                 title()
                     .font(.appSerif(size: 14, italic: true, simple: useSimpleFont))
                     .foregroundStyle(.primary)
                     .lineSpacing(-1)
+                    .lineLimit(1)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -822,7 +747,11 @@ private struct FeatureCardBody: View {
 struct HibiPlusView: View {
     // 0 = stamp card, 1 = feature card
     @State private var frontIndex = 0
-    @State private var expanded = false
+    @Binding var collapseProgress: CGFloat
+    private var expanded: Bool { collapseProgress < 0.5 }
+    private var chromeFade: Double {
+        Double(max(0, 1 - collapseProgress * 1.25))
+    }
     @State private var isPlus = false
     @State private var purchaseDate: Date?
 
@@ -850,10 +779,11 @@ struct HibiPlusView: View {
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
-            let frontW = expanded ? w - 32 : HPLayout.collapsed.width
-            let frontH = expanded ? expandedHeight(for: frontIndex) : HPLayout.collapsed.height
-            let backW = expanded ? w - 32 : HPLayout.collapsed.width
-            let backH = expanded ? expandedHeight(for: backIndex) : HPLayout.collapsed.height
+            let ef = 1 - collapseProgress
+            let frontW = HPLayout.collapsed.width + (w - 32 - HPLayout.collapsed.width) * ef
+            let frontH = HPLayout.collapsed.height + (expandedHeight(for: frontIndex) - HPLayout.collapsed.height) * ef
+            let backW = HPLayout.collapsed.width + (w - 32 - HPLayout.collapsed.width) * ef
+            let backH = HPLayout.collapsed.height + (expandedHeight(for: backIndex) - HPLayout.collapsed.height) * ef
             let stackW = lerp(frontW, backW, cardShift)
             let stackH = lerp(frontH, backH, cardShift)
             VStack(spacing: 0) {
@@ -865,15 +795,16 @@ struct HibiPlusView: View {
             .frame(width: w)
         }
         .frame(height: totalHeight)
-        .animation(HPLayout.collapseSpring, value: expanded)
         .animation(HPLayout.collapseSpring, value: isPlus)
     }
 
     private var totalHeight: CGFloat {
-        let frontH = expanded ? expandedHeight(for: frontIndex) : HPLayout.collapsed.height
-        let backH = expanded ? expandedHeight(for: backIndex) : HPLayout.collapsed.height
+        let ef = 1 - collapseProgress
+        let frontH = HPLayout.collapsed.height + (expandedHeight(for: frontIndex) - HPLayout.collapsed.height) * ef
+        let backH = HPLayout.collapsed.height + (expandedHeight(for: backIndex) - HPLayout.collapsed.height) * ef
         let h = lerp(frontH, backH, cardShift)
-        return h + 14 + HPLayout.hintHeight
+        let hintH = HPLayout.hintHeight * ef
+        return h + 14 + hintH
     }
 
     @ViewBuilder
@@ -971,13 +902,28 @@ struct HibiPlusView: View {
             .overlay {
                 GeometryReader { proxy in
                     cardBody(index: index)
-                        .frame(width: proxy.size.width, height: proxy.size.height)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
                         .allowsHitTesting(chromeAmount >= 1)
-                        .mask(alignment: .top) {
-                            VStack(spacing: 0) {
-                                Rectangle()
-                                    .frame(height: max(0, proxy.size.height - bottomContentProtection))
-                                Spacer(minLength: 0)
+                        .mask {
+                            HStack(spacing: 0) {
+                                LinearGradient(
+                                    stops: [.init(color: .clear, location: 0),
+                                            .init(color: .black, location: 1)],
+                                    startPoint: .leading, endPoint: .trailing
+                                )
+                                .frame(width: 16)
+                                VStack(spacing: 0) {
+                                    Rectangle()
+                                        .frame(height: max(0, proxy.size.height - bottomContentProtection))
+                                    Spacer(minLength: 0)
+                                }
+                                LinearGradient(
+                                    stops: [.init(color: .black, location: 0),
+                                            .init(color: .clear, location: 1)],
+                                    startPoint: .leading, endPoint: .trailing
+                                )
+                                .frame(width: 16)
                             }
                             .frame(width: proxy.size.width, height: proxy.size.height)
                         }
@@ -1005,19 +951,24 @@ struct HibiPlusView: View {
     private func cardBody(index: Int) -> some View {
         if index == 0 {
             StampCardBody(purchased: isPlus, date: purchaseDate,
-                          expanded: expanded, stampToken: stampToken)
+                          expandFraction: 1 - collapseProgress,
+                          chromeFade: chromeFade, stampToken: stampToken)
         } else {
-            FeatureCardBody(purchased: isPlus, expanded: expanded,
+            FeatureCardBody(purchased: isPlus, chromeFade: chromeFade,
                             ctaSuccess: $ctaSuccess, isGenerating: isGeneratingStamp,
                             onPurchase: purchase)
         }
     }
 
     private var hint: some View {
-        Text("Pull to tear · ↑ Next · ↓ Prev")
+        let ef = 1 - collapseProgress
+        return Text("Pull to tear · ↑ Next · ↓ Prev")
             .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
             .foregroundStyle(.tertiary)
             .frame(maxWidth: .infinity)
+            .frame(height: HPLayout.hintHeight * ef)
+            .opacity(chromeFade)
+            .clipped()
     }
 
     // MARK: gestures
@@ -1039,7 +990,11 @@ struct HibiPlusView: View {
 
     private func toggleExpand() {
         guard !isAnimating else { return }
-        withAnimation(HPLayout.collapseSpring) { expanded.toggle() }
+        let target: CGFloat = collapseProgress >= 0.5 ? 0 : 1
+        var t = Transaction()
+        t.animation = HijackingScrollView<EmptyView>.snapSpring
+        t.scrollContentOffsetAdjustmentBehavior = .disabled
+        withTransaction(t) { collapseProgress = target }
     }
 
     /// Flip to the other card, sliding the front off in `direction`
@@ -1071,7 +1026,7 @@ struct HibiPlusView: View {
         purchaseDate = date
         let scale = displayScale
 
-        // Capture main-actor-isolated values before entering detached context.
+        // Capture values before entering detached context.
         let seed = StampConfig.seed(from: date)
         let def = StampConfig.definition(for: seed)
         let compositeSize = HibiStamp.compositeSize
@@ -1113,7 +1068,7 @@ struct HibiPlusView: View {
                 withTransaction(t) {
                     frontIndex = 0
                     dragY = 0; cardShift = 0; isAnimating = false
-                    expanded = false
+                    collapseProgress = 1
                 }
                 ctaSuccess = false
                 // Stamp the seal after the card has settled
@@ -1122,7 +1077,7 @@ struct HibiPlusView: View {
                 }
             }
         } else {
-            expanded = false
+            collapseProgress = 1
             ctaSuccess = false
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
                 stampToken &+= 1
