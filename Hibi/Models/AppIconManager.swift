@@ -166,6 +166,12 @@ final class AppIconManager {
         }
     }
 
+    #if DEBUG
+    func overrideInstallDate(_ date: Date?) {
+        installDate = date
+    }
+    #endif
+
     func select(_ option: AppIconOption) async {
         guard isUnlocked(option) else { return }
         do {

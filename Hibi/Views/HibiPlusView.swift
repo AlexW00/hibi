@@ -177,37 +177,17 @@ struct HibiStamp: View {
 }
 
 // MARK: - App icon carousel
-//
-// Placeholder: repeats a SwiftUI facsimile of the current app icon. The real
-// icon ships as a Liquid Glass `.icon` bundle (no usable PNG in the asset
-// catalog), so we render a facsimile that matches its design: a paper tile,
-// two faint binding dots, an italic "26".
 
 private struct AppIconTile: View {
+    let assetName: String
     var size: CGFloat = 42
+
     var body: some View {
-        RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
-            .fill(PaperTints.card1)
-            .overlay {
-                RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.12), lineWidth: 0.5)
-            }
-            .overlay(alignment: .top) {
-                HStack {
-                    Circle().frame(width: 3, height: 3)
-                    Spacer()
-                    Circle().frame(width: 3, height: 3)
-                }
-                .foregroundStyle(.primary.opacity(0.35))
-                .padding(.horizontal, 6)
-                .padding(.top, 4)
-            }
-            .overlay {
-                Text(verbatim: "26")
-                    .font(.custom(AppFont.serifItalic, size: size * 0.58))
-                    .foregroundStyle(.primary)
-            }
+        Image(assetName)
+            .resizable()
+            .scaledToFit()
             .frame(width: size, height: size)
+            .clipShape(RoundedRectangle(cornerRadius: size * 0.23, style: .continuous))
             .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.10), radius: 4, y: 2)
     }
 }
@@ -216,7 +196,8 @@ struct AppIconCarousel: View {
     var size: CGFloat = 42
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private let count = 8
+    private static let assets = AppIconManager.icons.map(\.previewAssetName)
+    private var count: Int { Self.assets.count }
     private var spacing: CGFloat { size * 0.27 }
     private var shadowPadding: CGFloat { max(8, size * 0.20) }
     private var stripHeight: CGFloat { size + shadowPadding * 2 }
@@ -231,8 +212,8 @@ struct AppIconCarousel: View {
             Color.clear
                 .overlay {
                     HStack(spacing: spacing) {
-                        ForEach(0..<(count * 3), id: \.self) { _ in
-                            AppIconTile(size: size)
+                        ForEach(0..<(count * 3), id: \.self) { i in
+                            AppIconTile(assetName: Self.assets[i % count], size: size)
                         }
                     }
                     .offset(x: offset)
@@ -257,120 +238,43 @@ struct AppIconCarousel: View {
 
 // MARK: - Perk tile visuals
 
-private struct MiniIconTile: View {
-    var size: CGFloat = 26
-    var background: Color
-    var foreground: Color
-    var glyph: String
-    var italic: Bool = true
-    var dotColor: Color = .primary
-
-    var body: some View {
-        RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
-            .fill(background)
-            .overlay {
-                RoundedRectangle(cornerRadius: size * 0.23, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.10), lineWidth: 0.5)
-            }
-            .overlay(alignment: .top) {
-                HStack {
-                    Circle().frame(width: 2, height: 2)
-                    Spacer()
-                    Circle().frame(width: 2, height: 2)
-                }
-                .foregroundStyle(dotColor.opacity(0.35))
-                .padding(.horizontal, size * 0.14)
-                .padding(.top, size * 0.10)
-            }
-            .overlay {
-                Text(verbatim: glyph)
-                    .font(.custom(italic ? AppFont.serifItalic : AppFont.serifRegular,
-                                  size: size * 0.58))
-                    .foregroundStyle(foreground)
-            }
-            .frame(width: size, height: size)
-    }
-}
-
 private struct IconFan: View {
-    @Environment(\.colorScheme) private var colorScheme
+    private let size: CGFloat = 26
+    private let icons = ["AppIconPreview-Porcelain", "AppIconPreview-Default", "AppIconPreview-DiscoBalloon"]
+
     var body: some View {
         ZStack {
-            MiniIconTile(
-                background: PaperTints.card1,
-                foreground: .primary,
-                glyph: "26",
-                dotColor: .primary
-            )
-            .rotationEffect(.degrees(-12))
-            .offset(x: -8, y: 1)
-
-            MiniIconTile(
-                background: Color(red: 0.04, green: 0.04, blue: 0.04),
-                foreground: Color(red: 0.984, green: 0.980, blue: 0.969),
-                glyph: "日",
-                italic: false,
-                dotColor: .white
-            )
-            .zIndex(1)
-
-            MiniIconTile(
-                background: Color(red: 0.784, green: 0.212, blue: 0.165),
-                foreground: Color(red: 1, green: 0.98, blue: 0.94),
-                glyph: "26",
-                dotColor: Color(red: 1, green: 0.98, blue: 0.94)
-            )
-            .rotationEffect(.degrees(12))
-            .offset(x: 8, y: 1)
+            miniIcon(icons[0])
+                .rotationEffect(.degrees(-12))
+                .offset(x: -8, y: 1)
+            miniIcon(icons[1])
+                .zIndex(1)
+            miniIcon(icons[2])
+                .rotationEffect(.degrees(12))
+                .offset(x: 8, y: 1)
         }
         .frame(width: 44, height: 38)
         .accessibilityHidden(true)
     }
+
+    private func miniIcon(_ asset: String) -> some View {
+        Image(asset)
+            .resizable()
+            .scaledToFit()
+            .frame(width: size, height: size)
+            .clipShape(RoundedRectangle(cornerRadius: size * 0.23, style: .continuous))
+    }
 }
 
 private struct MiniPaperCard: View {
+    private let size: CGFloat = 38
+
     var body: some View {
-        RoundedRectangle(cornerRadius: 5, style: .continuous)
-            .fill(PaperTints.card1)
-            .overlay {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.12), lineWidth: 0.5)
-            }
-            .overlay(alignment: .top) {
-                HStack(spacing: 11) {
-                    Circle()
-                        .fill(PaperTints.bindingHole)
-                        .overlay {
-                            Circle().strokeBorder(Color.primary.opacity(0.18), lineWidth: 0.5)
-                        }
-                        .frame(width: 2.5, height: 2.5)
-                    Circle()
-                        .fill(PaperTints.bindingHole)
-                        .overlay {
-                            Circle().strokeBorder(Color.primary.opacity(0.18), lineWidth: 0.5)
-                        }
-                        .frame(width: 2.5, height: 2.5)
-                }
-                .padding(.top, 3)
-            }
-            .overlay {
-                Text(verbatim: "23")
-                    .font(.custom(AppFont.serifItalic, size: 19))
-                    .foregroundStyle(.primary)
-                    .offset(y: 2)
-            }
-            .overlay(alignment: .bottom) {
-                HStack(spacing: 2) {
-                    ForEach(0..<8, id: \.self) { _ in
-                        RoundedRectangle(cornerRadius: 0.5)
-                            .fill(Color.primary.opacity(0.22))
-                            .frame(height: 2)
-                    }
-                }
-                .padding(.horizontal, 4)
-                .padding(.bottom, 2)
-            }
-            .frame(width: 38, height: 38)
+        Image("AppIconPreview-Leatherbag")
+            .resizable()
+            .scaledToFit()
+            .frame(width: size, height: size)
+            .clipShape(RoundedRectangle(cornerRadius: size * 0.23, style: .continuous))
             .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18),
                     radius: 2, y: 1)
             .rotationEffect(.degrees(-3))
@@ -425,39 +329,12 @@ private struct RadarPingIndicator: View {
 
 private struct WidgetIllustration: View {
     var body: some View {
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
-            .fill(
-                RadialGradient(
-                    colors: [Color(red: 0.83, green: 0.85, blue: 0.89),
-                             Color(red: 0.55, green: 0.59, blue: 0.69)],
-                    center: .init(x: 0.3, y: 0.2), startRadius: 0, endRadius: 92
-                )
-            )
-            .overlay {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(PaperTints.card1)
-                    .overlay {
-                        VStack(spacing: 2) {
-                            HStack(spacing: 18) {
-                                Circle().fill(PaperTints.bindingHole).frame(width: 4, height: 4)
-                                Circle().fill(PaperTints.bindingHole).frame(width: 4, height: 4)
-                            }
-                            Text(verbatim: "Thursday")
-                                .font(.custom(AppFont.serifItalic, size: 8))
-                                .foregroundStyle(.secondary)
-                            Text(verbatim: "23")
-                                .font(.custom(AppFont.serifRegular, size: 38))
-                                .foregroundStyle(.primary)
-                                .overlay(alignment: .bottom) {
-                                    Rectangle().frame(width: 22, height: 1.25).foregroundStyle(.primary)
-                                }
-                        }
-                        .padding(.vertical, 6)
-                    }
-                    .padding(8)
-                    .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.10), radius: 4, y: 1)
-            }
-            .frame(width: 76, height: 76)
+        Image("AppIconPreview-PixelSun")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 62, height: 62)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.10), radius: 4, y: 1)
             .accessibilityHidden(true)
     }
 }

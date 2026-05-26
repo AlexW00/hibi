@@ -128,6 +128,8 @@ struct SettingsView: View {
                 } label: {
                     Label("Stamp Noise", systemImage: "drop")
                 }
+
+                IconLockDebugRow()
             }
             #endif
             }
@@ -319,6 +321,28 @@ private struct StampNoiseDebugView: View {
 
     private func persistNow() {
         raw = StampNoise.encode(values)
+    }
+}
+
+private struct IconLockDebugRow: View {
+    @Environment(AppIconManager.self) private var iconManager
+    @State private var isLocked = false
+
+    var body: some View {
+        Toggle(isOn: $isLocked) {
+            Label("Lock Early User Icon", systemImage: "lock")
+        }
+        .tint(.black)
+        .onAppear {
+            isLocked = !iconManager.isUnlocked(
+                AppIconManager.icons.first { $0.id == "early-user" }!
+            )
+        }
+        .onChange(of: isLocked) { _, locked in
+            // Future date = locked (install "hasn't happened yet"), past date = unlocked
+            let date: Date = locked ? .distantFuture : .distantPast
+            iconManager.overrideInstallDate(date)
+        }
     }
 }
 #endif
