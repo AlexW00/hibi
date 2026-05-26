@@ -68,6 +68,7 @@ struct SettingsView: View {
             }
         }
         .background(Color(.systemGroupedBackground))
+        .ignoresSafeArea(edges: .bottom)
         .navigationTitle(Text(verbatim: "Hibi"))
         .navigationDestination(item: $settingsDestination) { destination in
             switch destination {
