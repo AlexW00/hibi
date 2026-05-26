@@ -224,52 +224,59 @@ private struct StampNoiseDebugView: View {
     @State private var debouncer = Debouncer()
 
     var body: some View {
-        Form {
-            Section {
-                HStack {
-                    Spacer()
-                    HibiStamp(purchased: true, date: previewDate, size: 200)
-                        .padding(.vertical, 8)
-                    Spacer()
+        VStack(spacing: 0) {
+            // Sticky preview — always visible while the parameters scroll.
+            HibiStamp(purchased: true, date: previewDate, size: 180)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Color(.systemGroupedBackground))
+                .overlay(alignment: .bottom) {
+                    Divider().opacity(0.6)
                 }
-            }
+                .zIndex(1)
 
-            Section("Preset") {
-                Picker("Preset", selection: $presetID) {
-                    ForEach(StampNoise.Preset.allCases) { preset in
-                        Text(preset.label).tag(preset.rawValue)
+            Form {
+                Section("Preset") {
+                    Picker("Preset", selection: $presetID) {
+                        ForEach(StampNoise.Preset.allCases) { preset in
+                            Text(preset.label).tag(preset.rawValue)
+                        }
+                        if presetID == StampNoise.customPresetID {
+                            Text(verbatim: "Custom").tag(StampNoise.customPresetID)
+                        }
                     }
-                    if presetID == StampNoise.customPresetID {
-                        Text(verbatim: "Custom").tag(StampNoise.customPresetID)
+                    .pickerStyle(.segmented)
+                    .onChange(of: presetID) { _, newValue in
+                        guard let preset = StampNoise.Preset(rawValue: newValue) else { return }
+                        values = preset.values
+                        persistNow()
                     }
                 }
-                .pickerStyle(.segmented)
-                .onChange(of: presetID) { _, newValue in
-                    guard let preset = StampNoise.Preset(rawValue: newValue) else { return }
-                    values = preset.values
-                    persistNow()
-                }
-            }
 
-            Section("Parameters") {
-                ForEach(StampNoise.Param.allCases) { param in
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack {
-                            Text(verbatim: param.label)
-                                .font(.subheadline)
-                            Spacer()
-                            Text(verbatim: String(format: "%.2f", Double(values[param.rawValue])))
-                                .font(.subheadline.monospacedDigit())
+                Section("Parameters") {
+                    ForEach(StampNoise.Param.allCases) { param in
+                        VStack(alignment: .leading, spacing: 3) {
+                            HStack {
+                                Text(verbatim: param.label)
+                                    .font(.subheadline)
+                                Spacer()
+                                Text(verbatim: String(format: "%.2f", Double(values[param.rawValue])))
+                                    .font(.subheadline.monospacedDigit())
+                                    .foregroundStyle(.secondary)
+                            }
+                            Slider(value: binding(for: param),
+                                   in: Double(param.range.lowerBound)...Double(param.range.upperBound))
+                                .tint(.black)
+                            Text(verbatim: param.detail)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                        Slider(value: binding(for: param),
-                               in: Double(param.range.lowerBound)...Double(param.range.upperBound))
-                            .tint(.black)
+                        .padding(.vertical, 2)
                     }
-                    .padding(.vertical, 2)
                 }
             }
         }
+        .background(Color(.systemGroupedBackground))
         .navigationTitle(Text(verbatim: "Stamp Noise"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { values = StampNoise.decode(raw) }

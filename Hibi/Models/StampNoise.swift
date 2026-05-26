@@ -57,6 +57,27 @@ enum StampNoise {
             }
         }
 
+        var detail: String {
+            switch self {
+            case .masterStrength:  "Overall noise amount. 0 = clean stamp."
+            case .supplyScale:     "Size of the macro ink-density patches."
+            case .supplyStrength:  "How much ink darkness varies across the seal."
+            case .supplyErode:     "How far low-ink areas eat inward from the edge."
+            case .mottleScale:     "Frequency of the fine interior texture."
+            case .mottleStrength:  "Amount of patchy interior darkening."
+            case .dropoutStrength: "Density of tiny missing-ink specks."
+            case .dropoutScale:    "Speck grain — higher is finer."
+            case .chipStrength:    "Amount of larger dry voids."
+            case .chipScale:       "Void size — higher is smaller voids."
+            case .edgeRoughness:   "How jagged the outline breaks up."
+            case .edgeRoughScale:  "Frequency of the outline jaggedness."
+            case .rimWidth:        "Width of the darker pressed edge (squeegee)."
+            case .rimDarkness:     "How dark the pressed edge gets."
+            case .bleedWidth:      "How far ink feathers outside the edge."
+            case .bleedStrength:   "Amount of outward ink feathering."
+            }
+        }
+
         var range: ClosedRange<Float> {
             switch self {
             case .masterStrength:  0...1
