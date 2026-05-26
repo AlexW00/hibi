@@ -216,7 +216,7 @@ private final class Debouncer {
 
 private struct StampNoiseDebugView: View {
     @AppStorage(StampNoise.valuesKey) private var raw = StampNoise.defaultRaw
-    @AppStorage(StampNoise.presetKey) private var presetID = StampNoise.defaultPreset.rawValue
+    @AppStorage(StampNoise.presetKey) private var presetID = StampNoise.defaultPresetID
     @State private var values: [Float] = StampNoise.defaultValues
     // Pinned so re-rendering the form never re-triggers the (expensive)
     // composite/SDF rebuild inside the preview's HibiStamp.
@@ -238,17 +238,14 @@ private struct StampNoiseDebugView: View {
             Form {
                 Section("Preset") {
                     Picker("Preset", selection: $presetID) {
-                        ForEach(StampNoise.Preset.allCases) { preset in
-                            Text(preset.label).tag(preset.rawValue)
-                        }
-                        if presetID == StampNoise.customPresetID {
-                            Text(verbatim: "Custom").tag(StampNoise.customPresetID)
-                        }
+                        Text(verbatim: "Default").tag(StampNoise.defaultPresetID)
+                        Text(verbatim: "Custom").tag(StampNoise.customPresetID)
                     }
                     .pickerStyle(.segmented)
                     .onChange(of: presetID) { _, newValue in
-                        guard let preset = StampNoise.Preset(rawValue: newValue) else { return }
-                        values = preset.values
+                        // Selecting Default resets; Custom is just free-edit mode.
+                        guard newValue == StampNoise.defaultPresetID else { return }
+                        values = StampNoise.defaultValues
                         persistNow()
                     }
                 }

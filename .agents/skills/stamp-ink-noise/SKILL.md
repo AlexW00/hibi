@@ -1,6 +1,6 @@
 ---
 name: stamp-ink-noise
-description: How to create realistic rubber-stamp ink-transfer imperfections in Metal shaders. Covers the baked-SDF channel contract, the role-separated noise model (supply, mottle, dropout, chips, rim, bleed, roughness), the StampNoise parameter/preset system and DEBUG tuning menu, and the stamp pipeline (StampConfig seed, StampCompositor composite + SDF, StampShader.metal effect). Use when modifying stamp visuals, tuning noise parameters, or adding new stamp-related features.
+description: How to create realistic rubber-stamp ink-transfer imperfections in Metal shaders. Covers the baked-SDF channel contract, the role-separated noise model (supply, chips, roughness, rim, bleed), the StampNoise parameter system and DEBUG tuning menu, and the stamp pipeline (StampConfig seed, StampCompositor composite + SDF, StampShader.metal effect). Use when modifying stamp visuals, tuning noise parameters, or adding new stamp-related features.
 ---
 
 # Stamp Ink Noise & Pipeline
@@ -37,15 +37,15 @@ Convincing stamp noise is **never one function**. Real impressions combine ink-s
 | Mechanism | Noise | Affects | Physical analogue |
 |-----------|-------|---------|-------------------|
 | `supply`  | low-freq simplex fBm | ink darkness + inward erosion | uneven pad/pressure |
-| `mottle`  | mid-freq fBm | interior ink darkness | patchy transfer |
-| `dropout` | interleaved-gradient (blue-noise-ish) dither, clustered by low supply | sparse alpha holes | under-inking |
 | `chips`   | Worley cells | larger alpha voids | dry / relief wear |
 | `rough`   | high-freq simplex on the SDF boundary | boundary jaggedness | torn edge |
 | `rim`     | inner SDF band | darkens ink | squeegee / edge concentration |
 | `bleed`   | outer SDF band × anisotropic fBm | adds faint ink outside | capillary feathering |
 
+Two more mechanisms — `mottle` (mid-freq interior darkening) and `dropout` (clustered blue-noise specks) — were trialed and **removed** once the tuned default zeroed both. Re-add them from git history if a future look needs them; they are not in the current shader or param list.
+
 Key principles learned the hard way:
-- **Density (color) and coverage (alpha) are separate.** `supply`/`mottle` modulate ink *brightness* centered on 1.0; they do not on their own punch holes. Holes come from `dropout`/`chips` (multiplicative alpha) and boundary erosion.
+- **Density (color) and coverage (alpha) are separate.** `supply` modulates ink *brightness* centered on 1.0; it does not on its own punch holes. Holes come from `chips` (multiplicative alpha) and boundary erosion.
 - **Edge effects need a real distance field.** Rim darkening and outward bleed operate in bands several points wide — impossible from a 1px coverage ramp or a 2px neighbourhood. Hence the baked SDF.
 - **Erosion only removes ink** (`min(coverage, erodedAlpha)`); bleed is the only thing that adds outside the shape.
 - **`master = 0` must be exactly the clean composite** — `alpha = mix(coverage, eroded, master)` and every strength knob is pre-multiplied by `master`.
@@ -59,15 +59,15 @@ Approaches that did **not** work and should not be reintroduced as the *primary*
 ## Parameters, presets, and the debug menu
 
 `Hibi/Models/StampNoise.swift` is the single source of truth:
-- `Param` enum — ordered list of 16 floats. **Index order MUST match the `P_*` `#define`s in StampShader.metal.**
-- `Preset` enum — `clean` / `balanced` / `dry` / `wet`. `balanced` ships in release.
+- `Param` enum — ordered list of 12 floats. **Index order MUST match the `P_*` `#define`s in StampShader.metal.**
+- `defaultValues` — the single tuned preset that ships in release.
 - `encode`/`decode` — flat `[Float]` ⇄ comma-joined String for `@AppStorage`.
 
 `HibiStamp` (in `HibiPlusView.swift`) reads the values and passes them as `.floatArray(noiseValues)`. **Release always uses `StampNoise.defaultValues`**; only DEBUG builds read the persisted, tunable values (`#if DEBUG` around the `@AppStorage`).
 
-The DEBUG-only **Settings → Debug → Stamp Noise** page (`StampNoiseDebugView` in `SettingsView.swift`) shows a live `HibiStamp` preview, a preset segmented picker, and a slider per parameter. Editing a slider switches the preset to a `custom` sentinel. Because the SDF is param-independent, tuning never rebuilds the composite — it's a cheap shader re-render.
+The DEBUG-only **Settings → Debug → Stamp Noise** page (`StampNoiseDebugView` in `SettingsView.swift`) shows a live `HibiStamp` preview, a **Default / Custom** segmented picker (Default resets to `defaultValues`; Custom is free-edit), and a slider per parameter with a one-line description. Editing a slider flips the picker to `custom`. Because the SDF is param-independent, tuning never rebuilds the composite — it's a cheap shader re-render (the persist is debounced and the preview date is pinned so dragging stays smooth).
 
-When adding/removing a parameter, update **all** of: `Param` enum (+ `label`, `range`), every `Preset.values` array, and the `P_*` defines + reads in the shader. Keep the count in sync (`StampNoise.count`).
+When adding/removing a parameter, update **all** of: `Param` enum (+ `label`, `detail`, `range`), the `defaultValues` array, and the `P_*` defines + reads in the shader. Keep the count in sync (`StampNoise.count`).
 
 ## Bump / Emboss Calculation
 

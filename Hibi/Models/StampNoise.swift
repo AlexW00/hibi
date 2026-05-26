@@ -9,22 +9,15 @@ import Foundation
 ///
 /// Noise mechanisms are role-separated (see the deep-research notes):
 ///   • supply  — low-frequency simplex field: macro ink density / pressure
-///   • mottle  — mid-frequency fBm: interior texture
-///   • dropout — blue-noise-style dither: sparse missing ink, clustered in
-///               low-supply regions
 ///   • chips   — Worley cells: larger dry voids
-///   • edge    — SDF-driven rim darkening (squeegee) + outward capillary bleed
 ///   • rough   — high-frequency boundary jaggedness
+///   • edge    — SDF-driven rim darkening (squeegee) + outward capillary bleed
 enum StampNoise {
     enum Param: Int, CaseIterable, Identifiable {
         case masterStrength = 0
         case supplyScale
         case supplyStrength
         case supplyErode
-        case mottleScale
-        case mottleStrength
-        case dropoutStrength
-        case dropoutScale
         case chipStrength
         case chipScale
         case edgeRoughness
@@ -42,10 +35,6 @@ enum StampNoise {
             case .supplyScale:     "Supply scale"
             case .supplyStrength:  "Supply strength"
             case .supplyErode:     "Supply erode (pt)"
-            case .mottleScale:     "Mottle scale"
-            case .mottleStrength:  "Mottle strength"
-            case .dropoutStrength: "Dropout amount"
-            case .dropoutScale:    "Dropout grain"
             case .chipStrength:    "Chip voids"
             case .chipScale:       "Chip scale"
             case .edgeRoughness:   "Edge roughness (pt)"
@@ -63,10 +52,6 @@ enum StampNoise {
             case .supplyScale:     "Size of the macro ink-density patches."
             case .supplyStrength:  "How much ink darkness varies across the seal."
             case .supplyErode:     "How far low-ink areas eat inward from the edge."
-            case .mottleScale:     "Frequency of the fine interior texture."
-            case .mottleStrength:  "Amount of patchy interior darkening."
-            case .dropoutStrength: "Density of tiny missing-ink specks."
-            case .dropoutScale:    "Speck grain — higher is finer."
             case .chipStrength:    "Amount of larger dry voids."
             case .chipScale:       "Void size — higher is smaller voids."
             case .edgeRoughness:   "How jagged the outline breaks up."
@@ -84,10 +69,6 @@ enum StampNoise {
             case .supplyScale:     0.5...8
             case .supplyStrength:  0...1
             case .supplyErode:     0...10
-            case .mottleScale:     2...24
-            case .mottleStrength:  0...1
-            case .dropoutStrength: 0...1
-            case .dropoutScale:    0.5...6
             case .chipStrength:    0...1
             case .chipScale:       4...40
             case .edgeRoughness:   0...8
@@ -102,47 +83,19 @@ enum StampNoise {
 
     static let count = Param.allCases.count
 
-    enum Preset: String, CaseIterable, Identifiable {
-        case clean, balanced, dry, wet
-
-        var id: String { rawValue }
-
-        var label: String {
-            switch self {
-            case .clean:    "Clean"
-            case .balanced: "Balanced"
-            case .dry:      "Dry"
-            case .wet:      "Wet"
-            }
-        }
-
-        // Values follow `Param.allCases` order. See StampShader.metal.
-        // master, supplyScale, supplyStrength, supplyErode,
-        // mottleScale, mottleStrength, dropoutStrength, dropoutScale,
-        // chipStrength, chipScale, edgeRoughness, edgeRoughScale,
-        // rimWidth, rimDarkness, bleedWidth, bleedStrength
-        var values: [Float] {
-            switch self {
-            case .clean:
-                [0.0, 2.5, 0.35, 3.0, 9.0, 0.20, 0.18, 3.0, 0.0, 18.0, 2.0, 80.0, 3.0, 0.35, 2.0, 0.25]
-            case .balanced:
-                [1.0, 2.5, 0.35, 3.0, 9.0, 0.20, 0.18, 3.0, 0.0, 18.0, 2.0, 80.0, 3.0, 0.35, 2.0, 0.25]
-            case .dry:
-                [1.0, 2.0, 0.55, 5.0, 11.0, 0.35, 0.50, 3.5, 0.45, 16.0, 4.5, 90.0, 2.0, 0.25, 0.5, 0.05]
-            case .wet:
-                [1.0, 2.2, 0.18, 1.5, 8.0, 0.10, 0.05, 3.0, 0.0, 18.0, 1.0, 60.0, 5.0, 0.50, 4.0, 0.50]
-            }
-        }
-    }
-
-    /// The preset baked into release builds.
-    static let defaultPreset: Preset = .balanced
-    static var defaultValues: [Float] { defaultPreset.values }
+    /// The single tuned preset baked into release builds. Values follow
+    /// `Param.allCases` order:
+    /// master, supplyScale, supplyStrength, supplyErode,
+    /// chipStrength, chipScale, edgeRoughness, edgeRoughScale,
+    /// rimWidth, rimDarkness, bleedWidth, bleedStrength
+    static let defaultValues: [Float] =
+        [0.55, 2.24, 0.47, 2.04, 0.28, 13.31, 1.50, 75.27, 4.29, 0.60, 3.55, 0.16]
 
     // MARK: Persistence (DEBUG tuning only)
 
     static let valuesKey = "stampNoiseValues"
     static let presetKey = "stampNoisePreset"
+    static let defaultPresetID = "default"
     /// Sentinel preset id used when the user has hand-edited a slider.
     static let customPresetID = "custom"
 

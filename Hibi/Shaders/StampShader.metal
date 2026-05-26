@@ -7,18 +7,14 @@ using namespace metal;
 #define P_SUPPLY_SCALE     1
 #define P_SUPPLY_STRENGTH  2
 #define P_SUPPLY_ERODE     3
-#define P_MOTTLE_SCALE     4
-#define P_MOTTLE_STRENGTH  5
-#define P_DROPOUT_STRENGTH 6
-#define P_DROPOUT_SCALE    7
-#define P_CHIP_STRENGTH    8
-#define P_CHIP_SCALE       9
-#define P_EDGE_ROUGHNESS   10
-#define P_EDGE_ROUGH_SCALE 11
-#define P_RIM_WIDTH        12
-#define P_RIM_DARKNESS     13
-#define P_BLEED_WIDTH      14
-#define P_BLEED_STRENGTH   15
+#define P_CHIP_STRENGTH    4
+#define P_CHIP_SCALE       5
+#define P_EDGE_ROUGHNESS   6
+#define P_EDGE_ROUGH_SCALE 7
+#define P_RIM_WIDTH        8
+#define P_RIM_DARKNESS     9
+#define P_BLEED_WIDTH      10
+#define P_BLEED_STRENGTH   11
 
 // Normalized half-range used to encode the signed distance field into the
 // composite's green channel. MUST match StampCompositor.sdfRange.
@@ -40,10 +36,6 @@ uint3 pcg3d(uint3 v) {
     v.y += v.z * v.x;
     v.z += v.x * v.y;
     return v;
-}
-
-float hash01(uint3 seed) {
-    return float(pcg3d(seed).x) / float(0xFFFFFFFFu);
 }
 
 // Large deterministic 2D offset so each seed samples a different region of
@@ -113,11 +105,6 @@ float worley(float2 p, uint seedOffsetU) {
     return sqrt(minDist);
 }
 
-// Interleaved gradient noise (Jimenez) — cheap blue-noise-like dither.
-float ign(float2 p) {
-    return fract(52.9829189 * fract(0.06711056 * p.x + 0.00583715 * p.y));
-}
-
 // --- Stamp shader ---
 //
 // Applied as a layerEffect to the pre-composited mask+text image:
@@ -154,10 +141,6 @@ float ign(float2 p) {
     float supplyScale     = param(params, paramCount, P_SUPPLY_SCALE);
     float supplyStrength  = param(params, paramCount, P_SUPPLY_STRENGTH) * m;
     float supplyErode     = param(params, paramCount, P_SUPPLY_ERODE) * m;
-    float mottleScale     = param(params, paramCount, P_MOTTLE_SCALE);
-    float mottleStrength  = param(params, paramCount, P_MOTTLE_STRENGTH) * m;
-    float dropoutStrength = param(params, paramCount, P_DROPOUT_STRENGTH) * m;
-    float dropoutScale    = param(params, paramCount, P_DROPOUT_SCALE);
     float chipStrength    = param(params, paramCount, P_CHIP_STRENGTH) * m;
     float chipScale       = param(params, paramCount, P_CHIP_SCALE);
     float edgeRoughness   = param(params, paramCount, P_EDGE_ROUGHNESS) * m;
@@ -167,11 +150,8 @@ float ign(float2 p) {
     float bleedWidth      = param(params, paramCount, P_BLEED_WIDTH);
     float bleedStrength   = param(params, paramCount, P_BLEED_STRENGTH) * m;
 
-    // --- Control fields ---
-    // supply: slow macro pressure / ink-supply variation
-    // mottle: mid-frequency interior texture
+    // --- Control field: slow macro pressure / ink-supply variation ---
     float supply = fbm(uv * supplyScale, 4, seedOffset(seedU + 11u));
-    float mottle = fbm(uv * mottleScale, 3, seedOffset(seedU + 53u));
 
     // --- Signed distance (in points), inside > 0 ---
     float sdN   = (float(raw.g) - 0.5) * 2.0 * SDF_RANGE;  // image fraction
@@ -187,15 +167,6 @@ float ign(float2 p) {
     // Erosion only removes ink; never exceed the original coverage. Blend by
     // master so that at master = 0 the alpha is exactly the clean coverage.
     float alpha = mix(coverage, min(coverage, erodedAlpha), m);
-
-    // --- Sparse missing ink (blue-noise dither, clustered in low-supply) ---
-    float cluster  = fbm(uv * 5.0, 2, seedOffset(seedU + 401u));
-    float holeProb = dropoutStrength
-                   * smoothstep(0.55, 0.05, supply)
-                   * smoothstep(0.30, 0.75, cluster);
-    float ignSeed  = hash01(uint3(seedU, 7u, 13u)) * 1000.0;
-    float hole     = step(ign(position * dropoutScale + ignSeed), holeProb);
-    alpha *= (1.0 - hole);
 
     // --- Dry chips: larger irregular Worley voids ---
     float chip = 0.0;
@@ -221,9 +192,7 @@ float ign(float2 p) {
     }
 
     // --- Ink density (color brightness), centered on 1.0 ---
-    float density = 1.0;
-    density *= 1.0 + supplyStrength * (supply - 0.5) * 1.6;
-    density *= 1.0 + mottleStrength * (mottle - 0.5) * 1.6;
+    float density = 1.0 + supplyStrength * (supply - 0.5) * 1.6;
     density = clamp(density, 0.15, 1.3);
 
     // --- Rim darkening (squeegee): band just INSIDE the boundary ---
