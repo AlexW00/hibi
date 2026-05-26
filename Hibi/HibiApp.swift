@@ -24,6 +24,9 @@ struct HibiApp: App {
         if !defaults.bool(forKey: firstLaunchKey) {
             NoteletStorage.markCurrentVersionAsSeen()
             defaults.set(true, forKey: firstLaunchKey)
+            if defaults.object(forKey: "firstInstallDate") == nil {
+                defaults.set(Date(), forKey: "firstInstallDate")
+            }
         }
     }
 }
