@@ -202,17 +202,33 @@ private struct AppearanceSettingsView: View {
 // MARK: - Stamp Noise (DEBUG)
 
 #if DEBUG
+/// Coalesces rapid slider updates so the live Metal preview isn't asked to
+/// re-render on every drag tick.
+private final class Debouncer {
+    private var workItem: DispatchWorkItem?
+    func schedule(after delay: TimeInterval, _ action: @escaping () -> Void) {
+        workItem?.cancel()
+        let item = DispatchWorkItem(block: action)
+        workItem = item
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: item)
+    }
+}
+
 private struct StampNoiseDebugView: View {
     @AppStorage(StampNoise.valuesKey) private var raw = StampNoise.defaultRaw
     @AppStorage(StampNoise.presetKey) private var presetID = StampNoise.defaultPreset.rawValue
     @State private var values: [Float] = StampNoise.defaultValues
+    // Pinned so re-rendering the form never re-triggers the (expensive)
+    // composite/SDF rebuild inside the preview's HibiStamp.
+    @State private var previewDate = Date()
+    @State private var debouncer = Debouncer()
 
     var body: some View {
         Form {
             Section {
                 HStack {
                     Spacer()
-                    HibiStamp(purchased: true, date: Date(), size: 200)
+                    HibiStamp(purchased: true, date: previewDate, size: 200)
                         .padding(.vertical, 8)
                     Spacer()
                 }
@@ -231,7 +247,7 @@ private struct StampNoiseDebugView: View {
                 .onChange(of: presetID) { _, newValue in
                     guard let preset = StampNoise.Preset(rawValue: newValue) else { return }
                     values = preset.values
-                    persist()
+                    persistNow()
                 }
             }
 
@@ -264,13 +280,24 @@ private struct StampNoiseDebugView: View {
             get: { Double(values[param.rawValue]) },
             set: { newValue in
                 values[param.rawValue] = Float(newValue)
-                presetID = StampNoise.customPresetID
-                persist()
+                if presetID != StampNoise.customPresetID {
+                    presetID = StampNoise.customPresetID
+                }
+                schedulePersist()
             }
         )
     }
 
-    private func persist() {
+    /// Debounced write — keeps the slider responsive while the preview only
+    /// re-renders a few times per second.
+    private func schedulePersist() {
+        let snapshot = values
+        debouncer.schedule(after: 0.09) {
+            UserDefaults.standard.set(StampNoise.encode(snapshot), forKey: StampNoise.valuesKey)
+        }
+    }
+
+    private func persistNow() {
         raw = StampNoise.encode(values)
     }
 }
