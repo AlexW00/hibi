@@ -117,6 +117,12 @@ struct SettingsView: View {
                     Label("Demo Mode", systemImage: "wand.and.stars")
                 }
                 .tint(.black)
+
+                NavigationLink {
+                    StampNoiseDebugView()
+                } label: {
+                    Label("Stamp Noise", systemImage: "drop")
+                }
             }
             #endif
             }
@@ -192,6 +198,125 @@ private struct AppearanceSettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 }
+
+// MARK: - Stamp Noise (DEBUG)
+
+#if DEBUG
+/// Coalesces rapid slider updates so the live Metal preview isn't asked to
+/// re-render on every drag tick.
+private final class Debouncer {
+    private var workItem: DispatchWorkItem?
+    func schedule(after delay: TimeInterval, _ action: @escaping () -> Void) {
+        workItem?.cancel()
+        let item = DispatchWorkItem(block: action)
+        workItem = item
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: item)
+    }
+}
+
+private struct StampNoiseDebugView: View {
+    @AppStorage(StampNoise.valuesKey) private var raw = StampNoise.defaultRaw
+    @AppStorage(StampNoise.presetKey) private var presetID = StampNoise.defaultPresetID
+    @State private var values: [Float] = StampNoise.defaultValues
+    // Pinned so re-rendering the form never re-triggers the (expensive)
+    // composite/SDF rebuild inside the preview's HibiStamp.
+    @State private var previewDate = Date()
+    @State private var debouncer = Debouncer()
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Sticky preview — always visible while the parameters scroll.
+            HibiStamp(purchased: true, date: previewDate, size: 180)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Color(.systemGroupedBackground))
+                .overlay(alignment: .bottom) {
+                    Divider().opacity(0.6)
+                }
+                .zIndex(1)
+
+            Form {
+                Section("Preset") {
+                    Picker("Preset", selection: $presetID) {
+                        Text(verbatim: "Default").tag(StampNoise.defaultPresetID)
+                        Text(verbatim: "Custom").tag(StampNoise.customPresetID)
+                    }
+                    .pickerStyle(.segmented)
+                    .onChange(of: presetID) { _, newValue in
+                        // Selecting Default resets; Custom is just free-edit mode.
+                        guard newValue == StampNoise.defaultPresetID else { return }
+                        values = StampNoise.defaultValues
+                        persistNow()
+                    }
+                }
+
+                Section("Noise") {
+                    ForEach(StampNoise.Param.allCases.filter { $0.group == .noise }) { param in
+                        sliderRow(param)
+                    }
+                }
+
+                Section("Surface") {
+                    ForEach(StampNoise.Param.allCases.filter { $0.group == .surface }) { param in
+                        sliderRow(param)
+                    }
+                }
+            }
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationTitle(Text(verbatim: "Stamp Noise"))
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { values = StampNoise.decode(raw) }
+    }
+
+    @ViewBuilder
+    private func sliderRow(_ param: StampNoise.Param) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack {
+                Text(verbatim: param.label)
+                    .font(.subheadline)
+                Spacer()
+                Text(verbatim: String(format: "%.2f", Double(values[param.rawValue])))
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+            Slider(value: binding(for: param),
+                   in: Double(param.range.lowerBound)...Double(param.range.upperBound))
+                .tint(.black)
+            Text(verbatim: param.detail)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 2)
+    }
+
+    private func binding(for param: StampNoise.Param) -> Binding<Double> {
+        Binding(
+            get: { Double(values[param.rawValue]) },
+            set: { newValue in
+                values[param.rawValue] = Float(newValue)
+                if presetID != StampNoise.customPresetID {
+                    presetID = StampNoise.customPresetID
+                }
+                schedulePersist()
+            }
+        )
+    }
+
+    /// Debounced write — keeps the slider responsive while the preview only
+    /// re-renders a few times per second.
+    private func schedulePersist() {
+        let snapshot = values
+        debouncer.schedule(after: 0.09) {
+            UserDefaults.standard.set(StampNoise.encode(snapshot), forKey: StampNoise.valuesKey)
+        }
+    }
+
+    private func persistNow() {
+        raw = StampNoise.encode(values)
+    }
+}
+#endif
 
 // MARK: - Units
 

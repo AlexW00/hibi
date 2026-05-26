@@ -44,6 +44,15 @@ struct HibiStamp: View {
     @State private var motion = MotionStore()
     @State private var isLowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
 
+    // Noise parameters. Release builds always ship the default preset; DEBUG
+    // builds read the values tuned in the Stamp Noise debug menu.
+    #if DEBUG
+    @AppStorage(StampNoise.valuesKey) private var noiseRaw = StampNoise.defaultRaw
+    private var noiseValues: [Float] { StampNoise.decode(noiseRaw) }
+    #else
+    private var noiseValues: [Float] { StampNoise.defaultValues }
+    #endif
+
     var body: some View {
         Group {
             if purchased {
@@ -110,7 +119,8 @@ struct HibiStamp: View {
                     .float2(Float(size), Float(size)),
                     .float(Float(StampConfig.seed(from: date ?? Date()))),
                     .float2(0, 0),
-                    .color(PaperTints.sealInk)
+                    .color(PaperTints.sealInk),
+                    .floatArray(noiseValues)
                 ),
                 maxSampleOffset: CGSize(width: 2, height: 2)
             )
@@ -125,7 +135,8 @@ struct HibiStamp: View {
                     .float2(Float(size), Float(size)),
                     .float(Float(StampConfig.seed(from: date ?? Date()))),
                     .float2(Float(motion.tiltX), Float(motion.tiltY)),
-                    .color(PaperTints.sealInk)
+                    .color(PaperTints.sealInk),
+                    .floatArray(noiseValues)
                 ),
                 maxSampleOffset: CGSize(width: 2, height: 2)
             )
