@@ -15,7 +15,7 @@ enum AppIconDefaults {
 struct AppIconOption: Identifiable, Sendable {
     let id: String
     let displayName: LocalizedStringResource
-    let description: LocalizedStringResource
+    let subtitle: LocalizedStringResource
     let previewAssetName: String
     /// `nil` = primary/default icon. Non-nil = the name passed to
     /// `UIApplication.shared.setAlternateIconName(_:)`.
@@ -45,7 +45,7 @@ final class AppIconManager {
             AppIconOption(
                 id: "default",
                 displayName: "Default",
-                description: "The current Hibi icon.",
+                subtitle: "Available for everyone",
                 previewAssetName: "AppIconPreview-Default",
                 alternateIconName: nil,
                 unlock: .always
@@ -53,7 +53,7 @@ final class AppIconManager {
             AppIconOption(
                 id: "early-user",
                 displayName: "Early User",
-                description: "For those who were there from the start.",
+                subtitle: "Available to early users",
                 previewAssetName: "AppIconPreview-EarlyUser",
                 alternateIconName: "EarlyUser",
                 unlock: .beforeDate(cutoff)
@@ -61,7 +61,7 @@ final class AppIconManager {
             AppIconOption(
                 id: "disco-balloon",
                 displayName: "Disco Balloon",
-                description: "A shimmering disco calendar.",
+                subtitle: "Available for Hibi Plus users",
                 previewAssetName: "AppIconPreview-DiscoBalloon",
                 alternateIconName: "DiscoBalloon",
                 unlock: .always
@@ -69,7 +69,7 @@ final class AppIconManager {
             AppIconOption(
                 id: "leatherbag",
                 displayName: "Leatherbag",
-                description: "Warm leather-bound planner.",
+                subtitle: "Available for Hibi Plus users",
                 previewAssetName: "AppIconPreview-Leatherbag",
                 alternateIconName: "Leatherbag",
                 unlock: .always
@@ -77,7 +77,7 @@ final class AppIconManager {
             AppIconOption(
                 id: "pearl-hibi",
                 displayName: "Pearl",
-                description: "Iridescent pearl pages.",
+                subtitle: "Available for Hibi Plus users",
                 previewAssetName: "AppIconPreview-PearlHibi",
                 alternateIconName: "PearlHibi",
                 unlock: .always
@@ -85,7 +85,7 @@ final class AppIconManager {
             AppIconOption(
                 id: "pixel-sun",
                 displayName: "Pixel Sun",
-                description: "A pixelated sunrise.",
+                subtitle: "Available for Hibi Plus users",
                 previewAssetName: "AppIconPreview-PixelSun",
                 alternateIconName: "PixelSun",
                 unlock: .always
@@ -93,7 +93,7 @@ final class AppIconManager {
             AppIconOption(
                 id: "porcelain",
                 displayName: "Porcelain",
-                description: "Delicate blue porcelain.",
+                subtitle: "Available for Hibi Plus users",
                 previewAssetName: "AppIconPreview-Porcelain",
                 alternateIconName: "Porcelain",
                 unlock: .always
@@ -101,7 +101,7 @@ final class AppIconManager {
             AppIconOption(
                 id: "wood-stroke",
                 displayName: "Wood",
-                description: "Brushed kanji on warm wood.",
+                subtitle: "Available for Hibi Plus users",
                 previewAssetName: "AppIconPreview-WoodStroke",
                 alternateIconName: "WoodStroke",
                 unlock: .always

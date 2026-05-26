@@ -32,9 +32,23 @@ private struct AppIconRow: View {
         Button(action: onSelect) {
             HStack(spacing: 14) {
                 iconPreview
-                labels
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(option.displayName)
+                        .font(.body)
+                        .foregroundStyle(isUnlocked ? .primary : .secondary)
+                    Text(option.subtitle)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+
                 Spacer()
-                if isSelected {
+
+                if !isUnlocked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.secondary)
+                } else if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.accent)
                         .font(.title3)
@@ -52,36 +66,6 @@ private struct AppIconRow: View {
             .scaledToFit()
             .frame(width: 64, height: 64)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay {
-                if !isUnlocked {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(.background.opacity(0.55))
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(.secondary)
-                }
-            }
-    }
-
-    @ViewBuilder
-    private var labels: some View {
-        if isUnlocked {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(option.displayName)
-                    .font(.body)
-                Text(option.description)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-        } else {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(option.displayName)
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                Text("Available to early users")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-        }
+            .opacity(isUnlocked ? 1 : 0.4)
     }
 }
