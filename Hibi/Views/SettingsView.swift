@@ -39,6 +39,11 @@ struct SettingsView: View {
                     Label("Appearance", systemImage: "paintbrush")
                 }
                 NavigationLink {
+                    AppIconSettingsView()
+                } label: {
+                    Label("App Icon", systemImage: "app.dashed")
+                }
+                NavigationLink {
                     UnitsSettingsView()
                 } label: {
                     Label("Units", systemImage: "ruler")
