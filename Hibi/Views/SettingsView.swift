@@ -12,6 +12,12 @@ struct SettingsView: View {
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
     @State private var whatsNewVersion: NoteletPresentedVersion?
+    @State private var stackProgress: CGFloat = 0
+    @State private var snapTick: Int = 0
+
+    private let stackExpandedHeight: CGFloat = 360
+    private let stackCollapsedHeight: CGFloat = 210
+    private let stackCollapseRange: CGFloat = 150
 
     enum Appearance: String, CaseIterable, Identifiable {
         case system, light, dark
@@ -30,33 +36,86 @@ struct SettingsView: View {
         VStack(spacing: 0) {
             HibiPlusView()
                 .background(Color(.systemGroupedBackground))
+                .frame(height: stackHeight)
+                .clipped()
+                .contentShape(Rectangle())
+                .onTapGesture { toggleStackCollapse() }
                 .zIndex(1)
-            Form {
-                Section("General") {
-                NavigationLink {
-                    AppearanceSettingsView()
-                } label: {
-                    Label("Appearance", systemImage: "paintbrush")
-                }
-                NavigationLink {
-                    UnitsSettingsView()
-                } label: {
-                    Label("Units", systemImage: "ruler")
-                }
-                NavigationLink {
-                    CalendarSelectionView()
-                } label: {
-                    LabeledContent {
-                        Text(calendarSummary)
-                            .foregroundStyle(.secondary)
-                    } label: {
-                        Label("Calendars & Reminders", systemImage: "calendar")
+            HijackingScrollView(
+                progress: $stackProgress,
+                collapseDistance: stackCollapseRange,
+                onSnap: { snapTick &+= 1 }
+            ) {
+                settingsContent
+                    .padding(.top, 8)
+                    .padding(.bottom, 20)
+            }
+            .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: snapTick)
+            .background(Color(.systemGroupedBackground))
+            .zIndex(0)
+        }
+        .navigationTitle(Text(verbatim: "Hibi"))
+        .noteletSheet(
+            notes: WhatsNewContent.allNotes,
+            version: whatsNewVersion,
+            onDismiss: { whatsNewVersion = nil },
+            configuration: WhatsNewContent.configuration
+        )
+    }
+
+    private var stackHeight: CGFloat {
+        stackExpandedHeight + (stackCollapsedHeight - stackExpandedHeight) * stackProgress
+    }
+
+    private func toggleStackCollapse() {
+        let target: CGFloat = stackProgress >= 0.5 ? 0 : 1
+        guard target != stackProgress else { return }
+        snapTick &+= 1
+        var t = Transaction()
+        t.animation = .spring(response: 0.38, dampingFraction: 0.86)
+        t.scrollContentOffsetAdjustmentBehavior = .disabled
+        withTransaction(t) {
+            stackProgress = target
+        }
+    }
+
+    private var settingsContent: some View {
+        VStack(spacing: 18) {
+            GroupBox {
+                VStack(spacing: 0) {
+                    settingsRow {
+                        NavigationLink {
+                            AppearanceSettingsView()
+                        } label: {
+                            Label("Appearance", systemImage: "paintbrush")
+                        }
+                    }
+                    Divider()
+                    settingsRow {
+                        NavigationLink {
+                            UnitsSettingsView()
+                        } label: {
+                            Label("Units", systemImage: "ruler")
+                        }
+                    }
+                    Divider()
+                    settingsRow {
+                        NavigationLink {
+                            CalendarSelectionView()
+                        } label: {
+                            LabeledContent {
+                                Text(calendarSummary)
+                                    .foregroundStyle(.secondary)
+                            } label: {
+                                Label("Calendars & Reminders", systemImage: "calendar")
+                            }
+                        }
                     }
                 }
-            }
+            } label: { Text("General") }
 
             if hasMissingPermission {
-                Section("Permissions") {
+                GroupBox {
                     Button {
                         onReopenPermissions()
                         dismiss()
@@ -70,46 +129,52 @@ struct SettingsView: View {
                         }
                     }
                     .tint(.primary)
-                }
+                } label: { Text("Permissions") }
             }
 
-            Section("About") {
-                Button {
-                    whatsNewVersion = .v(WhatsNewContent.version)
-                } label: {
-                    LabeledContent {
-                        Text(Self.versionLabel)
-                            .foregroundStyle(.secondary)
-                    } label: {
-                        Text("What's New")
-                    }
-                }
-                .tint(.primary)
-
-                Link(destination: URL(string: "https://apps.weichart.de")!) {
-                    HStack(spacing: 12) {
-                        Image("WeichartApps")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 28, height: 28)
-                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text("More Apps")
-                                .foregroundStyle(.primary)
-                            Text(verbatim: "apps.weichart.de")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
+            GroupBox {
+                VStack(spacing: 0) {
+                    settingsRow {
+                        Button {
+                            whatsNewVersion = .v(WhatsNewContent.version)
+                        } label: {
+                            LabeledContent {
+                                Text(Self.versionLabel)
+                                    .foregroundStyle(.secondary)
+                            } label: {
+                                Text("What's New")
+                            }
                         }
-                        Spacer()
-                        Image(systemName: "arrow.up.right")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.tertiary)
+                        .tint(.primary)
+                    }
+                    Divider()
+                    settingsRow {
+                        Link(destination: URL(string: "https://apps.weichart.de")!) {
+                            HStack(spacing: 12) {
+                                Image("WeichartApps")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 28, height: 28)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text("More Apps")
+                                        .foregroundStyle(.primary)
+                                    Text(verbatim: "apps.weichart.de")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
                     }
                 }
-            }
+            } label: { Text("About") }
 
             #if DEBUG
-            Section("Debug") {
+            GroupBox {
                 Toggle(isOn: Binding(
                     get: { eventStore.isDemoMode },
                     set: { eventStore.setDemoMode($0) }
@@ -117,26 +182,28 @@ struct SettingsView: View {
                     Label("Demo Mode", systemImage: "wand.and.stars")
                 }
                 .tint(.black)
-            }
+            } label: { Text("Debug") }
             #endif
-            }
-            .overlay(alignment: .top) {
-                LinearGradient(
-                    colors: [Color(.systemGroupedBackground),
-                             Color(.systemGroupedBackground).opacity(0)],
-                    startPoint: .top, endPoint: .bottom
-                )
-                .frame(height: 24)
-                .allowsHitTesting(false)
-            }
         }
-        .navigationTitle(Text(verbatim: "Hibi"))
-        .noteletSheet(
-            notes: WhatsNewContent.allNotes,
-            version: whatsNewVersion,
-            onDismiss: { whatsNewVersion = nil },
-            configuration: WhatsNewContent.configuration
-        )
+        .padding(.horizontal, 16)
+        .padding(.top, 6)
+        .frame(maxWidth: .infinity, alignment: .top)
+        .overlay(alignment: .top) {
+            LinearGradient(
+                colors: [Color(.systemGroupedBackground), Color(.systemGroupedBackground).opacity(0)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 24)
+            .allowsHitTesting(false)
+        }
+    }
+
+    private func settingsRow<LabelView: View>(@ViewBuilder _ label: () -> LabelView) -> some View {
+        label()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 4)
     }
 
     private var calendarSummary: LocalizedStringResource {
