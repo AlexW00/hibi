@@ -205,6 +205,7 @@ struct SettingsView: View {
                     }
                 }
 
+                settingsDivider
                 IconLockDebugRow()
             }
             #endif
@@ -452,6 +453,8 @@ private struct IconLockDebugRow: View {
             Label("Lock Early User Icon", systemImage: "lock")
         }
         .tint(.black)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
         .onAppear {
             isLocked = !iconManager.isUnlocked(
                 AppIconManager.icons.first { $0.id == "early-user" }!

@@ -66,7 +66,7 @@ enum StampNoise {
             switch self {
             case .masterStrength:  "Overall noise amount. 0 = clean stamp."
             case .supplyScale:     "Size of the macro ink-density patches."
-            case .supplyStrength:  "How much ink darkness varies across the seal."
+            case .supplyStrength:  "How much ink darkness varies across the stamp."
             case .supplyErode:     "How far low-ink areas eat inward from the edge."
             case .chipStrength:    "Amount of larger dry voids."
             case .chipScale:       "Void size — higher is smaller voids."

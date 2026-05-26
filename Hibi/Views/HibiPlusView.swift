@@ -5,8 +5,8 @@ import SwiftUI
 private enum HPLayout {
     static let collapsed = CGSize(width: 280, height: 280)
     static let stampExpandedHeight: CGFloat = 486
-    static let featureExpandedHeight: CGFloat = 540
-    static let featureExpandedHeightPurchased: CGFloat = 480
+    static let featureExpandedHeight: CGFloat = 510
+    static let featureExpandedHeightPurchased: CGFloat = 450
     static let peek: CGFloat = 9
     static let side: CGFloat = 14
     static let corner: CGFloat = 18
@@ -17,14 +17,8 @@ private enum HPLayout {
     static let backBottomContentProtection: CGFloat = 56
 }
 
-private let earlyAccessEndDate: Date = {
-    var c = DateComponents(); c.year = 2026; c.month = 6; c.day = 30
-    var cal = Calendar(identifier: .gregorian)
-    cal.timeZone = TimeZone(identifier: "Europe/Berlin") ?? cal.timeZone
-    return cal.date(from: c) ?? Date()
-}()
 
-// MARK: - Stamp (Metal seal)
+// MARK: - Stamp (Metal)
 
 struct HibiStamp: View {
     let purchased: Bool
@@ -68,23 +62,21 @@ struct HibiStamp: View {
         }
         .frame(width: size, height: size)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(purchased ? accessibilityDateLabel : Text("Awaiting your seal"))
+        .accessibilityLabel(purchased ? accessibilityDateLabel : Text("Awaiting your stamp"))
     }
 
     private var accessibilityDateLabel: Text {
         if let date {
             let formatted = date.formatted(.dateTime.year().month().day())
-            return Text("Hibi Plus seal, dated \(formatted)")
+            return Text("Hibi Plus stamp, dated \(formatted)")
         }
-        return Text("Hibi Plus seal")
+        return Text("Hibi Plus stamp")
     }
 
     private func runStampIn() {
         guard !appeared else { return }
-        guard !reduceMotion else { appeared = true; pressScale = 1; return }
-        withAnimation(.easeOut(duration: 0.28)) { appeared = true }
-        withAnimation(.spring(response: 0.34, dampingFraction: 0.6)) { pressScale = 0.96 }
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.7).delay(0.12)) { pressScale = 1 }
+        appeared = true
+        pressScale = 1
     }
 
     private var sealBody: some View {
@@ -190,7 +182,7 @@ struct HibiStamp: View {
                     VStack(spacing: 6) {
                         ProgressView()
                             .tint(PaperTints.sealInk.opacity(0.4))
-                        Text("Generating your seal…")
+                        Text("Generating your stamp…")
                             .font(.custom(AppFont.serifItalic, size: 11))
                             .foregroundStyle(PaperTints.sealInk.opacity(0.5))
                     }
@@ -208,7 +200,7 @@ struct HibiStamp: View {
                         .font(.system(size: 8, weight: .semibold))
                         .tracking(1.8)
                         .foregroundStyle(.tertiary)
-                    Text("your seal")
+                    Text("your stamp")
                         .font(.custom(AppFont.serifItalic, size: 13))
                         .foregroundStyle(.tertiary)
                 }
@@ -307,100 +299,21 @@ private struct IconFan: View {
     }
 }
 
-private struct MiniPaperCard: View {
+// MARK: - Perk tile visuals (stamp preview)
+
+private struct MiniStamp: View {
+    private let size: CGFloat = 36
+
     var body: some View {
-        RoundedRectangle(cornerRadius: 5, style: .continuous)
-            .fill(PaperTints.card1)
-            .overlay {
-                RoundedRectangle(cornerRadius: 5, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.12), lineWidth: 0.5)
-            }
-            .overlay(alignment: .top) {
-                HStack(spacing: 11) {
-                    Circle()
-                        .fill(PaperTints.bindingHole)
-                        .overlay {
-                            Circle().strokeBorder(Color.primary.opacity(0.18), lineWidth: 0.5)
-                        }
-                        .frame(width: 2.5, height: 2.5)
-                    Circle()
-                        .fill(PaperTints.bindingHole)
-                        .overlay {
-                            Circle().strokeBorder(Color.primary.opacity(0.18), lineWidth: 0.5)
-                        }
-                        .frame(width: 2.5, height: 2.5)
-                }
-                .padding(.top, 3)
-            }
-            .overlay {
-                Text(verbatim: "23")
-                    .font(.custom(AppFont.serifItalic, size: 19))
-                    .foregroundStyle(.primary)
-                    .offset(y: 2)
-            }
-            .overlay(alignment: .bottom) {
-                HStack(spacing: 2) {
-                    ForEach(0..<8, id: \.self) { _ in
-                        RoundedRectangle(cornerRadius: 0.5)
-                            .fill(Color.primary.opacity(0.22))
-                            .frame(height: 2)
-                    }
-                }
-                .padding(.horizontal, 4)
-                .padding(.bottom, 2)
-            }
-            .frame(width: 38, height: 38)
-            .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18),
-                    radius: 2, y: 1)
-            .rotationEffect(.degrees(-3))
+        Image("StampPreview")
+            .resizable()
+            .scaledToFit()
+            .frame(width: size, height: size)
             .accessibilityHidden(true)
     }
 }
 
-// MARK: - Early access tile (Widgets promo)
-
-private struct RadarPingIndicator: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    private let size: CGFloat = 16
-    private let dotSize: CGFloat = 5
-    private let cycle: TimeInterval = 1.8
-    private let green = Color(red: 0.20, green: 0.78, blue: 0.35)
-
-    var body: some View {
-        TimelineView(.animation(paused: reduceMotion)) { context in
-            let elapsed = context.date.timeIntervalSinceReferenceDate
-            let phase = reduceMotion ? 0 : elapsed.truncatingRemainder(dividingBy: cycle) / cycle
-
-            ZStack {
-                if reduceMotion {
-                    Circle()
-                        .strokeBorder(green.opacity(0.24), lineWidth: 1)
-                        .frame(width: 10, height: 10)
-                } else {
-                    pingRing(phase: CGFloat(phase))
-                    pingRing(phase: CGFloat((phase + 0.52).truncatingRemainder(dividingBy: 1)))
-                }
-
-                Circle()
-                    .fill(green)
-                    .frame(width: dotSize, height: dotSize)
-                    .shadow(color: green.opacity(0.32), radius: 3, y: 1)
-            }
-            .frame(width: size, height: size)
-        }
-        .accessibilityHidden(true)
-    }
-
-    private func pingRing(phase: CGFloat) -> some View {
-        let ringSize = dotSize + (size - dotSize) * phase
-        let opacity = Double((1 - phase) * 0.38)
-
-        return Circle()
-            .stroke(green.opacity(opacity), lineWidth: 1.1)
-            .frame(width: ringSize, height: ringSize)
-    }
-}
+// MARK: - Widgets promo tile
 
 private struct WidgetIllustration: View {
     var body: some View {
@@ -441,50 +354,22 @@ private struct WidgetIllustration: View {
     }
 }
 
-struct EarlyAccessTile: View {
-    private var daysLeft: Int {
-        var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = TimeZone(identifier: "Europe/Berlin") ?? cal.timeZone
-        let start = cal.startOfDay(for: Date())
-        let end = cal.startOfDay(for: earlyAccessEndDate)
-        return max(0, cal.dateComponents([.day], from: start, to: end).day ?? 0)
-    }
-
+struct WidgetsTile: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 8) {
-                RadarPingIndicator()
-                Text("Currently in early access")
-                    .font(.system(size: 10, weight: .semibold))
+        HStack(spacing: 10) {
+            WidgetIllustration()
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Widgets")
+                    .font(.custom(AppFont.serifRegular, size: 18))
                     .lineLimit(1)
-                Spacer()
-                Text("\(daysLeft) days left")
-                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                Text("On your home screen — paper, every day.")
+                    .font(.custom(AppFont.serifItalic, size: 11.5))
                     .foregroundStyle(.tertiary)
-                    .lineLimit(1)
-                    .layoutPriority(1)
+                    .lineLimit(2)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 9)
-            .overlay(alignment: .bottom) {
-                Rectangle().frame(height: 0.5).foregroundStyle(Color.primary.opacity(0.10))
-            }
-
-            HStack(spacing: 10) {
-                WidgetIllustration()
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Widgets")
-                        .font(.custom(AppFont.serifRegular, size: 18))
-                        .lineLimit(1)
-                    Text("On your home screen — paper, every day.")
-                        .font(.custom(AppFont.serifItalic, size: 11.5))
-                        .foregroundStyle(.tertiary)
-                        .lineLimit(1)
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(12)
+            Spacer(minLength: 0)
         }
+        .padding(12)
         .background(Color.primary.opacity(0.04))
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .overlay {
@@ -516,7 +401,7 @@ struct PlusCTA: View {
                         ProgressView()
                             .tint(.white)
                             .scaleEffect(0.8)
-                        Text("Generating your seal…")
+                        Text("Generating your stamp…")
                             .font(.custom(AppFont.serifItalic, size: 13))
                     }
                 } else if showSuccess {
@@ -545,7 +430,7 @@ struct PlusCTA: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(
-            isGenerating ? Text("Generating your seal") :
+            isGenerating ? Text("Generating your stamp") :
             showSuccess ? Text("Purchased. Thank you.") :
             Text("Buy Hibi Plus, $4.99 one-time")
         )
@@ -613,7 +498,7 @@ private struct StampCardBody: View {
                 .frame(maxWidth: .infinity)
 
             if !purchased {
-                Text("Purchase Hibi Plus to receive your personalized seal.")
+                Text("Purchase Hibi Plus to receive your personalized stamp.")
                     .font(.appSerif(size: 15, italic: true, simple: useSimpleFont))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -664,17 +549,17 @@ private struct FeatureCardBody: View {
                         Text("Dress Hibi up.")
                     }
                     perkTile {
-                        MiniPaperCard()
+                        MiniStamp()
                     } rule: {
-                        Text("Early access")
+                        Text("Custom stamp")
                     } title: {
-                        Text("Try features first.")
+                        Text("Uniquely yours.")
                     }
                 }
                 .opacity(chromeFade)
                 .padding(.bottom, 12 * chromeFade)
 
-                EarlyAccessTile()
+                WidgetsTile()
                     .opacity(chromeFade)
                     .padding(.bottom, (purchased ? 10 : 14) * chromeFade)
 
@@ -693,14 +578,14 @@ private struct FeatureCardBody: View {
                         RestorePurchasesLink()
                     }
                     .opacity(chromeFade)
-                    .padding(.bottom, 36 * chromeFade)
+                    .padding(.bottom, 58 * chromeFade)
                 }
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 16)
             .padding(.top, 8)
 
-            Text("Tap to see what's inside.")
+            Text("Tap to find out more.")
                 .font(.appSerif(size: 11.5, italic: true, simple: useSimpleFont))
                 .foregroundStyle(.tertiary)
                 .opacity(1 - chromeFade)
@@ -763,7 +648,9 @@ struct HibiPlusView: View {
     @State private var isGeneratingStamp = false
     @State private var generationTask: Task<Void, Never>?
 
+    @State private var motion = MotionStore()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.displayScale) private var displayScale
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
@@ -794,6 +681,10 @@ struct HibiPlusView: View {
         }
         .frame(height: totalHeight)
         .animation(HPLayout.collapseSpring, value: isPlus)
+        .onAppear { updateMotion() }
+        .onDisappear { motion.stop() }
+        .onChange(of: scenePhase) { _, _ in updateMotion() }
+        .onChange(of: reduceMotion) { _, _ in updateMotion() }
     }
 
     private var totalHeight: CGFloat {
@@ -823,6 +714,7 @@ struct HibiPlusView: View {
                     bottomContentProtection: HPLayout.backBottomContentProtection,
                     bottomChromeAmount: 1
                 )
+                .modifier(parallax(depth: 2))
                 .opacity(Double(cardShift))
                 .zIndex(0)
             }
@@ -841,6 +733,7 @@ struct HibiPlusView: View {
                 bottomContentProtection: lerp(HPLayout.backBottomContentProtection, 0, cardShift),
                 bottomChromeAmount: 1
             )
+            .modifier(parallax(depth: 1))
             .zIndex(1)
 
             // Front card — draggable; slides off in the drag direction on commit.
@@ -851,6 +744,7 @@ struct HibiPlusView: View {
                 horizontalInset: 0, bottomPeek: peek,
                 shadowAmount: 1, chromeAmount: 1
             )
+            .modifier(parallax(depth: 0))
             .offset(y: dragY)
             .rotationEffect(.degrees(Double(dragY * 0.02)),
                             anchor: dragY > 0 ? .top : .bottom)
@@ -1052,35 +946,40 @@ struct HibiPlusView: View {
         }
     }
 
-    /// Flips to the stamp card and stamps the seal once the composite is ready.
+    /// Flips to the stamp card and stamps once the composite is ready.
     private func finishPurchaseFlip() {
         isGeneratingStamp = false
         isPlus = true
 
         if frontIndex != 0 {
             isAnimating = true
-            withAnimation(.easeIn(duration: 0.32)) { dragY = HPLayout.offScreen }
-            withAnimation(.easeOut(duration: 0.32)) { cardShift = 1 }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            withAnimation(.easeIn(duration: 0.6)) { dragY = HPLayout.offScreen }
+            withAnimation(.easeOut(duration: 0.6)) { cardShift = 1 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) {
                 var t = Transaction(); t.disablesAnimations = true
                 withTransaction(t) {
                     frontIndex = 0
                     dragY = 0; cardShift = 0; isAnimating = false
-                    collapseProgress = 1
                 }
                 ctaSuccess = false
-                // Stamp the seal after the card has settled
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-                    stampToken &+= 1
-                }
-            }
-        } else {
-            collapseProgress = 1
-            ctaSuccess = false
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
                 stampToken &+= 1
             }
+        } else {
+            ctaSuccess = false
+            stampToken &+= 1
         }
+    }
+
+    private func updateMotion() {
+        if scenePhase == .active && !reduceMotion {
+            motion.start()
+        } else {
+            motion.stop()
+        }
+    }
+
+    private func parallax(depth: Int) -> ParallaxOffset {
+        ParallaxOffset(motion: motion, depth: depth, maxOffset: 2.8, reduceMotion: reduceMotion)
     }
 
     private func lerp(_ a: CGFloat, _ b: CGFloat, _ t: CGFloat) -> CGFloat { a + (b - a) * t }

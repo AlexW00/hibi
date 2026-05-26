@@ -819,7 +819,7 @@ struct DayView: View {
 /// reads as parallax. `tiltX` is left/right lean, `tiltY` is front/back
 /// recline; negate a component here if the on-device direction feels inverted.
 /// A no-op under Reduce Motion.
-private struct ParallaxOffset: ViewModifier {
+struct ParallaxOffset: ViewModifier {
     let motion: MotionStore
     let depth: Int
     let maxOffset: CGFloat
