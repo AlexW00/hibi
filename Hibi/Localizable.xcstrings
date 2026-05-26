@@ -4731,16 +4731,14 @@
         }
       }
     },
-    "Generating your seal" : {
-
-    },
     "Generating your seal…" : {
+      "comment" : "Shown while the stamp composite is being generated.",
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dein Siegel wird erstellt …"
+            "value" : "Dein Siegel wird erstellt…"
           }
         },
         "en" : {
@@ -4770,7 +4768,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "인장 생성 중…"
+            "value" : "도장 생성 중…"
           }
         },
         "ms" : {
@@ -4794,13 +4792,13 @@
         "zh-Hant-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "正在生成你的印章…"
+            "value" : "正在產生你的印章…"
           }
         },
         "zh-Hant-TW" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "正在生成你的印章…"
+            "value" : "正在產生你的印章…"
           }
         }
       }

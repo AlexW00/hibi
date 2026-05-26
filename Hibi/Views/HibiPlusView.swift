@@ -4,7 +4,7 @@ import SwiftUI
 
 private enum HPLayout {
     static let collapsed = CGSize(width: 280, height: 280)
-    static let stampExpandedHeight: CGFloat = 420
+    static let stampExpandedHeight: CGFloat = 486
     static let featureExpandedHeight: CGFloat = 540
     static let featureExpandedHeightPurchased: CGFloat = 480
     static let peek: CGFloat = 9
@@ -228,7 +228,7 @@ private struct AppIconTile: View {
             .scaledToFit()
             .frame(width: size, height: size)
             .clipShape(RoundedRectangle(cornerRadius: size * 0.23, style: .continuous))
-            .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.10), radius: 4, y: 2)
+            .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18), radius: 4, y: 2)
     }
 }
 
@@ -303,6 +303,7 @@ private struct IconFan: View {
             .scaledToFit()
             .frame(width: size, height: size)
             .clipShape(RoundedRectangle(cornerRadius: size * 0.23, style: .continuous))
+            .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18), radius: 3, y: 1.5)
     }
 }
 
@@ -603,18 +604,25 @@ private struct StampCardBody: View {
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
 
     var body: some View {
-        VStack(spacing: 18) {
+        let height = HPLayout.collapsed.height
+            + (HPLayout.stampExpandedHeight - HPLayout.collapsed.height) * expandFraction
+
+        ZStack {
             HibiStamp(purchased: purchased, date: date,
                       size: 200 + 110 * expandFraction, stampToken: stampToken)
+                .frame(maxWidth: .infinity)
+
             if !purchased {
                 Text("Purchase Hibi Plus to receive your personalized seal.")
                     .font(.appSerif(size: 15, italic: true, simple: useSimpleFont))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .opacity(chromeFade)
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+                    .padding(.bottom, 44)
             }
         }
-        .frame(maxWidth: .infinity)
+        .frame(height: height)
         .padding(.horizontal, 16)
     }
 }
@@ -685,7 +693,7 @@ private struct FeatureCardBody: View {
                         RestorePurchasesLink()
                     }
                     .opacity(chromeFade)
-                    .padding(.bottom, 26 * chromeFade)
+                    .padding(.bottom, 36 * chromeFade)
                 }
             }
             .frame(maxWidth: .infinity)
