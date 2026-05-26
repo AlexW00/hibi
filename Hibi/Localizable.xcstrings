@@ -4731,6 +4731,9 @@
         }
       }
     },
+    "Generating your seal" : {
+
+    },
     "Generating your seal…" : {
       "comment" : "Shown while the stamp composite is being generated.",
       "extractionState" : "manual",
