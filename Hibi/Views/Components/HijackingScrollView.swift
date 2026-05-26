@@ -21,6 +21,10 @@ struct HijackingScrollView<Content: View>: UIViewRepresentable {
     var onSnap: (() -> Void)? = nil
     @ViewBuilder var content: () -> Content
 
+    static var snapSpring: Animation {
+        .spring(response: 0.38, dampingFraction: 0.86)
+    }
+
     func makeCoordinator() -> Coordinator {
         let binding = $progress
         return Coordinator(
@@ -35,7 +39,7 @@ struct HijackingScrollView<Content: View>: UIViewRepresentable {
             },
             snapProgress: { target in
                 var t = Transaction()
-                t.animation = .spring(response: 0.38, dampingFraction: 0.86)
+                t.animation = HijackingScrollView.snapSpring
                 t.scrollContentOffsetAdjustmentBehavior = .disabled
                 withTransaction(t) { binding.wrappedValue = target }
             },
@@ -86,7 +90,7 @@ struct HijackingScrollView<Content: View>: UIViewRepresentable {
         }
         context.coordinator.snapProgress = { target in
             var t = Transaction()
-            t.animation = .spring(response: 0.38, dampingFraction: 0.86)
+            t.animation = HijackingScrollView.snapSpring
             t.scrollContentOffsetAdjustmentBehavior = .disabled
             withTransaction(t) { binding.wrappedValue = target }
         }
