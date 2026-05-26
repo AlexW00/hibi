@@ -207,6 +207,9 @@ struct SettingsView: View {
 
                 settingsDivider
                 IconLockDebugRow()
+
+                settingsDivider
+                PlusDebugRow()
             }
             #endif
         }
@@ -465,6 +468,22 @@ private struct IconLockDebugRow: View {
             let date: Date = locked ? .distantFuture : .distantPast
             iconManager.overrideInstallDate(date)
         }
+    }
+}
+
+private struct PlusDebugRow: View {
+    @Environment(PlusStore.self) private var plusStore
+
+    var body: some View {
+        Toggle(isOn: Binding(
+            get: { plusStore.isPlus },
+            set: { plusStore.debugSetPlus($0) }
+        )) {
+            Label("Hibi Plus (debug)", systemImage: "seal")
+        }
+        .tint(.black)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
     }
 }
 #endif

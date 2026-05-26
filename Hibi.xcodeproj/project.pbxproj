@@ -23,6 +23,13 @@
 			remoteGlobalIDString = 4B1507002FBEA5BF00F49AFD;
 			remoteInfo = HibiWidgetsExtension;
 		};
+		4B20000B2FC2000000F49AFD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4B802FC52F8F5453008F00F4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4B802FCC2F8F5453008F00F4;
+			remoteInfo = Hibi;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,10 +48,12 @@
 
 /* Begin PBXFileReference section */
 		4B0451052F96B000009EA06E /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		4B20000C2FC2000000F49AFD /* Hibi.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Hibi.storekit; sourceTree = "<group>"; };
 		4B1507012FBEA5BF00F49AFD /* HibiWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HibiWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B1507032FBEA5BF00F49AFD /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		4B1507052FBEA5BF00F49AFD /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		4B802FCD2F8F5453008F00F4 /* Hibi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hibi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4B2000022FC2000000F49AFD /* HibiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HibiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -65,6 +74,7 @@
 				Localizable.xcstrings,
 				Models/AppGroup.swift,
 				Models/CalendarEvent.swift,
+				Models/PlusEntitlement.swift,
 				Models/Preferences.swift,
 				Models/SampleData.swift,
 				Models/WidgetEventsSnapshot.swift,
@@ -105,6 +115,11 @@
 			path = Hibi;
 			sourceTree = "<group>";
 		};
+		4B2000012FC2000000F49AFD /* HibiTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = HibiTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +142,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4B2000052FC2000000F49AFD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -143,8 +165,10 @@
 			isa = PBXGroup;
 			children = (
 				4B0451052F96B000009EA06E /* Config.xcconfig */,
+				4B20000C2FC2000000F49AFD /* Hibi.storekit */,
 				4B802FCF2F8F5453008F00F4 /* Hibi */,
 				4B1507072FBEA5BF00F49AFD /* HibiWidgets */,
+				4B2000012FC2000000F49AFD /* HibiTests */,
 				4B1507022FBEA5BF00F49AFD /* Frameworks */,
 				4B802FCE2F8F5453008F00F4 /* Products */,
 			);
@@ -155,6 +179,7 @@
 			children = (
 				4B802FCD2F8F5453008F00F4 /* Hibi.app */,
 				4B1507012FBEA5BF00F49AFD /* HibiWidgetsExtension.appex */,
+				4B2000022FC2000000F49AFD /* HibiTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -211,6 +236,29 @@
 			productReference = 4B802FCD2F8F5453008F00F4 /* Hibi.app */;
 			productType = "com.apple.product-type.application";
 		};
+		4B2000032FC2000000F49AFD /* HibiTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4B2000092FC2000000F49AFD /* Build configuration list for PBXNativeTarget "HibiTests" */;
+			buildPhases = (
+				4B2000042FC2000000F49AFD /* Sources */,
+				4B2000052FC2000000F49AFD /* Frameworks */,
+				4B2000062FC2000000F49AFD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4B20000A2FC2000000F49AFD /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4B2000012FC2000000F49AFD /* HibiTests */,
+			);
+			name = HibiTests;
+			packageProductDependencies = (
+			);
+			productName = HibiTests;
+			productReference = 4B2000022FC2000000F49AFD /* HibiTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -226,6 +274,10 @@
 					};
 					4B802FCC2F8F5453008F00F4 = {
 						CreatedOnToolsVersion = 26.4;
+					};
+					4B2000032FC2000000F49AFD = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = 4B802FCC2F8F5453008F00F4;
 					};
 				};
 			};
@@ -259,6 +311,7 @@
 			targets = (
 				4B802FCC2F8F5453008F00F4 /* Hibi */,
 				4B1507002FBEA5BF00F49AFD /* HibiWidgetsExtension */,
+				4B2000032FC2000000F49AFD /* HibiTests */,
 			);
 		};
 /* End PBXProject section */
@@ -272,6 +325,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4B802FCB2F8F5453008F00F4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4B2000062FC2000000F49AFD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -295,6 +355,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4B2000042FC2000000F49AFD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -302,6 +369,11 @@
 			isa = PBXTargetDependency;
 			target = 4B1507002FBEA5BF00F49AFD /* HibiWidgetsExtension */;
 			targetProxy = 4B15070F2FBEA5C200F49AFD /* PBXContainerItemProxy */;
+		};
+		4B20000A2FC2000000F49AFD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4B802FCC2F8F5453008F00F4 /* Hibi */;
+			targetProxy = 4B20000B2FC2000000F49AFD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -561,6 +633,50 @@
 			};
 			name = Release;
 		};
+		4B2000072FC2000000F49AFD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 22;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.10;
+				PRODUCT_BUNDLE_IDENTIFIER = com.weichart.hibi.HibiTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Hibi.app/Hibi";
+			};
+			name = Debug;
+		};
+		4B2000082FC2000000F49AFD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 22;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.10;
+				PRODUCT_BUNDLE_IDENTIFIER = com.weichart.hibi.HibiTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Hibi.app/Hibi";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -587,6 +703,15 @@
 			buildConfigurations = (
 				4B802FD92F8F5454008F00F4 /* Debug */,
 				4B802FDA2F8F5454008F00F4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4B2000092FC2000000F49AFD /* Build configuration list for PBXNativeTarget "HibiTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4B2000072FC2000000F49AFD /* Debug */,
+				4B2000082FC2000000F49AFD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
