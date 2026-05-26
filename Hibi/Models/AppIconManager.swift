@@ -2,9 +2,17 @@ import StoreKit
 import SwiftUI
 import UIKit
 
+// MARK: - Shared keys
+
+enum AppIconDefaults {
+    static let firstInstallDate = "firstInstallDate"
+    static let installDateVerified = "installDateVerified"
+    static let hasLaunchedBefore = "hasLaunchedBefore"
+}
+
 // MARK: - Icon option model
 
-struct AppIconOption: Identifiable {
+struct AppIconOption: Identifiable, Sendable {
     let id: String
     let displayName: LocalizedStringResource
     let description: LocalizedStringResource
@@ -14,7 +22,7 @@ struct AppIconOption: Identifiable {
     let alternateIconName: String?
     let unlock: Unlock
 
-    enum Unlock {
+    enum Unlock: Sendable {
         case always
         case beforeDate(Date)
     }
@@ -107,26 +115,43 @@ final class AppIconManager {
     }
 
     func loadInstallDate() async {
-        if let stored = UserDefaults.standard.object(forKey: "firstInstallDate") as? Date {
-            self.installDate = stored
+        guard installDate == nil else { return }
+
+        let defaults = UserDefaults.standard
+
+        // If we already verified against AppTransaction, trust the cache.
+        if defaults.bool(forKey: AppIconDefaults.installDateVerified),
+           let cached = defaults.object(forKey: AppIconDefaults.firstInstallDate) as? Date {
+            self.installDate = cached
             return
         }
 
+        // Always consult AppTransaction — it survives reinstalls.
         do {
             let appTransaction = try await AppTransaction.shared
             if case .verified(let transaction) = appTransaction {
                 let date = transaction.originalPurchaseDate
-                UserDefaults.standard.set(date, forKey: "firstInstallDate")
+                defaults.set(date, forKey: AppIconDefaults.firstInstallDate)
+                defaults.set(true, forKey: AppIconDefaults.installDateVerified)
                 self.installDate = date
                 return
             }
-        } catch {}
+        } catch {
+            #if DEBUG
+            print("[AppIconManager] AppTransaction failed: \(error)")
+            #endif
+        }
 
-        // Fallback: existing user who updated but has no recorded date.
-        // hasLaunchedBefore is true → they were here before this version.
-        if UserDefaults.standard.bool(forKey: "hasLaunchedBefore") {
-            let fallback = Date.distantPast
-            UserDefaults.standard.set(fallback, forKey: "firstInstallDate")
+        // Unverified cache (written by HibiApp on first launch).
+        if let cached = defaults.object(forKey: AppIconDefaults.firstInstallDate) as? Date {
+            self.installDate = cached
+            return
+        }
+
+        // Existing user who updated but has no recorded date.
+        if defaults.bool(forKey: AppIconDefaults.hasLaunchedBefore) {
+            let fallback = Date()
+            defaults.set(fallback, forKey: AppIconDefaults.firstInstallDate)
             self.installDate = fallback
         }
     }
@@ -146,6 +171,10 @@ final class AppIconManager {
         do {
             try await UIApplication.shared.setAlternateIconName(option.alternateIconName)
             selectedIconID = option.id
-        } catch {}
+        } catch {
+            #if DEBUG
+            print("[AppIconManager] setAlternateIconName failed: \(error)")
+            #endif
+        }
     }
 }
