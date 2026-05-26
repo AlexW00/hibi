@@ -692,8 +692,7 @@ struct HibiPlusView: View {
         let frontH = HPLayout.collapsed.height + (expandedHeight(for: frontIndex) - HPLayout.collapsed.height) * ef
         let backH = HPLayout.collapsed.height + (expandedHeight(for: backIndex) - HPLayout.collapsed.height) * ef
         let h = lerp(frontH, backH, cardShift)
-        let hintH = HPLayout.hintHeight * ef
-        return h + 14 + hintH
+        return h + 14 + HPLayout.hintHeight
     }
 
     @ViewBuilder
@@ -853,14 +852,11 @@ struct HibiPlusView: View {
     }
 
     private var hint: some View {
-        let ef = 1 - collapseProgress
-        return Text("Pull to tear · ↑ Next · ↓ Prev")
+        Text("Pull to tear · ↑ Next · ↓ Prev")
             .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
             .foregroundStyle(.tertiary)
             .frame(maxWidth: .infinity)
-            .frame(height: HPLayout.hintHeight * ef)
-            .opacity(chromeFade)
-            .clipped()
+            .frame(height: HPLayout.hintHeight)
     }
 
     // MARK: gestures
