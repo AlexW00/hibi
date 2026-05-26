@@ -38,7 +38,6 @@ struct HibiStamp: View {
     @Environment(\.displayScale) private var displayScale
     @State private var pressScale: CGFloat = 1
     @State private var appeared = false
-    @State private var pendingStampIn = false
 
     // Metal stamp state
     @State private var compositeImage: CGImage?
@@ -63,10 +62,6 @@ struct HibiStamp: View {
                     .rotationEffect(.degrees(rotation))
                     .scaleEffect(appeared ? pressScale : 1.18)
                     .opacity(appeared ? 1 : 0)
-                    .onChange(of: stampToken, initial: true) { _, _ in
-                        appeared = false
-                        pendingStampIn = true
-                    }
             } else {
                 slotBody
             }
@@ -85,6 +80,7 @@ struct HibiStamp: View {
     }
 
     private func runStampIn() {
+        guard !appeared else { return }
         guard !reduceMotion else { appeared = true; pressScale = 1; return }
         withAnimation(.easeOut(duration: 0.28)) { appeared = true }
         withAnimation(.spring(response: 0.34, dampingFraction: 0.6)) { pressScale = 0.96 }
@@ -106,6 +102,7 @@ struct HibiStamp: View {
         .onAppear { buildComposite() }
         .onChange(of: date) { _, _ in buildComposite() }
         .onChange(of: stampToken) { _, _ in
+            appeared = false
             buildComposite()
         }
         .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
@@ -163,7 +160,7 @@ struct HibiStamp: View {
         ) {
             compositeImage = cached
             isGenerating = false
-            flushStampIn()
+            runStampIn()
             return
         }
 
@@ -180,7 +177,7 @@ struct HibiStamp: View {
             await MainActor.run {
                 compositeImage = image
                 isGenerating = false
-                flushStampIn()
+                runStampIn()
             }
         }
     }
@@ -199,13 +196,6 @@ struct HibiStamp: View {
                     }
                 }
             }
-    }
-
-    /// Plays the stamp-in animation if one was deferred until the composite loaded.
-    private func flushStampIn() {
-        guard pendingStampIn else { return }
-        pendingStampIn = false
-        runStampIn()
     }
 
     private var slotBody: some View {
