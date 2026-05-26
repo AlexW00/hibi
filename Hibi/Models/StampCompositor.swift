@@ -1,7 +1,7 @@
 import CoreGraphics
 import CoreText
+import Foundation
 import ImageIO
-import UIKit
 
 enum StampCompositor {
     // MARK: - Cache
@@ -98,12 +98,15 @@ enum StampCompositor {
         ctx.translateBy(x: 0, y: CGFloat(px))
         ctx.scaleBy(x: 1, y: -1)
 
-        // Push ctx onto UIKit's stack so UIImage.draw can find it.
-        // UIImage.draw is CTM-aware and renders right-side-up in our y-flipped context.
-        // Raw CGContext.draw would flip the mask (CG's bottom-left-origin convention).
-        UIGraphicsPushContext(ctx)
-        UIImage(cgImage: maskImage).draw(in: CGRect(x: 0, y: 0, width: px, height: px))
-        UIGraphicsPopContext()
+        // Draw mask using pure CoreGraphics (safe for background threads,
+        // unlike UIGraphicsPushContext / UIImage.draw which require the main
+        // thread). Temporarily undo the y-flip so CGContext.draw renders the
+        // mask right-side-up (CG.draw assumes a y-up coordinate system).
+        ctx.saveGState()
+        ctx.translateBy(x: 0, y: CGFloat(px))
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.draw(maskImage, in: CGRect(x: 0, y: 0, width: px, height: px))
+        ctx.restoreGState()
 
         // Draw date text on top
         drawDateText(
@@ -301,9 +304,11 @@ enum StampCompositor {
         guard !chars.isEmpty else { return }
 
         // Measure each character's advance width using CTLine
+        // Use CoreText attribute keys directly (not UIKit's .font/.foregroundColor)
+        // so this code runs safely on background threads without UIKit.
         let attrs: [NSAttributedString.Key: Any] = [
-            .font: font,
-            .foregroundColor: color
+            NSAttributedString.Key(kCTFontAttributeName as String): font,
+            NSAttributedString.Key(kCTForegroundColorAttributeName as String): color
         ]
 
         var advances: [CGFloat] = []
