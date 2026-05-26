@@ -602,13 +602,14 @@ private struct StampCardBody: View {
     let purchased: Bool
     let date: Date?
     let expanded: Bool
+    let expandFraction: CGFloat
     let stampToken: Int
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
 
     var body: some View {
         VStack(spacing: 18) {
             HibiStamp(purchased: purchased, date: date,
-                      size: expanded ? 310 : 200, stampToken: stampToken)
+                      size: 200 + 110 * expandFraction, stampToken: stampToken)
             if expanded && !purchased {
                 Text("Purchase Hibi Plus to receive your personalized seal.")
                     .font(.appSerif(size: 15, italic: true, simple: useSimpleFont))
@@ -627,11 +628,10 @@ private struct StampCardBody: View {
 private struct FeatureCardBody: View {
     let purchased: Bool
     let expanded: Bool
+    let chromeFade: Double
     @Binding var ctaSuccess: Bool
     let onPurchase: () -> Void
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
-
-    private var chromeFade: Double { expanded ? 1 : 0 }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -756,7 +756,14 @@ private struct FeatureCardBody: View {
 struct HibiPlusView: View {
     // 0 = stamp card, 1 = feature card
     @State private var frontIndex = 0
-    @State private var expanded = false
+    @Binding var collapseProgress: CGFloat
+    init(collapseProgress: Binding<CGFloat> = .constant(1)) {
+        self._collapseProgress = collapseProgress
+    }
+    private var expanded: Bool { collapseProgress < 0.5 }
+    private var chromeFade: Double {
+        Double(max(0, 1 - collapseProgress * 1.25))
+    }
     @State private var isPlus = false
     @State private var purchaseDate: Date?
 
@@ -781,10 +788,11 @@ struct HibiPlusView: View {
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
-            let frontW = expanded ? w - 32 : HPLayout.collapsed.width
-            let frontH = expanded ? expandedHeight(for: frontIndex) : HPLayout.collapsed.height
-            let backW = expanded ? w - 32 : HPLayout.collapsed.width
-            let backH = expanded ? expandedHeight(for: backIndex) : HPLayout.collapsed.height
+            let ef = 1 - collapseProgress
+            let frontW = HPLayout.collapsed.width + (w - 32 - HPLayout.collapsed.width) * ef
+            let frontH = HPLayout.collapsed.height + (expandedHeight(for: frontIndex) - HPLayout.collapsed.height) * ef
+            let backW = HPLayout.collapsed.width + (w - 32 - HPLayout.collapsed.width) * ef
+            let backH = HPLayout.collapsed.height + (expandedHeight(for: backIndex) - HPLayout.collapsed.height) * ef
             let stackW = lerp(frontW, backW, cardShift)
             let stackH = lerp(frontH, backH, cardShift)
             VStack(spacing: 0) {
@@ -796,15 +804,16 @@ struct HibiPlusView: View {
             .frame(width: w)
         }
         .frame(height: totalHeight)
-        .animation(HPLayout.collapseSpring, value: expanded)
         .animation(HPLayout.collapseSpring, value: isPlus)
     }
 
     private var totalHeight: CGFloat {
-        let frontH = expanded ? expandedHeight(for: frontIndex) : HPLayout.collapsed.height
-        let backH = expanded ? expandedHeight(for: backIndex) : HPLayout.collapsed.height
+        let ef = 1 - collapseProgress
+        let frontH = HPLayout.collapsed.height + (expandedHeight(for: frontIndex) - HPLayout.collapsed.height) * ef
+        let backH = HPLayout.collapsed.height + (expandedHeight(for: backIndex) - HPLayout.collapsed.height) * ef
         let h = lerp(frontH, backH, cardShift)
-        return h + 14 + HPLayout.hintHeight
+        let hintH = HPLayout.hintHeight * ef
+        return h + 14 + hintH
     }
 
     @ViewBuilder
@@ -936,18 +945,24 @@ struct HibiPlusView: View {
     private func cardBody(index: Int) -> some View {
         if index == 0 {
             StampCardBody(purchased: isPlus, date: purchaseDate,
-                          expanded: expanded, stampToken: stampToken)
+                          expanded: expanded, expandFraction: 1 - collapseProgress,
+                          stampToken: stampToken)
         } else {
             FeatureCardBody(purchased: isPlus, expanded: expanded,
+                            chromeFade: chromeFade,
                             ctaSuccess: $ctaSuccess, onPurchase: purchase)
         }
     }
 
     private var hint: some View {
-        Text("Pull to tear · ↑ Next · ↓ Prev")
+        let ef = 1 - collapseProgress
+        return Text("Pull to tear · ↑ Next · ↓ Prev")
             .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
             .foregroundStyle(.tertiary)
             .frame(maxWidth: .infinity)
+            .frame(height: HPLayout.hintHeight * ef)
+            .opacity(chromeFade)
+            .clipped()
     }
 
     // MARK: gestures
@@ -969,7 +984,11 @@ struct HibiPlusView: View {
 
     private func toggleExpand() {
         guard !isAnimating else { return }
-        withAnimation(HPLayout.collapseSpring) { expanded.toggle() }
+        let target: CGFloat = collapseProgress >= 0.5 ? 0 : 1
+        var t = Transaction()
+        t.animation = HijackingScrollView<EmptyView>.snapSpring
+        t.scrollContentOffsetAdjustmentBehavior = .disabled
+        withTransaction(t) { collapseProgress = target }
     }
 
     /// Flip to the other card, sliding the front off in `direction`
@@ -1012,7 +1031,7 @@ struct HibiPlusView: View {
                     withTransaction(t) {
                         frontIndex = 0
                         dragY = 0; cardShift = 0; isAnimating = false
-                        expanded = false
+                        collapseProgress = 1
                     }
                     ctaSuccess = false
                     // 3) stamp the seal after the card has settled
@@ -1021,7 +1040,7 @@ struct HibiPlusView: View {
                     }
                 }
             } else {
-                expanded = false
+                collapseProgress = 1
                 ctaSuccess = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
                     stampToken &+= 1
