@@ -1,7 +1,7 @@
 import CoreGraphics
 import Foundation
 
-struct StampDateRegion: Codable {
+nonisolated struct StampDateRegion: Codable {
     let center: [CGFloat]       // [x, y] normalized 0..1
     let size: [CGFloat]         // [w, h] normalized 0..1
     let rotation: CGFloat       // degrees, positive = clockwise
@@ -22,12 +22,12 @@ struct StampDateRegion: Codable {
     var centerY: CGFloat { center[1] }
 }
 
-struct StampDefinition: Codable {
+nonisolated struct StampDefinition: Codable {
     let stampId: String
     let dateRegion: StampDateRegion
 }
 
-enum StampConfig {
+nonisolated enum StampConfig {
     private static let definitions: [StampDefinition] = {
         guard let url = Bundle.main.url(forResource: "stamps", withExtension: "json"),
               let data = try? Data(contentsOf: url),

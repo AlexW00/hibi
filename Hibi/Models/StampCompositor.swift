@@ -1,8 +1,68 @@
 import CoreGraphics
 import CoreText
-import UIKit
+import Foundation
+import ImageIO
 
-enum StampCompositor {
+nonisolated enum StampCompositor {
+    // MARK: - Cache
+
+    private static let memoryCache = NSCache<NSString, CGImageWrapper>()
+
+    private final class CGImageWrapper {
+        let image: CGImage
+        init(_ image: CGImage) { self.image = image }
+    }
+
+    private static func cacheKey(stampId: String, date: Date, px: Int) -> NSString {
+        NSString(string: "\(stampId)-\(Int(date.timeIntervalSince1970))-\(px)")
+    }
+
+    private static var diskCacheDirectory: URL? {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("StampComposites", isDirectory: true)
+    }
+
+    private static func diskURL(stampId: String, date: Date, px: Int) -> URL? {
+        guard let dir = diskCacheDirectory else { return nil }
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir.appendingPathComponent("\(stampId)-\(Int(date.timeIntervalSince1970))-\(px).png")
+    }
+
+    /// Fast synchronous lookup: memory cache → disk cache. Returns nil on miss.
+    static func cachedComposite(
+        definition: StampDefinition,
+        date: Date,
+        outputSize: CGFloat,
+        scale: CGFloat
+    ) -> CGImage? {
+        let px = Int(outputSize * scale)
+        guard px > 0 else { return nil }
+
+        let key = cacheKey(stampId: definition.stampId, date: date, px: px)
+        if let hit = memoryCache.object(forKey: key) { return hit.image }
+
+        guard let url = diskURL(stampId: definition.stampId, date: date, px: px),
+              let provider = CGDataProvider(url: url as CFURL),
+              let image = CGImage(pngDataProviderSource: provider,
+                                  decode: nil, shouldInterpolate: false,
+                                  intent: .defaultIntent)
+        else { return nil }
+
+        memoryCache.setObject(CGImageWrapper(image), forKey: key)
+        return image
+    }
+
+    private static func persistToDisk(_ image: CGImage, stampId: String, date: Date, px: Int) {
+        guard let url = diskURL(stampId: stampId, date: date, px: px),
+              let dest = CGImageDestinationCreateWithURL(
+                  url as CFURL, "public.png" as CFString, 1, nil)
+        else { return }
+        CGImageDestinationAddImage(dest, image, nil)
+        CGImageDestinationFinalize(dest)
+    }
+
+    // MARK: - Composite
+
     /// Rasterizes a stamp's mask + date text into a single composite CGImage.
     /// The image is grayscale ink-coverage: 0 = no ink (paper), 1 = full ink.
     /// Output dimensions = `outputSize` in points × `scale`.
@@ -16,6 +76,9 @@ enum StampCompositor {
     ) -> CGImage? {
         let px = Int(outputSize * scale)
         guard px > 0 else { return nil }
+
+        let key = cacheKey(stampId: definition.stampId, date: date, px: px)
+        if let cached = memoryCache.object(forKey: key) { return cached.image }
 
         // Load mask PNG
         guard let maskImage = loadMask(stampId: definition.stampId) else { return nil }
@@ -35,12 +98,15 @@ enum StampCompositor {
         ctx.translateBy(x: 0, y: CGFloat(px))
         ctx.scaleBy(x: 1, y: -1)
 
-        // Push ctx onto UIKit's stack so UIImage.draw can find it.
-        // UIImage.draw is CTM-aware and renders right-side-up in our y-flipped context.
-        // Raw CGContext.draw would flip the mask (CG's bottom-left-origin convention).
-        UIGraphicsPushContext(ctx)
-        UIImage(cgImage: maskImage).draw(in: CGRect(x: 0, y: 0, width: px, height: px))
-        UIGraphicsPopContext()
+        // Draw mask using pure CoreGraphics (safe for background threads,
+        // unlike UIGraphicsPushContext / UIImage.draw which require the main
+        // thread). Temporarily undo the y-flip so CGContext.draw renders the
+        // mask right-side-up (CG.draw assumes a y-up coordinate system).
+        ctx.saveGState()
+        ctx.translateBy(x: 0, y: CGFloat(px))
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.draw(maskImage, in: CGRect(x: 0, y: 0, width: px, height: px))
+        ctx.restoreGState()
 
         // Draw date text on top
         drawDateText(
@@ -56,7 +122,10 @@ enum StampCompositor {
         // the final mask+text coverage so text edges get stamped too.
         bakeSDF(ctx: ctx, width: px, height: px)
 
-        return ctx.makeImage()
+        guard let image = ctx.makeImage() else { return nil }
+        memoryCache.setObject(CGImageWrapper(image), forKey: key)
+        persistToDisk(image, stampId: definition.stampId, date: date, px: px)
+        return image
     }
 
     private static func loadMask(stampId: String) -> CGImage? {
@@ -235,9 +304,11 @@ enum StampCompositor {
         guard !chars.isEmpty else { return }
 
         // Measure each character's advance width using CTLine
+        // Use CoreText attribute keys directly (not UIKit's .font/.foregroundColor)
+        // so this code runs safely on background threads without UIKit.
         let attrs: [NSAttributedString.Key: Any] = [
-            .font: font,
-            .foregroundColor: color
+            NSAttributedString.Key(kCTFontAttributeName as String): font,
+            NSAttributedString.Key(kCTForegroundColorAttributeName as String): color
         ]
 
         var advances: [CGFloat] = []

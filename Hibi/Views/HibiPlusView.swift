@@ -41,6 +41,8 @@ struct HibiStamp: View {
 
     // Metal stamp state
     @State private var compositeImage: CGImage?
+    @State private var compositeTask: Task<Void, Never>?
+    @State private var isGenerating = false
     @State private var motion = MotionStore()
     @State private var isLowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
 
@@ -60,10 +62,6 @@ struct HibiStamp: View {
                     .rotationEffect(.degrees(rotation))
                     .scaleEffect(appeared ? pressScale : 1.18)
                     .opacity(appeared ? 1 : 0)
-                    .onChange(of: stampToken, initial: true) { _, _ in
-                        appeared = false
-                        runStampIn()
-                    }
             } else {
                 slotBody
             }
@@ -82,6 +80,7 @@ struct HibiStamp: View {
     }
 
     private func runStampIn() {
+        guard !appeared else { return }
         guard !reduceMotion else { appeared = true; pressScale = 1; return }
         withAnimation(.easeOut(duration: 0.28)) { appeared = true }
         withAnimation(.spring(response: 0.34, dampingFraction: 0.6)) { pressScale = 0.96 }
@@ -97,12 +96,13 @@ struct HibiStamp: View {
                     liveStamp(image: compositeImage)
                 }
             } else {
-                Circle().fill(PaperTints.sealInk.opacity(0.06))
+                sealPlaceholder
             }
         }
         .onAppear { buildComposite() }
         .onChange(of: date) { _, _ in buildComposite() }
         .onChange(of: stampToken) { _, _ in
+            appeared = false
             buildComposite()
         }
         .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
@@ -144,18 +144,58 @@ struct HibiStamp: View {
             .onDisappear { motion.stop() }
     }
 
-    private static let compositeSize: CGFloat = 310
+    static let compositeSize: CGFloat = 310
 
     private func buildComposite() {
+        compositeTask?.cancel()
         guard let date else { compositeImage = nil; return }
         let seed = StampConfig.seed(from: date)
         guard let def = StampConfig.definition(for: seed) else { compositeImage = nil; return }
-        compositeImage = StampCompositor.composite(
-            definition: def,
-            date: date,
-            outputSize: Self.compositeSize,
-            scale: displayScale
-        )
+        let scale = displayScale
+        let compositeSize = Self.compositeSize
+
+        // Fast path: memory or disk cache → instant stamp with full shader.
+        if let cached = StampCompositor.cachedComposite(
+            definition: def, date: date, outputSize: compositeSize, scale: scale
+        ) {
+            compositeImage = cached
+            isGenerating = false
+            runStampIn()
+            return
+        }
+
+        // Slow path: generate async, persist for next time.
+        isGenerating = true
+        compositeTask = Task.detached(priority: .userInitiated) {
+            let image = StampCompositor.composite(
+                definition: def,
+                date: date,
+                outputSize: compositeSize,
+                scale: scale
+            )
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                compositeImage = image
+                isGenerating = false
+                runStampIn()
+            }
+        }
+    }
+
+    private var sealPlaceholder: some View {
+        Circle()
+            .fill(PaperTints.sealInk.opacity(0.06))
+            .overlay {
+                if isGenerating {
+                    VStack(spacing: 6) {
+                        ProgressView()
+                            .tint(PaperTints.sealInk.opacity(0.4))
+                        Text("Generating your seal…")
+                            .font(.custom(AppFont.serifItalic, size: 11))
+                            .foregroundStyle(PaperTints.sealInk.opacity(0.5))
+                    }
+                }
+            }
     }
 
     private var slotBody: some View {
@@ -459,7 +499,10 @@ struct EarlyAccessTile: View {
 struct PlusCTA: View {
     /// True once the success morph has played; owner drives the rest.
     @Binding var showSuccess: Bool
+    var isGenerating: Bool = false
     let onPurchase: () -> Void
+
+    private var isActive: Bool { showSuccess || isGenerating }
 
     var body: some View {
         Button {
@@ -468,7 +511,15 @@ struct PlusCTA: View {
             onPurchase()
         } label: {
             Group {
-                if showSuccess {
+                if isGenerating {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                            .tint(.white)
+                            .scaleEffect(0.8)
+                        Text("Generating your seal…")
+                            .font(.custom(AppFont.serifItalic, size: 13))
+                    }
+                } else if showSuccess {
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark")
                             .font(.system(size: 14, weight: .bold))
@@ -487,13 +538,17 @@ struct PlusCTA: View {
             }
             .padding(.horizontal, 22)
             .padding(.vertical, 12)
-            .foregroundStyle(showSuccess ? Color.white : PaperTints.card1)
-            .background(showSuccess ? Color(red: 0.20, green: 0.78, blue: 0.35) : Color.primary)
+            .foregroundStyle(isActive ? Color.white : PaperTints.card1)
+            .background(isActive ? Color(red: 0.20, green: 0.78, blue: 0.35) : Color.primary)
             .clipShape(Capsule())
             .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18), radius: 6, y: 2)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(showSuccess ? Text("Purchased. Thank you.") : Text("Buy Hibi Plus, $4.99 one-time"))
+        .accessibilityLabel(
+            isGenerating ? Text("Generating your seal") :
+            showSuccess ? Text("Purchased. Thank you.") :
+            Text("Buy Hibi Plus, $4.99 one-time")
+        )
     }
 }
 
@@ -578,6 +633,7 @@ private struct FeatureCardBody: View {
     let purchased: Bool
     let chromeFade: Double
     @Binding var ctaSuccess: Bool
+    var isGenerating: Bool = false
     let onPurchase: () -> Void
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
 
@@ -633,7 +689,7 @@ private struct FeatureCardBody: View {
 
                 if !purchased {
                     VStack(spacing: 8) {
-                        PlusCTA(showSuccess: $ctaSuccess, onPurchase: onPurchase)
+                        PlusCTA(showSuccess: $ctaSuccess, isGenerating: isGenerating, onPurchase: onPurchase)
                         RestorePurchasesLink()
                     }
                     .opacity(chromeFade)
@@ -704,9 +760,12 @@ struct HibiPlusView: View {
     @State private var commitCount = 0                 // haptic
     @State private var ctaSuccess = false
     @State private var stampToken = 0
+    @State private var isGeneratingStamp = false
+    @State private var generationTask: Task<Void, Never>?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.displayScale) private var displayScale
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
 
     private var backIndex: Int { 1 - frontIndex }
@@ -894,7 +953,8 @@ struct HibiPlusView: View {
                           chromeFade: chromeFade, stampToken: stampToken)
         } else {
             FeatureCardBody(purchased: isPlus, chromeFade: chromeFade,
-                            ctaSuccess: $ctaSuccess, onPurchase: purchase)
+                            ctaSuccess: $ctaSuccess, isGenerating: isGeneratingStamp,
+                            onPurchase: purchase)
         }
     }
 
@@ -958,37 +1018,67 @@ struct HibiPlusView: View {
     }
 
     /// CTA tapped: success morph has already started (PlusCTA set ctaSuccess).
-    /// After a beat, set Plus state, flip to the stamp card, and stamp the seal.
+    /// Pre-generate the stamp composite so flipping to the stamp card is instant.
     private func purchase() {
-        // 1) let the green checkmark read for a moment
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            isPlus = true
-            purchaseDate = Date()
+        let date = Date()
+        purchaseDate = date
+        let scale = displayScale
 
-            // 2) flip to the stamp card (collapsed)
-            if frontIndex != 0 {
-                isAnimating = true
-                withAnimation(.easeIn(duration: 0.32)) { dragY = HPLayout.offScreen }
-                withAnimation(.easeOut(duration: 0.32)) { cardShift = 1 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                    var t = Transaction(); t.disablesAnimations = true
-                    withTransaction(t) {
-                        frontIndex = 0
-                        dragY = 0; cardShift = 0; isAnimating = false
-                        collapseProgress = 1
-                    }
-                    ctaSuccess = false
-                    // 3) stamp the seal after the card has settled
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-                        stampToken &+= 1
-                    }
+        // Capture values before entering detached context.
+        let seed = StampConfig.seed(from: date)
+        let def = StampConfig.definition(for: seed)
+        let compositeSize = HibiStamp.compositeSize
+
+        // Start composite generation immediately so the cache is warm
+        // before the stamp card appears.
+        generationTask?.cancel()
+        generationTask = Task.detached(priority: .userInitiated) {
+            guard let def else { return }
+            _ = StampCompositor.composite(
+                definition: def, date: date,
+                outputSize: compositeSize, scale: scale
+            )
+        }
+
+        // 1) Show checkmark for 0.8s, then switch to "Generating…" on the CTA
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            withAnimation(.easeInOut(duration: 0.25)) { isGeneratingStamp = true }
+        }
+
+        // 2) Wait for composite to finish, then flip to stamp card
+        Task {
+            await generationTask?.value
+            await MainActor.run { finishPurchaseFlip() }
+        }
+    }
+
+    /// Flips to the stamp card and stamps the seal once the composite is ready.
+    private func finishPurchaseFlip() {
+        isGeneratingStamp = false
+        isPlus = true
+
+        if frontIndex != 0 {
+            isAnimating = true
+            withAnimation(.easeIn(duration: 0.32)) { dragY = HPLayout.offScreen }
+            withAnimation(.easeOut(duration: 0.32)) { cardShift = 1 }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                var t = Transaction(); t.disablesAnimations = true
+                withTransaction(t) {
+                    frontIndex = 0
+                    dragY = 0; cardShift = 0; isAnimating = false
+                    collapseProgress = 1
                 }
-            } else {
-                collapseProgress = 1
                 ctaSuccess = false
+                // Stamp the seal after the card has settled
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
                     stampToken &+= 1
                 }
+            }
+        } else {
+            collapseProgress = 1
+            ctaSuccess = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                stampToken &+= 1
             }
         }
     }
