@@ -20,10 +20,12 @@ struct HibiApp: App {
     /// already seen, so Notelet only fires on subsequent upgrades.
     private static func markWhatsNewSeenOnFreshInstall() {
         let defaults = UserDefaults.standard
-        let firstLaunchKey = "hasLaunchedBefore"
-        if !defaults.bool(forKey: firstLaunchKey) {
+        if !defaults.bool(forKey: AppIconDefaults.hasLaunchedBefore) {
             NoteletStorage.markCurrentVersionAsSeen()
-            defaults.set(true, forKey: firstLaunchKey)
+            defaults.set(true, forKey: AppIconDefaults.hasLaunchedBefore)
+            if defaults.object(forKey: AppIconDefaults.firstInstallDate) == nil {
+                defaults.set(Date(), forKey: AppIconDefaults.firstInstallDate)
+            }
         }
     }
 }

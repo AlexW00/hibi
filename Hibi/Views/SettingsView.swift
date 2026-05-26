@@ -28,7 +28,7 @@ struct SettingsView: View {
     }
 
     enum SettingsDestination: String, Hashable, Identifiable {
-        case appearance, units, calendars
+        case appearance, appIcon, units, calendars
         #if DEBUG
         case stampNoise
         #endif
@@ -73,6 +73,7 @@ struct SettingsView: View {
         .navigationDestination(item: $settingsDestination) { destination in
             switch destination {
             case .appearance: AppearanceSettingsView()
+            case .appIcon: AppIconSettingsView()
             case .units: UnitsSettingsView()
             case .calendars: CalendarSelectionView()
             #if DEBUG
@@ -95,6 +96,9 @@ struct SettingsView: View {
             settingsSection("General") {
                 settingsNavRow("Appearance", systemImage: "paintbrush",
                                destination: .appearance)
+                settingsDivider
+                settingsNavRow("App Icon", systemImage: "app.dashed",
+                               destination: .appIcon)
                 settingsDivider
                 settingsNavRow("Units", systemImage: "ruler",
                                destination: .units)
@@ -200,6 +204,8 @@ struct SettingsView: View {
                             .foregroundStyle(.tertiary)
                     }
                 }
+
+                IconLockDebugRow()
             }
             #endif
         }
@@ -434,6 +440,28 @@ private struct StampNoiseDebugView: View {
 
     private func persistNow() {
         raw = StampNoise.encode(values)
+    }
+}
+
+private struct IconLockDebugRow: View {
+    @Environment(AppIconManager.self) private var iconManager
+    @State private var isLocked = false
+
+    var body: some View {
+        Toggle(isOn: $isLocked) {
+            Label("Lock Early User Icon", systemImage: "lock")
+        }
+        .tint(.black)
+        .onAppear {
+            isLocked = !iconManager.isUnlocked(
+                AppIconManager.icons.first { $0.id == "early-user" }!
+            )
+        }
+        .onChange(of: isLocked) { _, locked in
+            // Future date = locked (install "hasn't happened yet"), past date = unlocked
+            let date: Date = locked ? .distantFuture : .distantPast
+            iconManager.overrideInstallDate(date)
+        }
     }
 }
 #endif
