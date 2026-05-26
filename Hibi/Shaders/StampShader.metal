@@ -15,6 +15,10 @@ using namespace metal;
 #define P_RIM_DARKNESS     9
 #define P_BLEED_WIDTH      10
 #define P_BLEED_STRENGTH   11
+// Surface — NOT gated by master (specular & depth are not noise).
+#define P_SPEC_STRENGTH    12
+#define P_SPEC_FOCUS       13
+#define P_BUMP_STRENGTH    14
 
 // Normalized half-range used to encode the signed distance field into the
 // composite's green channel. MUST match StampCompositor.sdfRange.
@@ -149,6 +153,10 @@ float worley(float2 p, uint seedOffsetU) {
     float rimDarkness     = param(params, paramCount, P_RIM_DARKNESS) * m;
     float bleedWidth      = param(params, paramCount, P_BLEED_WIDTH);
     float bleedStrength   = param(params, paramCount, P_BLEED_STRENGTH) * m;
+    // Surface knobs — independent of master.
+    float specStrength    = param(params, paramCount, P_SPEC_STRENGTH);
+    float specFocus       = param(params, paramCount, P_SPEC_FOCUS);
+    float bumpStrength    = param(params, paramCount, P_BUMP_STRENGTH);
 
     // --- Control field: slow macro pressure / ink-supply variation ---
     float supply = fbm(uv * supplyScale, 4, seedOffset(seedU + 11u));
@@ -205,11 +213,11 @@ float worley(float2 p, uint seedOffsetU) {
     baseInk *= half(density);
     baseInk *= half(1.0 - rim * 0.6);
 
-    // --- Specular highlight (gyro-driven) — unchanged ---
+    // --- Specular highlight (gyro-driven) ---
     float2 specCenter = float2(0.5 + tilt.x * 0.5, 0.5 + tilt.y * 0.5);
     float d = distance(uv, specCenter);
-    float hotspot = exp(-d * d * 8.0);
-    half3 specular = inkColor.rgb * half(hotspot * 0.45);
+    float hotspot = exp(-d * d * specFocus);
+    half3 specular = inkColor.rgb * half(hotspot * specStrength);
 
     // --- Bump / emboss — unchanged; uses RAW coverage on both sides ---
     float pressure = 0.5 + supply * 0.6;
@@ -223,7 +231,7 @@ float worley(float2 p, uint seedOffsetU) {
     half bump = half(bumpLight);
     half positiveBump = max(bump, 0.0h);
     half negativeBump = min(bump, 0.0h);
-    half3 bumpColor = inkColor.rgb * (positiveBump * 0.55h) + half3(negativeBump * 0.45h);
+    half3 bumpColor = (inkColor.rgb * (positiveBump * 0.55h) + half3(negativeBump * 0.45h)) * half(bumpStrength);
 
     // --- Final composite ---
     half3 finalColor = clamp(baseInk + specular + bumpColor, half3(0.0h), half3(1.0h));

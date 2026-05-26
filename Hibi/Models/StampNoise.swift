@@ -26,8 +26,21 @@ enum StampNoise {
         case rimDarkness
         case bleedWidth
         case bleedStrength
+        // Surface — independent of master (not noise).
+        case specStrength
+        case specFocus
+        case bumpStrength
 
         var id: Int { rawValue }
+
+        enum Group { case noise, surface }
+
+        var group: Group {
+            switch self {
+            case .specStrength, .specFocus, .bumpStrength: .surface
+            default: .noise
+            }
+        }
 
         var label: String {
             switch self {
@@ -43,6 +56,9 @@ enum StampNoise {
             case .rimDarkness:     "Rim darkness"
             case .bleedWidth:      "Bleed width (pt)"
             case .bleedStrength:   "Bleed strength"
+            case .specStrength:    "Specular strength"
+            case .specFocus:       "Specular focus"
+            case .bumpStrength:    "Depth strength"
             }
         }
 
@@ -60,6 +76,9 @@ enum StampNoise {
             case .rimDarkness:     "How dark the pressed edge gets."
             case .bleedWidth:      "How far ink feathers outside the edge."
             case .bleedStrength:   "Amount of outward ink feathering."
+            case .specStrength:    "Brightness of the tilt-driven highlight."
+            case .specFocus:       "Higher = tighter, smaller highlight."
+            case .bumpStrength:    "Strength of the embossed depth lighting."
             }
         }
 
@@ -77,6 +96,9 @@ enum StampNoise {
             case .rimDarkness:     0...1
             case .bleedWidth:      0...10
             case .bleedStrength:   0...1
+            case .specStrength:    0...1
+            case .specFocus:       2...24
+            case .bumpStrength:    0...2
             }
         }
     }
@@ -87,9 +109,11 @@ enum StampNoise {
     /// `Param.allCases` order:
     /// master, supplyScale, supplyStrength, supplyErode,
     /// chipStrength, chipScale, edgeRoughness, edgeRoughScale,
-    /// rimWidth, rimDarkness, bleedWidth, bleedStrength
+    /// rimWidth, rimDarkness, bleedWidth, bleedStrength,
+    /// specStrength, specFocus, bumpStrength
     static let defaultValues: [Float] =
-        [0.55, 2.24, 0.47, 2.04, 0.28, 13.31, 1.50, 75.27, 4.29, 0.60, 3.55, 0.16]
+        [0.55, 2.24, 0.47, 2.04, 0.28, 13.31, 1.50, 75.27, 4.29, 0.60, 3.55, 0.16,
+         0.45, 8.0, 1.0]
 
     // MARK: Persistence (DEBUG tuning only)
 

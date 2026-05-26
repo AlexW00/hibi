@@ -250,25 +250,15 @@ private struct StampNoiseDebugView: View {
                     }
                 }
 
-                Section("Parameters") {
-                    ForEach(StampNoise.Param.allCases) { param in
-                        VStack(alignment: .leading, spacing: 3) {
-                            HStack {
-                                Text(verbatim: param.label)
-                                    .font(.subheadline)
-                                Spacer()
-                                Text(verbatim: String(format: "%.2f", Double(values[param.rawValue])))
-                                    .font(.subheadline.monospacedDigit())
-                                    .foregroundStyle(.secondary)
-                            }
-                            Slider(value: binding(for: param),
-                                   in: Double(param.range.lowerBound)...Double(param.range.upperBound))
-                                .tint(.black)
-                            Text(verbatim: param.detail)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(.vertical, 2)
+                Section("Noise") {
+                    ForEach(StampNoise.Param.allCases.filter { $0.group == .noise }) { param in
+                        sliderRow(param)
+                    }
+                }
+
+                Section("Surface") {
+                    ForEach(StampNoise.Param.allCases.filter { $0.group == .surface }) { param in
+                        sliderRow(param)
                     }
                 }
             }
@@ -277,6 +267,27 @@ private struct StampNoiseDebugView: View {
         .navigationTitle(Text(verbatim: "Stamp Noise"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { values = StampNoise.decode(raw) }
+    }
+
+    @ViewBuilder
+    private func sliderRow(_ param: StampNoise.Param) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack {
+                Text(verbatim: param.label)
+                    .font(.subheadline)
+                Spacer()
+                Text(verbatim: String(format: "%.2f", Double(values[param.rawValue])))
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+            Slider(value: binding(for: param),
+                   in: Double(param.range.lowerBound)...Double(param.range.upperBound))
+                .tint(.black)
+            Text(verbatim: param.detail)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 2)
     }
 
     private func binding(for param: StampNoise.Param) -> Binding<Double> {

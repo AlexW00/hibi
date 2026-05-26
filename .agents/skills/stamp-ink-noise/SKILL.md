@@ -59,7 +59,7 @@ Approaches that did **not** work and should not be reintroduced as the *primary*
 ## Parameters, presets, and the debug menu
 
 `Hibi/Models/StampNoise.swift` is the single source of truth:
-- `Param` enum — ordered list of 12 floats. **Index order MUST match the `P_*` `#define`s in StampShader.metal.**
+- `Param` enum — ordered list of 15 floats (12 `.noise` + 3 `.surface`). **Index order MUST match the `P_*` `#define`s in StampShader.metal.** The `.surface` params (specular strength/focus, depth strength) drive the specular highlight and emboss; they are **not** gated by `master` (they aren't noise) and the debug UI shows them in a separate "Surface" section.
 - `defaultValues` — the single tuned preset that ships in release.
 - `encode`/`decode` — flat `[Float]` ⇄ comma-joined String for `@AppStorage`.
 
