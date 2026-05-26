@@ -3,7 +3,7 @@ import CoreText
 import Foundation
 import ImageIO
 
-enum StampCompositor {
+nonisolated enum StampCompositor {
     // MARK: - Cache
 
     private static let memoryCache = NSCache<NSString, CGImageWrapper>()

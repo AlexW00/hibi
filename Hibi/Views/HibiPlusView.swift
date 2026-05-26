@@ -155,10 +155,11 @@ struct HibiStamp: View {
         let seed = StampConfig.seed(from: date)
         guard let def = StampConfig.definition(for: seed) else { compositeImage = nil; return }
         let scale = displayScale
+        let compositeSize = Self.compositeSize
 
         // Fast path: memory or disk cache → instant stamp with full shader.
         if let cached = StampCompositor.cachedComposite(
-            definition: def, date: date, outputSize: Self.compositeSize, scale: scale
+            definition: def, date: date, outputSize: compositeSize, scale: scale
         ) {
             compositeImage = cached
             isGenerating = false
@@ -172,7 +173,7 @@ struct HibiStamp: View {
             let image = StampCompositor.composite(
                 definition: def,
                 date: date,
-                outputSize: Self.compositeSize,
+                outputSize: compositeSize,
                 scale: scale
             )
             guard !Task.isCancelled else { return }

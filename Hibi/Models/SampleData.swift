@@ -87,7 +87,7 @@ enum AppColor {
     static let accent: Color = .primary
 }
 
-enum AppFont {
+nonisolated enum AppFont {
     static let serifRegular = "InstrumentSerif-Regular"
     static let serifItalic  = "InstrumentSerif-Italic"
     /// Noto Serif JP Regular. Used for the entire display face when the user's
