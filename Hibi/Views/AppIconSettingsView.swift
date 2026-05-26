@@ -31,42 +31,9 @@ private struct AppIconRow: View {
     var body: some View {
         Button(action: onSelect) {
             HStack(spacing: 14) {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(.tertiarySystemFill))
-                    .frame(width: 64, height: 64)
-                    .overlay {
-                        Image(option.previewAssetName)
-                            .resizable()
-                            .scaledToFit()
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    }
-                    .overlay(alignment: .bottomTrailing) {
-                        if !isUnlocked {
-                            Image(systemName: "lock.fill")
-                                .font(.caption2)
-                                .foregroundStyle(.white)
-                                .padding(4)
-                                .background(.ultraThinMaterial, in: Circle())
-                                .offset(x: 4, y: 4)
-                        }
-                    }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(option.displayName)
-                        .font(.body)
-                        .foregroundStyle(isUnlocked ? .primary : .secondary)
-                    Text(option.description)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                    if !isUnlocked {
-                        Text("Available to early users")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                    }
-                }
-
+                iconPreview
+                labels
                 Spacer()
-
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.accent)
@@ -77,5 +44,44 @@ private struct AppIconRow: View {
         }
         .disabled(!isUnlocked)
         .tint(.primary)
+    }
+
+    private var iconPreview: some View {
+        Image(option.previewAssetName)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 64, height: 64)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay {
+                if !isUnlocked {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(.background.opacity(0.55))
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(.secondary)
+                }
+            }
+    }
+
+    @ViewBuilder
+    private var labels: some View {
+        if isUnlocked {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(option.displayName)
+                    .font(.body)
+                Text(option.description)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(option.displayName)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                Text("Available to early users")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
     }
 }
