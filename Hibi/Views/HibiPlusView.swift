@@ -4,7 +4,7 @@ import SwiftUI
 
 private enum HPLayout {
     static let collapsed = CGSize(width: 280, height: 280)
-    static let stampExpandedHeight: CGFloat = 450
+    static let stampExpandedHeight: CGFloat = 486
     static let featureExpandedHeight: CGFloat = 540
     static let featureExpandedHeightPurchased: CGFloat = 480
     static let peek: CGFloat = 9
@@ -564,7 +564,7 @@ private struct StampCardBody: View {
                     .lineLimit(1)
                     .opacity(chromeFade)
                     .frame(maxHeight: .infinity, alignment: .bottom)
-                    .padding(.bottom, 22)
+                    .padding(.bottom, 44)
             }
         }
         .frame(height: height)
