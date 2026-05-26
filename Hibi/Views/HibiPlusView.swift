@@ -38,9 +38,12 @@ struct HibiStamp: View {
     @Environment(\.displayScale) private var displayScale
     @State private var pressScale: CGFloat = 1
     @State private var appeared = false
+    @State private var pendingStampIn = false
 
     // Metal stamp state
     @State private var compositeImage: CGImage?
+    @State private var compositeTask: Task<Void, Never>?
+    @State private var isGenerating = false
     @State private var motion = MotionStore()
     @State private var isLowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
 
@@ -62,7 +65,7 @@ struct HibiStamp: View {
                     .opacity(appeared ? 1 : 0)
                     .onChange(of: stampToken, initial: true) { _, _ in
                         appeared = false
-                        runStampIn()
+                        pendingStampIn = true
                     }
             } else {
                 slotBody
@@ -97,7 +100,7 @@ struct HibiStamp: View {
                     liveStamp(image: compositeImage)
                 }
             } else {
-                Circle().fill(PaperTints.sealInk.opacity(0.06))
+                sealPlaceholder
             }
         }
         .onAppear { buildComposite() }
@@ -147,15 +150,61 @@ struct HibiStamp: View {
     private static let compositeSize: CGFloat = 310
 
     private func buildComposite() {
+        compositeTask?.cancel()
         guard let date else { compositeImage = nil; return }
         let seed = StampConfig.seed(from: date)
         guard let def = StampConfig.definition(for: seed) else { compositeImage = nil; return }
-        compositeImage = StampCompositor.composite(
-            definition: def,
-            date: date,
-            outputSize: Self.compositeSize,
-            scale: displayScale
-        )
+        let scale = displayScale
+
+        // Fast path: memory or disk cache → instant stamp with full shader.
+        if let cached = StampCompositor.cachedComposite(
+            definition: def, date: date, outputSize: Self.compositeSize, scale: scale
+        ) {
+            compositeImage = cached
+            isGenerating = false
+            flushStampIn()
+            return
+        }
+
+        // Slow path: generate async, persist for next time.
+        isGenerating = true
+        compositeTask = Task.detached(priority: .userInitiated) {
+            let image = StampCompositor.composite(
+                definition: def,
+                date: date,
+                outputSize: Self.compositeSize,
+                scale: scale
+            )
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                compositeImage = image
+                isGenerating = false
+                flushStampIn()
+            }
+        }
+    }
+
+    private var sealPlaceholder: some View {
+        Circle()
+            .fill(PaperTints.sealInk.opacity(0.06))
+            .overlay {
+                if isGenerating {
+                    VStack(spacing: 6) {
+                        ProgressView()
+                            .tint(PaperTints.sealInk.opacity(0.4))
+                        Text("Generating your seal…")
+                            .font(.custom(AppFont.serifItalic, size: 11))
+                            .foregroundStyle(PaperTints.sealInk.opacity(0.5))
+                    }
+                }
+            }
+    }
+
+    /// Plays the stamp-in animation if one was deferred until the composite loaded.
+    private func flushStampIn() {
+        guard pendingStampIn else { return }
+        pendingStampIn = false
+        runStampIn()
     }
 
     private var slotBody: some View {
