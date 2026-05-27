@@ -35,7 +35,7 @@ struct SettingsView: View {
     }
 
     enum SettingsDestination: String, Hashable, Identifiable {
-        case appearance, appIcon, units, calendars
+        case appearance, appIcon, behavior, units, calendars
         #if DEBUG
         case stampNoise
         #endif
@@ -81,6 +81,7 @@ struct SettingsView: View {
             switch destination {
             case .appearance: AppearanceSettingsView()
             case .appIcon: AppIconSettingsView()
+            case .behavior: BehaviorSettingsView()
             case .units: UnitsSettingsView()
             case .calendars: CalendarSelectionView()
             #if DEBUG
@@ -106,6 +107,9 @@ struct SettingsView: View {
                 settingsDivider
                 settingsNavRow("App Icon", systemImage: "app.dashed",
                                destination: .appIcon)
+                settingsDivider
+                settingsNavRow("Behavior", systemImage: "hand.draw",
+                               destination: .behavior)
                 settingsDivider
                 settingsNavRow("Units", systemImage: "ruler",
                                destination: .units)
@@ -306,7 +310,6 @@ struct SettingsView: View {
 
 private struct AppearanceSettingsView: View {
     @AppStorage("appearance") private var appearanceRaw: String = SettingsView.Appearance.system.rawValue
-    @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
     @AppStorage("preferCompactDayView") private var preferCompactDayView: Bool = false
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
 
@@ -325,13 +328,28 @@ private struct AppearanceSettingsView: View {
             }
 
             Section("Day View") {
-                Toggle("Invert swipe direction", isOn: $invertDaySwipe)
-                    .tint(.black)
                 Toggle("Prefer compact mode", isOn: $preferCompactDayView)
                     .tint(.black)
             }
         }
         .navigationTitle("Appearance")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - Behavior
+
+private struct BehaviorSettingsView: View {
+    @AppStorage("invertDaySwipe") private var invertDaySwipe: Bool = false
+
+    var body: some View {
+        Form {
+            Section("Day View") {
+                Toggle("Invert swipe direction", isOn: $invertDaySwipe)
+                    .tint(.black)
+            }
+        }
+        .navigationTitle("Behavior")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
