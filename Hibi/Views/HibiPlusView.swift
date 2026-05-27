@@ -432,6 +432,9 @@ struct PlusCTA: View {
     private var isBusy: Bool { isDone || isGenerating || isPurchasing }
     /// Tappable only once a real price has loaded and no flow is in flight.
     private var isReady: Bool { price != nil && !isBusy }
+    /// Waiting on StoreKit for the price (no other flow in flight) — dim the
+    /// capsule so it reads as not-yet-interactive.
+    private var isLoadingPrice: Bool { price == nil && !isBusy }
 
     var body: some View {
         Button {
@@ -476,6 +479,7 @@ struct PlusCTA: View {
             .background(Color.primary)
             .clipShape(Capsule())
             .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18), radius: 6, y: 2)
+            .opacity(isLoadingPrice ? 0.5 : 1)
         }
         .buttonStyle(.plain)
         .disabled(!isReady)
