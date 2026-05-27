@@ -8,7 +8,7 @@ import UIKit
 /// presentation records the changelog as seen. We currently ship
 /// `MARKETING_VERSION = 1.10`.
 enum WhatsNewContent {
-    static let version = "1.10"
+    static let version = "2.0"
 
     /// Single page, dark "Continue" button to match the app's monochrome chrome.
     static var configuration: NoteletConfiguration {

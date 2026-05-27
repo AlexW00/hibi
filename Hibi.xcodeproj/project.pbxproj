@@ -216,6 +216,7 @@
 				4B2000042FC2000000F49AFD /* Sources */,
 				4B2000052FC2000000F49AFD /* Frameworks */,
 				4B2000062FC2000000F49AFD /* Resources */,
+				4B20000D2FC2000000F49AFD /* Copy xcstrings for tests */,
 			);
 			buildRules = (
 			);
@@ -339,6 +340,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4B20000D2FC2000000F49AFD /* Copy xcstrings for tests */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Hibi/Localizable.xcstrings",
+				"$(SRCROOT)/Hibi/InfoPlist.xcstrings",
+			);
+			name = "Copy xcstrings for tests";
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Localizable.xcstrings",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/InfoPlist.xcstrings",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cp \"${SRCROOT}/Hibi/Localizable.xcstrings\" \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/\"\ncp \"${SRCROOT}/Hibi/InfoPlist.xcstrings\" \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4B1506FD2FBEA5BF00F49AFD /* Sources */ = {

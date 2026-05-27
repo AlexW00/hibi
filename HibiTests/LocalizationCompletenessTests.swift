@@ -6,11 +6,13 @@ import Testing
 /// for all 11 shipping locales. Prevents the bug class where What's New or
 /// Settings text ships English-only to non-English users (v1.8 incident).
 ///
-/// Reads `.xcstrings` source files from the project directory (they're JSON on
-/// disk but compiled into `.lproj` folders during build, so Bundle lookups
-/// won't find them).
+/// A Run Script build phase on HibiTests copies the raw `.xcstrings` JSON
+/// into the test host bundle so these tests work on-device (where `#filePath`
+/// paths are unreachable).
 @Suite("Localization completeness")
 struct LocalizationCompletenessTests {
+
+    private final class _BundleAnchor {}
 
     private static let shippingLocales = [
         "en", "de", "ja", "ko", "ms", "es", "it", "pt-BR",
@@ -45,21 +47,10 @@ struct LocalizationCompletenessTests {
         let value: String?
     }
 
-    private static func projectRoot() -> URL? {
-        // Walk up from the test bundle's executable to find the project root.
-        // Test host is at: DerivedData/.../Build/Products/Debug-iphoneos/Hibi.app/Hibi
-        // We need the source tree, not the build products.
-        // Use #filePath to find the project root at compile time.
-        let testFile = URL(fileURLWithPath: #filePath)
-        // testFile = .../HibiTests/LocalizationCompletenessTests.swift
-        // project root = .../Hibi (parent of HibiTests)
-        return testFile.deletingLastPathComponent().deletingLastPathComponent()
-    }
-
-    private static func loadCatalog(named name: String, subdirectory: String = "Hibi") -> CatalogEntry? {
-        guard let root = projectRoot() else { return nil }
-        let url = root.appendingPathComponent(subdirectory).appendingPathComponent("\(name).xcstrings")
-        guard let data = try? Data(contentsOf: url),
+    private static func loadCatalog(named name: String) -> CatalogEntry? {
+        let bundle = Bundle(for: _BundleAnchor.self)
+        guard let url = bundle.url(forResource: name, withExtension: "xcstrings"),
+              let data = try? Data(contentsOf: url),
               let catalog = try? JSONDecoder().decode(CatalogEntry.self, from: data)
         else { return nil }
         return catalog
