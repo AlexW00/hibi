@@ -7,17 +7,18 @@ struct SettingsView: View {
     /// presents the onboarding sheet once this screen pops (can't show the
     /// onboarding sheet while Settings is still on the navigation stack).
     let onReopenPermissions: () -> Void
+    let expandPlus: Bool
 
     @Environment(\.dismiss) private var dismiss
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
     @State private var whatsNewVersion: NoteletPresentedVersion?
     @State private var settingsDestination: SettingsDestination?
-    @State private var collapseProgress: CGFloat
+    @State private var collapseProgress: CGFloat = 1
 
     init(onReopenPermissions: @escaping () -> Void, expandPlus: Bool = false) {
         self.onReopenPermissions = onReopenPermissions
-        _collapseProgress = State(initialValue: expandPlus ? 0 : 1)
+        self.expandPlus = expandPlus
     }
 
     enum Appearance: String, CaseIterable, Identifiable {
@@ -42,7 +43,7 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HibiPlusView(collapseProgress: $collapseProgress)
+            HibiPlusView(collapseProgress: $collapseProgress, expandPlus: expandPlus)
                 .background(Color(.systemGroupedBackground))
                 .zIndex(1)
 

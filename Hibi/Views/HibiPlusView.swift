@@ -674,9 +674,16 @@ private struct FeatureCardBody: View {
 
 struct HibiPlusView: View {
     // 0 = stamp card, 1 = feature card
-    @State private var frontIndex = 0
+    @State private var frontIndex: Int
     @Binding var collapseProgress: CGFloat
+    private let expandOnAppear: Bool
     private var expanded: Bool { collapseProgress < 0.5 }
+
+    init(collapseProgress: Binding<CGFloat>, expandPlus: Bool = false) {
+        _collapseProgress = collapseProgress
+        _frontIndex = State(initialValue: expandPlus ? 1 : 0)
+        expandOnAppear = expandPlus
+    }
     private var chromeFade: Double {
         Double(max(0, 1 - collapseProgress * 1.25))
     }
@@ -735,7 +742,16 @@ struct HibiPlusView: View {
         }
         .frame(height: totalHeight)
         .animation(HPLayout.collapseSpring, value: isPlus)
-        .onAppear { updateMotion() }
+        .onAppear {
+            updateMotion()
+            if expandOnAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                    withAnimation(HPLayout.collapseSpring) {
+                        collapseProgress = 0
+                    }
+                }
+            }
+        }
         .onDisappear { motion.stop() }
         .onChange(of: scenePhase) { _, _ in updateMotion() }
         .onChange(of: reduceMotion) { _, _ in updateMotion() }
