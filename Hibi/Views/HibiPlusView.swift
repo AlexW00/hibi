@@ -423,15 +423,19 @@ struct PlusCTA: View {
     var isPurchasing: Bool = false
     var isGenerating: Bool = false
     var isDone: Bool = false
-    /// Localized price, e.g. "$4.99". Falls back to the placeholder default.
-    var price: String = "$4.99"
+    /// Localized price, e.g. "$4.99". `nil` until StoreKit returns the product;
+    /// while `nil` the button shows a spinner and is disabled so a wrong-currency
+    /// placeholder is never shown.
+    var price: String?
     let onPurchase: () -> Void
 
     private var isBusy: Bool { isDone || isGenerating || isPurchasing }
+    /// Tappable only once a real price has loaded and no flow is in flight.
+    private var isReady: Bool { price != nil && !isBusy }
 
     var body: some View {
         Button {
-            guard !isBusy else { return }
+            guard isReady else { return }
             onPurchase()
         } label: {
             Group {
@@ -450,12 +454,7 @@ struct PlusCTA: View {
                         Text("Personalizing your Stamp…")
                             .font(.custom(AppFont.serifItalic, size: 13))
                     }
-                } else if isPurchasing {
-                    ProgressView()
-                        .tint(PaperTints.card1)
-                        .scaleEffect(0.9)
-                        .frame(height: 18)
-                } else {
+                } else if let price, !isPurchasing {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Text(verbatim: price)
                             .font(.system(size: 15, weight: .medium, design: .monospaced))
@@ -463,6 +462,12 @@ struct PlusCTA: View {
                             .font(.custom(AppFont.serifItalic, size: 12.5))
                             .opacity(0.7)
                     }
+                } else {
+                    // Purchase in flight, or the price hasn't loaded yet.
+                    ProgressView()
+                        .tint(PaperTints.card1)
+                        .scaleEffect(0.9)
+                        .frame(height: 18)
                 }
             }
             .padding(.horizontal, 22)
@@ -473,12 +478,16 @@ struct PlusCTA: View {
             .shadow(color: Color(red: 0.16, green: 0.14, blue: 0.10).opacity(0.18), radius: 6, y: 2)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(
-            isDone ? Text("Done") :
-            isGenerating ? Text("Personalizing your Stamp") :
-            isPurchasing ? Text("Purchasing…") :
-            Text("Buy Hibi Plus, \(price) one-time")
-        )
+        .disabled(!isReady)
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    private var accessibilityLabel: Text {
+        if isDone { return Text("Done") }
+        if isGenerating { return Text("Personalizing your Stamp") }
+        if isPurchasing { return Text("Purchasing…") }
+        if let price { return Text("Buy Hibi Plus, \(price) one-time") }
+        return Text("Loading price…")
     }
 }
 
@@ -568,7 +577,7 @@ private struct FeatureCardBody: View {
     var isPurchasing: Bool = false
     var isGenerating: Bool = false
     var isDone: Bool = false
-    var price: String = "$4.99"
+    var price: String?
     let onPurchase: () -> Void
     let onRestore: () -> Void
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
@@ -928,7 +937,7 @@ struct HibiPlusView: View {
                             isPurchasing: isPurchasing,
                             isGenerating: isGeneratingStamp,
                             isDone: isDoneGenerating,
-                            price: plusStore.displayPrice ?? "$4.99",
+                            price: plusStore.displayPrice,
                             onPurchase: purchase,
                             onRestore: restore)
         }

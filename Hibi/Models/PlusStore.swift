@@ -24,7 +24,8 @@ final class PlusStore {
     private(set) var isPurchasing = false
 
     /// Localized, ready-to-display price (e.g. "$4.99"). `nil` until the
-    /// product loads; views fall back to a hard-coded placeholder.
+    /// product loads; the purchase button shows a spinner while it's `nil`
+    /// rather than a placeholder, so a wrong-currency price is never shown.
     var displayPrice: String? { product?.displayPrice }
 
     private let entitlement: PlusEntitlementStore
