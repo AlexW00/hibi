@@ -113,7 +113,7 @@ enum StampNoise {
     /// specStrength, specFocus, bumpStrength
     static let defaultValues: [Float] =
         [0.55, 2.24, 0.47, 2.04, 0.28, 13.31, 1.50, 75.27, 4.29, 0.60, 3.55, 0.16,
-         0.84, 17.0, 1.7]
+         1.0, 17.0, 1.7]
 
     // MARK: Persistence (DEBUG tuning only)
 
