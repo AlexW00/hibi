@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Layout constants
 
@@ -36,6 +37,7 @@ struct HibiStamp: View {
     @Environment(\.displayScale) private var displayScale
     @State private var pressScale: CGFloat = 1
     @State private var appeared = false
+    @State private var shouldAnimatePunch = false
 
     // Metal stamp state
     @State private var compositeImage: CGImage?
@@ -79,8 +81,25 @@ struct HibiStamp: View {
 
     private func runStampIn() {
         guard !appeared else { return }
-        appeared = true
-        pressScale = 1
+
+        if shouldAnimatePunch && !reduceMotion {
+            shouldAnimatePunch = false
+            withAnimation(.easeIn(duration: 0.18)) {
+                appeared = true
+                pressScale = 0.92
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+                let generator = UIImpactFeedbackGenerator(style: .heavy)
+                generator.impactOccurred()
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.55)) {
+                    pressScale = 1.0
+                }
+            }
+        } else {
+            shouldAnimatePunch = false
+            appeared = true
+            pressScale = 1
+        }
     }
 
     private var sealBody: some View {
@@ -100,6 +119,8 @@ struct HibiStamp: View {
         .onChange(of: seed) { _, _ in buildComposite() }
         .onChange(of: stampToken) { _, _ in
             appeared = false
+            shouldAnimatePunch = true
+            UIImpactFeedbackGenerator(style: .heavy).prepare()
             buildComposite()
         }
         .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
