@@ -539,6 +539,18 @@ private struct PlusDebugRow: View {
         .tint(.black)
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
+
+        Divider().padding(.leading, 16)
+
+        Toggle(isOn: Binding(
+            get: { plusStore.debugSuppressPrice },
+            set: { plusStore.debugSuppressPrice = $0 }
+        )) {
+            Label("Suppress Plus price", systemImage: "hourglass")
+        }
+        .tint(.black)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
     }
 }
 #endif
