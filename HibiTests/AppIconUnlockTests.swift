@@ -56,7 +56,7 @@ final class AppIconUnlockTests: XCTestCase {
         }
         XCTAssertEqual(alwaysCount, 1, "Exactly one always-free icon (Default)")
         XCTAssertEqual(beforeDateCount, 1, "Exactly one early-user icon")
-        XCTAssertEqual(plusCount, 6, "The remaining six icons are Plus-gated")
+        XCTAssertEqual(plusCount, 8, "The remaining icons are Plus-gated")
     }
 
     func testAllPlusIconsTrackEntitlement() {

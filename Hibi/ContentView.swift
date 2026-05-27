@@ -128,6 +128,57 @@ struct ContentView: View {
         eventStore.ensureLoaded(year: clock.year, month: clock.month)
     }
 
+    private func performInitialSetup() {
+        plusStore.start()
+        appIconManager.isPlus = plusStore.isPlus
+        eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
+        weatherStore.refresh()
+        if !eventStore.isDemoMode {
+            let shouldOnboard = !eventStore.hasCalendarAccess
+                || (!eventStore.hasReminderAccess && !eventStore.reminderAccessDenied)
+            if shouldOnboard {
+                let bundleVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0"
+                let hasNotesForBundle = WhatsNewContent.version == bundleVersion
+                let whatsNewWillPresent = hasNotesForBundle
+                    && NoteletStorage.getLatestSeenAppVersion() != bundleVersion
+                needsOnboarding = true
+                if !whatsNewWillPresent {
+                    showOnboarding = true
+                }
+            }
+        }
+    }
+
+    private func handleOpenURL(_ url: URL) {
+        guard url.scheme == "hibi" else { return }
+        switch url.host {
+        case "today", nil:
+            displayedYear = SampleData.todayYear
+            displayedMonth = SampleData.todayMonth
+            selectedYear = SampleData.todayYear
+            selectedMonth = SampleData.todayMonth
+            selectedDay = SampleData.todayDay
+            selection = .day
+            scrollToNowToken &+= 1
+        case "event":
+            let identifier = url.pathComponents.dropFirst().first ?? ""
+            guard !identifier.isEmpty else { return }
+            displayedYear = SampleData.todayYear
+            displayedMonth = SampleData.todayMonth
+            selectedYear = SampleData.todayYear
+            selectedMonth = SampleData.todayMonth
+            selectedDay = SampleData.todayDay
+            selection = .day
+            scrollToNowToken &+= 1
+            openEditor(forEventIdentifier: identifier)
+        case "plus":
+            expandPlusOnSettings = true
+            showSettings = true
+        default:
+            break
+        }
+    }
+
     private func returnToNow() {
         withAnimation(.snappy(duration: 0.35)) {
             displayedYear = SampleData.todayYear
@@ -139,62 +190,66 @@ struct ContentView: View {
         scrollToNowToken &+= 1
     }
 
+    private var tabContent: some View {
+        TabView(selection: selectionBinding) {
+            Tab("Month", systemImage: "square.grid.3x3", value: CalendarTab.month) {
+                MonthsScrollView(
+                    displayedYear: $displayedYear,
+                    displayedMonth: $displayedMonth,
+                    scrollToNowToken: scrollToNowToken,
+                    tabSwitchToken: tabSwitchToken,
+                    onPickDay: { year, month, day in
+                        displayedYear = year
+                        displayedMonth = month
+                        selectedYear = year
+                        selectedMonth = month
+                        selectedDay = day
+                        selection = .day
+                    }
+                )
+            }
+
+            Tab("Week", systemImage: "text.alignleft", value: CalendarTab.stream) {
+                StreamView(
+                    displayedYear: $displayedYear,
+                    displayedMonth: $displayedMonth,
+                    selectedDay: $selectedDay,
+                    scrollToNowToken: scrollToNowToken,
+                    tabSwitchToken: tabSwitchToken,
+                    onPickDay: { year, month, day in
+                        displayedYear = year
+                        displayedMonth = month
+                        selectedYear = year
+                        selectedMonth = month
+                        selectedDay = day
+                        selection = .day
+                    },
+                    onTapEvent: openEditor(for:)
+                )
+            }
+
+            Tab("Day", systemImage: "calendar", value: CalendarTab.day) {
+                DayView(
+                    year: selectedYear,
+                    month: selectedMonth,
+                    day: $selectedDay,
+                    scrollToNowToken: scrollToNowToken,
+                    onTapEvent: openEditor(for:),
+                    onDateChange: { y, m, d in
+                        selectedYear = y
+                        selectedMonth = m
+                        selectedDay = d
+                        displayedYear = y
+                        displayedMonth = m
+                    }
+                )
+            }
+        }
+    }
+
     var body: some View {
         NavigationStack {
-            TabView(selection: selectionBinding) {
-                Tab("Month", systemImage: "square.grid.3x3", value: CalendarTab.month) {
-                    MonthsScrollView(
-                        displayedYear: $displayedYear,
-                        displayedMonth: $displayedMonth,
-                        scrollToNowToken: scrollToNowToken,
-                        tabSwitchToken: tabSwitchToken,
-                        onPickDay: { year, month, day in
-                            displayedYear = year
-                            displayedMonth = month
-                            selectedYear = year
-                            selectedMonth = month
-                            selectedDay = day
-                            selection = .day
-                        }
-                    )
-                }
-
-                Tab("Week", systemImage: "text.alignleft", value: CalendarTab.stream) {
-                    StreamView(
-                        displayedYear: $displayedYear,
-                        displayedMonth: $displayedMonth,
-                        selectedDay: $selectedDay,
-                        scrollToNowToken: scrollToNowToken,
-                        tabSwitchToken: tabSwitchToken,
-                        onPickDay: { year, month, day in
-                            displayedYear = year
-                            displayedMonth = month
-                            selectedYear = year
-                            selectedMonth = month
-                            selectedDay = day
-                            selection = .day
-                        },
-                        onTapEvent: openEditor(for:)
-                    )
-                }
-
-                Tab("Day", systemImage: "calendar", value: CalendarTab.day) {
-                    DayView(
-                        year: selectedYear,
-                        month: selectedMonth,
-                        day: $selectedDay,
-                        scrollToNowToken: scrollToNowToken,
-                        onTapEvent: openEditor(for:),
-                        onDateChange: { y, m, d in
-                            selectedYear = y
-                            selectedMonth = m
-                            selectedDay = d
-                            displayedYear = y
-                            displayedMonth = m
-                        }
-                    )
-                }
-            }
+            tabContent
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -205,8 +260,6 @@ struct ContentView: View {
                     }
                 }
                 ToolbarItem(placement: .principal) {
-                    // Month name is already locale-aware via the accessor;
-                    // verbatim skips the pointless "%@ · %@" catalog entry.
                     Text(verbatim: "\(MonthNames.full[displayedMonth - 1]) · \(String(displayedYear))")
                         .font(.appSerif(size: 15, italic: true, simple: useSimpleFont))
                         .foregroundStyle(.secondary)
@@ -247,42 +300,7 @@ struct ContentView: View {
         .environment(clock)
         .environment(appIconManager)
         .environment(plusStore)
-        .onOpenURL { url in
-            guard url.scheme == "hibi" else { return }
-            switch url.host {
-            case "today", nil:
-                // Anchor the displayed date on the device's real "today" —
-                // not whatever the user had selected. The widget always
-                // shows today, so tapping it should land you there.
-                displayedYear = SampleData.todayYear
-                displayedMonth = SampleData.todayMonth
-                selectedYear = SampleData.todayYear
-                selectedMonth = SampleData.todayMonth
-                selectedDay = SampleData.todayDay
-                selection = .day
-                scrollToNowToken &+= 1
-            case "event":
-                // hibi://event/{identifier} — emitted by the Schedule
-                // widget when a specific event pill is tapped. Land on
-                // today (the widget only shows today) and present the
-                // editor for that event.
-                let identifier = url.pathComponents.dropFirst().first ?? ""
-                guard !identifier.isEmpty else { return }
-                displayedYear = SampleData.todayYear
-                displayedMonth = SampleData.todayMonth
-                selectedYear = SampleData.todayYear
-                selectedMonth = SampleData.todayMonth
-                selectedDay = SampleData.todayDay
-                selection = .day
-                scrollToNowToken &+= 1
-                openEditor(forEventIdentifier: identifier)
-            case "plus":
-                expandPlusOnSettings = true
-                showSettings = true
-            default:
-                break
-            }
-        }
+        .onOpenURL(perform: handleOpenURL)
         .noteletSheet(
             notes: WhatsNewContent.allNotes,
             version: .current,
@@ -308,28 +326,7 @@ struct ContentView: View {
                 onContinue: { }
             )
         }
-        .task {
-            plusStore.start()
-            appIconManager.isPlus = plusStore.isPlus
-            eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
-            weatherStore.refresh()
-            if !eventStore.isDemoMode {
-                // Show onboarding when calendar isn't granted yet (fresh install),
-                // OR when calendar is granted but reminders haven't been asked
-                // (upgrade from a version without reminder support).
-                let shouldOnboard = !eventStore.hasCalendarAccess
-                    || (!eventStore.hasReminderAccess && !eventStore.reminderAccessDenied)
-                if shouldOnboard {
-                    let whatsNewWillPresent = NoteletStorage.getLatestSeenAppVersion()
-                        != WhatsNewContent.version
-                    needsOnboarding = true
-                    if !whatsNewWillPresent {
-                        showOnboarding = true
-                    }
-                    // else: onboarding shows after WhatsNew dismisses (via onDismiss)
-                }
-            }
-        }
+        .task { performInitialSetup() }
         .onChange(of: displayedYear) { _, _ in
             eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
         }
