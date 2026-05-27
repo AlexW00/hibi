@@ -163,6 +163,16 @@ struct SettingsView: View {
 
                 settingsDivider
 
+                settingsLinkRow("Contact", systemImage: "envelope",
+                                url: "mailto:mail@weichart.de")
+
+                settingsDivider
+
+                settingsLinkRow("Suggest a Feature", systemImage: "lightbulb",
+                                url: "https://github.com/AlexW00/hibi/discussions")
+
+                settingsDivider
+
                 Link(destination: URL(string: "https://apps.weichart.de")!) {
                     HStack(spacing: 12) {
                         Image("WeichartApps")
@@ -277,6 +287,26 @@ struct SettingsView: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.tertiary)
             }
+        }
+    }
+
+    private func settingsLinkRow(
+        _ titleKey: LocalizedStringKey,
+        systemImage: String,
+        url: String
+    ) -> some View {
+        Link(destination: URL(string: url)!) {
+            HStack {
+                Label(titleKey, systemImage: systemImage)
+                    .foregroundStyle(.primary)
+                Spacer()
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
         }
     }
 
