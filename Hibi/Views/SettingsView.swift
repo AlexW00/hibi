@@ -207,6 +207,9 @@ struct SettingsView: View {
 
                 settingsDivider
                 IconLockDebugRow()
+
+                settingsDivider
+                PlusDebugRow()
             }
             #endif
         }
@@ -353,7 +356,7 @@ private struct StampNoiseDebugView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Sticky preview — always visible while the parameters scroll.
-            HibiStamp(purchased: true, date: previewDate, size: 180)
+            HibiStamp(purchased: true, seed: StampConfig.seed(from: previewDate), date: previewDate, size: 180)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(Color(.systemGroupedBackground))
@@ -465,6 +468,22 @@ private struct IconLockDebugRow: View {
             let date: Date = locked ? .distantFuture : .distantPast
             iconManager.overrideInstallDate(date)
         }
+    }
+}
+
+private struct PlusDebugRow: View {
+    @Environment(PlusStore.self) private var plusStore
+
+    var body: some View {
+        Toggle(isOn: Binding(
+            get: { plusStore.isPlus },
+            set: { plusStore.debugSetPlus($0) }
+        )) {
+            Label("Hibi Plus (debug)", systemImage: "seal")
+        }
+        .tint(.black)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
     }
 }
 #endif

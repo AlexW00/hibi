@@ -1,0 +1,38 @@
+{
+  "identifier" : "B3F1A4C2-0E7D-4F2A-9C61-2A8F5D4E1B90",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : false,
+      "internalID" : "1D9C7E55-3A42-4B8E-A0F6-7C2B9E14D3A1",
+      "localizations" : [
+        {
+          "description" : "Unlock all app icons, your personalized stamp, and home-screen widgets. One-time purchase.",
+          "displayName" : "Hibi Plus",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.weichart.hibi.plus",
+      "referenceName" : "Hibi Plus",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

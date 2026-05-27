@@ -37,6 +37,7 @@ struct ContentView: View {
     @State private var weatherStore = WeatherStore()
     @State private var clock = Clock()
     @State private var appIconManager = AppIconManager()
+    @State private var plusStore = PlusStore()
     @State private var editorMode: EventEditorSheet.Mode?
     @State private var showOnboarding = false
     @State private var needsOnboarding = false
@@ -240,6 +241,7 @@ struct ContentView: View {
         .environment(weatherStore)
         .environment(clock)
         .environment(appIconManager)
+        .environment(plusStore)
         .onOpenURL { url in
             guard url.scheme == "hibi" else { return }
             switch url.host {
@@ -299,6 +301,8 @@ struct ContentView: View {
             )
         }
         .task {
+            plusStore.start()
+            appIconManager.isPlus = plusStore.isPlus
             eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
             weatherStore.refresh()
             if !eventStore.isDemoMode {
@@ -331,6 +335,9 @@ struct ContentView: View {
             if newValue {
                 eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
             }
+        }
+        .onChange(of: plusStore.isPlus) { _, newValue in
+            appIconManager.isPlus = newValue
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {

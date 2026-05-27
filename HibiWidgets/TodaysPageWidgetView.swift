@@ -6,7 +6,14 @@ struct TodaysPageWidgetView: View {
 
     @Environment(\.widgetFamily) private var family
 
+    private var isPlus: Bool { PlusEntitlementStore().isPlus }
+
     var body: some View {
+        content.plusLocked(!isPlus)
+    }
+
+    @ViewBuilder
+    private var content: some View {
         switch family {
         case .systemLarge:
             LargePaperView(entry: entry)

@@ -22,6 +22,10 @@ private enum HPLayout {
 
 struct HibiStamp: View {
     let purchased: Bool
+    /// Drives the stamp design choice and the shader's ink noise. Derived from
+    /// the purchase UUID (stable), independent of the displayed `date`.
+    let seed: UInt64
+    /// The purchase date, rendered as the dated text on the stamp.
     let date: Date?
     var size: CGFloat = 154
     var rotation: Double = -6
@@ -93,6 +97,7 @@ struct HibiStamp: View {
         }
         .onAppear { buildComposite() }
         .onChange(of: date) { _, _ in buildComposite() }
+        .onChange(of: seed) { _, _ in buildComposite() }
         .onChange(of: stampToken) { _, _ in
             appeared = false
             buildComposite()
@@ -109,7 +114,7 @@ struct HibiStamp: View {
             .layerEffect(
                 ShaderLibrary.stampEffect(
                     .float2(Float(size), Float(size)),
-                    .float(Float(StampConfig.seed(from: date ?? Date()))),
+                    .float(Float(seed)),
                     .float2(0, 0),
                     .color(PaperTints.sealInk),
                     .floatArray(noiseValues)
@@ -125,7 +130,7 @@ struct HibiStamp: View {
             .layerEffect(
                 ShaderLibrary.stampEffect(
                     .float2(Float(size), Float(size)),
-                    .float(Float(StampConfig.seed(from: date ?? Date()))),
+                    .float(Float(seed)),
                     .float2(Float(motion.tiltX), Float(motion.tiltY)),
                     .color(PaperTints.sealInk),
                     .floatArray(noiseValues)
@@ -141,7 +146,6 @@ struct HibiStamp: View {
     private func buildComposite() {
         compositeTask?.cancel()
         guard let date else { compositeImage = nil; return }
-        let seed = StampConfig.seed(from: date)
         guard let def = StampConfig.definition(for: seed) else { compositeImage = nil; return }
         let scale = displayScale
         let compositeSize = Self.compositeSize
@@ -384,15 +388,21 @@ struct WidgetsTile: View {
 struct PlusCTA: View {
     /// True once the success morph has played; owner drives the rest.
     @Binding var showSuccess: Bool
+    /// StoreKit purchase sheet is in flight (before success is known).
+    var isPurchasing: Bool = false
     var isGenerating: Bool = false
+    /// Localized price, e.g. "$4.99". Falls back to the placeholder default.
+    var price: String = "$4.99"
     let onPurchase: () -> Void
 
+    /// Any in-flight or completed state — blocks re-taps.
+    private var isBusy: Bool { showSuccess || isGenerating || isPurchasing }
+    /// Drives the green "success" colorway (only once the purchase landed).
     private var isActive: Bool { showSuccess || isGenerating }
 
     var body: some View {
         Button {
-            guard !showSuccess else { return }
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { showSuccess = true }
+            guard !isBusy else { return }
             onPurchase()
         } label: {
             Group {
@@ -411,9 +421,14 @@ struct PlusCTA: View {
                         Text("Thank you")
                             .font(.system(size: 15, weight: .semibold))
                     }
+                } else if isPurchasing {
+                    ProgressView()
+                        .tint(PaperTints.card1)
+                        .scaleEffect(0.9)
+                        .frame(height: 18)
                 } else {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text(verbatim: "$4.99")
+                        Text(verbatim: price)
                             .font(.system(size: 15, weight: .medium, design: .monospaced))
                         Text("one-time")
                             .font(.custom(AppFont.serifItalic, size: 12.5))
@@ -432,16 +447,17 @@ struct PlusCTA: View {
         .accessibilityLabel(
             isGenerating ? Text("Generating your stamp") :
             showSuccess ? Text("Purchased. Thank you.") :
-            Text("Buy Hibi Plus, $4.99 one-time")
+            isPurchasing ? Text("Purchasing…") :
+            Text("Buy Hibi Plus, \(price) one-time")
         )
     }
 }
 
 struct RestorePurchasesLink: View {
+    let onRestore: () -> Void
+
     var body: some View {
-        Button {
-            // No-op placeholder — no real IAP yet.
-        } label: {
+        Button(action: onRestore) {
             Text("Restore purchases")
                 .font(.custom(AppFont.serifItalic, size: 11.5))
                 .foregroundStyle(.tertiary)
@@ -482,6 +498,7 @@ private struct PlusHeader: View {
 
 private struct StampCardBody: View {
     let purchased: Bool
+    let seed: UInt64
     let date: Date?
     let expandFraction: CGFloat
     let chromeFade: Double
@@ -493,7 +510,7 @@ private struct StampCardBody: View {
             + (HPLayout.stampExpandedHeight - HPLayout.collapsed.height) * expandFraction
 
         ZStack {
-            HibiStamp(purchased: purchased, date: date,
+            HibiStamp(purchased: purchased, seed: seed, date: date,
                       size: 200 + 110 * expandFraction, stampToken: stampToken)
                 .frame(maxWidth: .infinity)
 
@@ -518,8 +535,11 @@ private struct FeatureCardBody: View {
     let purchased: Bool
     let chromeFade: Double
     @Binding var ctaSuccess: Bool
+    var isPurchasing: Bool = false
     var isGenerating: Bool = false
+    var price: String = "$4.99"
     let onPurchase: () -> Void
+    let onRestore: () -> Void
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont = false
 
     var body: some View {
@@ -574,8 +594,12 @@ private struct FeatureCardBody: View {
 
                 if !purchased {
                     VStack(spacing: 8) {
-                        PlusCTA(showSuccess: $ctaSuccess, isGenerating: isGenerating, onPurchase: onPurchase)
-                        RestorePurchasesLink()
+                        PlusCTA(showSuccess: $ctaSuccess,
+                                isPurchasing: isPurchasing,
+                                isGenerating: isGenerating,
+                                price: price,
+                                onPurchase: onPurchase)
+                        RestorePurchasesLink(onRestore: onRestore)
                     }
                     .opacity(chromeFade)
                     .padding(.bottom, 58 * chromeFade)
@@ -635,8 +659,16 @@ struct HibiPlusView: View {
     private var chromeFade: Double {
         Double(max(0, 1 - collapseProgress * 1.25))
     }
-    @State private var isPlus = false
-    @State private var purchaseDate: Date?
+    @Environment(PlusStore.self) private var plusStore
+    private var isPlus: Bool { plusStore.isPlus }
+    private var purchaseDate: Date? { plusStore.purchaseDate }
+    /// Stamp randomness seed: derived from the cached purchase UUID, falling
+    /// back to the date only if no UUID has been recorded yet.
+    private var stampSeed: UInt64 {
+        if let uuid = plusStore.seedUUID { return StampConfig.seed(from: uuid) }
+        if let date = purchaseDate { return StampConfig.seed(from: date) }
+        return 0
+    }
 
     // animation state
     @State private var dragY: CGFloat = 0
@@ -644,6 +676,7 @@ struct HibiPlusView: View {
     @State private var cardShift: CGFloat = 0          // 0…1, back rises to front
     @State private var commitCount = 0                 // haptic
     @State private var ctaSuccess = false
+    @State private var isPurchasing = false
     @State private var stampToken = 0
     @State private var isGeneratingStamp = false
     @State private var generationTask: Task<Void, Never>?
@@ -841,13 +874,17 @@ struct HibiPlusView: View {
     @ViewBuilder
     private func cardBody(index: Int) -> some View {
         if index == 0 {
-            StampCardBody(purchased: isPlus, date: purchaseDate,
+            StampCardBody(purchased: isPlus, seed: stampSeed, date: purchaseDate,
                           expandFraction: 1 - collapseProgress,
                           chromeFade: chromeFade, stampToken: stampToken)
         } else {
             FeatureCardBody(purchased: isPlus, chromeFade: chromeFade,
-                            ctaSuccess: $ctaSuccess, isGenerating: isGeneratingStamp,
-                            onPurchase: purchase)
+                            ctaSuccess: $ctaSuccess,
+                            isPurchasing: isPurchasing,
+                            isGenerating: isGeneratingStamp,
+                            price: plusStore.displayPrice ?? "$4.99",
+                            onPurchase: purchase,
+                            onRestore: restore)
         }
     }
 
@@ -907,20 +944,32 @@ struct HibiPlusView: View {
         }
     }
 
-    /// CTA tapped: success morph has already started (PlusCTA set ctaSuccess).
-    /// Pre-generate the stamp composite so flipping to the stamp card is instant.
+    /// CTA tapped: run the StoreKit purchase. The CTA shows a spinner while the
+    /// system sheet is up; only a verified success plays the celebratory
+    /// checkmark → stamp-generation → flip sequence. Cancel/failure quietly
+    /// returns to the price.
     private func purchase() {
-        let date = Date()
-        purchaseDate = date
-        let scale = displayScale
+        guard !isPurchasing else { return }
+        isPurchasing = true
+        Task {
+            let success = await plusStore.purchase()
+            isPurchasing = false
+            guard success else { return }
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                ctaSuccess = true
+            }
+            beginStampReveal()
+        }
+    }
 
-        // Capture values before entering detached context.
-        let seed = StampConfig.seed(from: date)
-        let def = StampConfig.definition(for: seed)
+    /// Pre-generate the stamp composite (seeded from the recorded purchase
+    /// date) so flipping to the stamp card is instant, then flip.
+    private func beginStampReveal() {
+        let date = purchaseDate ?? Date()
+        let scale = displayScale
+        let def = StampConfig.definition(for: stampSeed)
         let compositeSize = HibiStamp.compositeSize
 
-        // Start composite generation immediately so the cache is warm
-        // before the stamp card appears.
         generationTask?.cancel()
         generationTask = Task.detached(priority: .userInitiated) {
             guard let def else { return }
@@ -930,22 +979,27 @@ struct HibiPlusView: View {
             )
         }
 
-        // 1) Show checkmark for 0.8s, then switch to "Generating…" on the CTA
+        // Show checkmark for 0.8s, then switch to "Generating…" on the CTA.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
             withAnimation(.easeInOut(duration: 0.25)) { isGeneratingStamp = true }
         }
 
-        // 2) Wait for composite to finish, then flip to stamp card
+        // Wait for the composite to finish, then flip to the stamp card.
         Task {
             await generationTask?.value
             await MainActor.run { finishPurchaseFlip() }
         }
     }
 
+    /// Restore a prior purchase (e.g. on a new device). On success the
+    /// entitlement flips and the card collapses into its Plus state.
+    private func restore() {
+        Task { await plusStore.restore() }
+    }
+
     /// Flips to the stamp card and stamps once the composite is ready.
     private func finishPurchaseFlip() {
         isGeneratingStamp = false
-        isPlus = true
 
         if frontIndex != 0 {
             isAnimating = true

@@ -1431,74 +1431,191 @@
         }
       }
     },
-    "Buy Hibi Plus, $4.99 one-time": {
+    "Buy Hibi Plus, %@ one-time": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hibi Plus kaufen, 4,99 $ einmalig"
+            "value": "Hibi Plus kaufen, %@ einmalig"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Buy Hibi Plus, $4.99 one-time"
+            "value": "Buy Hibi Plus, %@ one-time"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Comprar Hibi Plus, $4.99 pago único"
+            "value": "Comprar Hibi Plus, %@ pago único"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Acquista Hibi Plus, $4,99 una tantum"
+            "value": "Acquista Hibi Plus, %@ una tantum"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hibi Plusを購入する、$4.99 買い切り"
+            "value": "Hibi Plusを購入する、%@ 買い切り"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hibi Plus 구입, $4.99 일회 결제"
+            "value": "Hibi Plus 구입, %@ 일회 결제"
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Beli Hibi Plus, $4.99 sekali bayar"
+            "value": "Beli Hibi Plus, %@ sekali bayar"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Comprar Hibi Plus, $4,99 pagamento único"
+            "value": "Comprar Hibi Plus, %@ pagamento único"
           }
         },
         "zh-Hans-CN": {
           "stringUnit": {
             "state": "translated",
-            "value": "购买 Hibi Plus，$4.99 一次性"
+            "value": "购买 Hibi Plus，%@ 一次性"
           }
         },
         "zh-Hant-HK": {
           "stringUnit": {
             "state": "translated",
-            "value": "購買 Hibi Plus，$4.99 一次性"
+            "value": "購買 Hibi Plus，%@ 一次性"
           }
         },
         "zh-Hant-TW": {
           "stringUnit": {
             "state": "translated",
-            "value": "購買 Hibi Plus，$4.99 一次性"
+            "value": "購買 Hibi Plus，%@ 一次性"
           }
+        }
+      }
+    },
+    "Locked. Unlock widgets with Hibi Plus in the app.": {
+      "comment": "Accessibility label for a locked Hibi Plus home-screen widget.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": { "state": "translated", "value": "Gesperrt. Schalte Widgets mit Hibi Plus in der App frei." }
+        },
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Locked. Unlock widgets with Hibi Plus in the app." }
+        },
+        "es": {
+          "stringUnit": { "state": "translated", "value": "Bloqueado. Desbloquea los widgets con Hibi Plus en la app." }
+        },
+        "it": {
+          "stringUnit": { "state": "translated", "value": "Bloccato. Sblocca i widget con Hibi Plus nell’app." }
+        },
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "ロック中です。アプリのHibi Plusでウィジェットのロックを解除できます。" }
+        },
+        "ko": {
+          "stringUnit": { "state": "translated", "value": "잠김. 앱에서 Hibi Plus로 위젯을 잠금 해제하세요." }
+        },
+        "ms": {
+          "stringUnit": { "state": "translated", "value": "Dikunci. Buka kunci widget dengan Hibi Plus dalam apl." }
+        },
+        "pt-BR": {
+          "stringUnit": { "state": "translated", "value": "Bloqueado. Desbloqueie os widgets com o Hibi Plus no app." }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": { "state": "translated", "value": "已锁定。在 App 中通过 Hibi Plus 解锁小组件。" }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": { "state": "translated", "value": "已鎖定。在 App 中透過 Hibi Plus 解鎖小工具。" }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": { "state": "translated", "value": "已鎖定。在 App 中透過 Hibi Plus 解鎖小工具。" }
+        }
+      }
+    },
+    "Purchasing…": {
+      "comment": "Accessibility label while the StoreKit purchase sheet is in flight.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": { "state": "translated", "value": "Wird gekauft …" }
+        },
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Purchasing…" }
+        },
+        "es": {
+          "stringUnit": { "state": "translated", "value": "Comprando…" }
+        },
+        "it": {
+          "stringUnit": { "state": "translated", "value": "Acquisto in corso…" }
+        },
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "購入中…" }
+        },
+        "ko": {
+          "stringUnit": { "state": "translated", "value": "구매 중…" }
+        },
+        "ms": {
+          "stringUnit": { "state": "translated", "value": "Membeli…" }
+        },
+        "pt-BR": {
+          "stringUnit": { "state": "translated", "value": "Comprando…" }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": { "state": "translated", "value": "购买中…" }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": { "state": "translated", "value": "購買中…" }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": { "state": "translated", "value": "購買中…" }
+        }
+      }
+    },
+    "Unlock widgets in the app": {
+      "comment": "Caption under the lock on a Hibi Plus home-screen widget.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": { "state": "translated", "value": "Widgets in der App freischalten" }
+        },
+        "en": {
+          "stringUnit": { "state": "translated", "value": "Unlock widgets in the app" }
+        },
+        "es": {
+          "stringUnit": { "state": "translated", "value": "Desbloquéalos en la app" }
+        },
+        "it": {
+          "stringUnit": { "state": "translated", "value": "Sblocca i widget nell’app" }
+        },
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "アプリでロックを解除" }
+        },
+        "ko": {
+          "stringUnit": { "state": "translated", "value": "앱에서 위젯 잠금 해제" }
+        },
+        "ms": {
+          "stringUnit": { "state": "translated", "value": "Buka kunci dalam apl" }
+        },
+        "pt-BR": {
+          "stringUnit": { "state": "translated", "value": "Desbloqueie no app" }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": { "state": "translated", "value": "在 App 中解锁小组件" }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": { "state": "translated", "value": "在 App 中解鎖小工具" }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": { "state": "translated", "value": "在 App 中解鎖小工具" }
         }
       }
     },

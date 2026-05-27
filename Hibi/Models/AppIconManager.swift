@@ -25,6 +25,8 @@ struct AppIconOption: Identifiable, Sendable {
     enum Unlock: Sendable {
         case always
         case beforeDate(Date)
+        /// Unlocked only while the Hibi Plus entitlement is active.
+        case plus
     }
 }
 
@@ -35,6 +37,11 @@ struct AppIconOption: Identifiable, Sendable {
 final class AppIconManager {
     private(set) var selectedIconID: String
     private(set) var installDate: Date?
+
+    /// Mirrors the Hibi Plus entitlement. Owned by `PlusStore`; the view layer
+    /// pushes changes in so `.plus`-gated icons unlock the moment a purchase
+    /// completes (this is `@Observable`, so the icon list re-renders).
+    var isPlus: Bool = false
 
     static let icons: [AppIconOption] = {
         var cal = Calendar(identifier: .gregorian)
@@ -64,7 +71,7 @@ final class AppIconManager {
                 subtitle: "Available for Hibi Plus users",
                 previewAssetName: "AppIconPreview-DiscoBalloon",
                 alternateIconName: "DiscoBalloon",
-                unlock: .always
+                unlock: .plus
             ),
             AppIconOption(
                 id: "leatherbag",
@@ -72,7 +79,7 @@ final class AppIconManager {
                 subtitle: "Available for Hibi Plus users",
                 previewAssetName: "AppIconPreview-Leatherbag",
                 alternateIconName: "Leatherbag",
-                unlock: .always
+                unlock: .plus
             ),
             AppIconOption(
                 id: "pearl-hibi",
@@ -80,7 +87,7 @@ final class AppIconManager {
                 subtitle: "Available for Hibi Plus users",
                 previewAssetName: "AppIconPreview-PearlHibi",
                 alternateIconName: "PearlHibi",
-                unlock: .always
+                unlock: .plus
             ),
             AppIconOption(
                 id: "pixel-sun",
@@ -88,7 +95,7 @@ final class AppIconManager {
                 subtitle: "Available for Hibi Plus users",
                 previewAssetName: "AppIconPreview-PixelSun",
                 alternateIconName: "PixelSun",
-                unlock: .always
+                unlock: .plus
             ),
             AppIconOption(
                 id: "porcelain",
@@ -96,7 +103,7 @@ final class AppIconManager {
                 subtitle: "Available for Hibi Plus users",
                 previewAssetName: "AppIconPreview-Porcelain",
                 alternateIconName: "Porcelain",
-                unlock: .always
+                unlock: .plus
             ),
             AppIconOption(
                 id: "wood-stroke",
@@ -104,7 +111,7 @@ final class AppIconManager {
                 subtitle: "Available for Hibi Plus users",
                 previewAssetName: "AppIconPreview-WoodStroke",
                 alternateIconName: "WoodStroke",
-                unlock: .always
+                unlock: .plus
             ),
         ]
     }()
@@ -157,12 +164,24 @@ final class AppIconManager {
     }
 
     func isUnlocked(_ option: AppIconOption) -> Bool {
+        Self.isUnlocked(option, isPlus: isPlus, installDate: installDate)
+    }
+
+    /// Pure unlock rule, factored out so it can be unit-tested without a
+    /// `UIApplication`.
+    static func isUnlocked(
+        _ option: AppIconOption,
+        isPlus: Bool,
+        installDate: Date?
+    ) -> Bool {
         switch option.unlock {
         case .always:
             return true
         case .beforeDate(let cutoff):
-            guard let install = installDate else { return false }
-            return install < cutoff
+            guard let installDate else { return false }
+            return installDate < cutoff
+        case .plus:
+            return isPlus
         }
     }
 

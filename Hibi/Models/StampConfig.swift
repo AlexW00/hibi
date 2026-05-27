@@ -67,8 +67,28 @@ nonisolated enum StampConfig {
 
     // MARK: - Seed
 
-    /// Placeholder seed derived from the purchase date.
-    /// TODO: Replace with IAP Transaction UUID once StoreKit 2 is wired up.
+    /// Stable randomness seed derived from the purchase's UUID (the StoreKit
+    /// transaction's `appAccountToken`). This is the production source: it
+    /// picks the stamp design and drives the shader's ink noise, and stays
+    /// identical for the lifetime of the purchase regardless of the displayed
+    /// date.
+    ///
+    /// Hashes the 16 UUID bytes (FNV-1a) and masks to 24 bits: `Float` only
+    /// represents integers exactly up to 2^24, and the seed round-trips
+    /// through `.float()` into the Metal shader.
+    static func seed(from uuid: UUID) -> UInt64 {
+        var hash: UInt64 = 0xcbf2_9ce4_8422_2325
+        withUnsafeBytes(of: uuid.uuid) { raw in
+            for byte in raw {
+                hash ^= UInt64(byte)
+                hash = hash &* 0x0000_0100_0000_01b3
+            }
+        }
+        return hash & 0x00FF_FFFF
+    }
+
+    /// Date-derived seed. Retained for the DEBUG stamp-noise preview, which
+    /// has no purchase UUID to key off. Production uses `seed(from: UUID)`.
     ///
     /// The packed date value can exceed 2^24 (~16.7M), but `Float` only
     /// represents integers exactly up to 2^24. We hash through a Wang hash
