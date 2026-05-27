@@ -252,8 +252,14 @@ private struct DeepLink<Content: View>: View {
     let eventID: String
     @ViewBuilder var content: () -> Content
 
+    private var isPlus: Bool { PlusEntitlementStore().isPlus }
+
     var body: some View {
-        Link(destination: URL(string: "hibi://event/\(eventID)") ?? URL(string: "hibi://today")!) {
+        if isPlus {
+            Link(destination: URL(string: "hibi://event/\(eventID)") ?? URL(string: "hibi://today")!) {
+                content()
+            }
+        } else {
             content()
         }
     }
@@ -671,6 +677,8 @@ private struct ReminderCheckbox: View {
     /// the editorial scale of the rest of the hero card.
     let isHero: Bool
 
+    private var isPlus: Bool { PlusEntitlementStore().isPlus }
+
     var body: some View {
         let width: CGFloat = {
             if isHero { return isMedium ? 64 : 52 }
@@ -678,19 +686,27 @@ private struct ReminderCheckbox: View {
         }()
         let glyph: CGFloat = isHero ? (isMedium ? 22 : 18) : (isMedium ? 16 : 14)
 
-        Button(intent: ToggleReminderCompletionIntent(reminderID: reminderID)) {
-            Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: glyph, weight: .medium))
-                .foregroundStyle(tint.mix(with: .black, by: 0.10))
-                .contentTransition(.symbolEffect(.replace))
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        Group {
+            if isPlus {
+                Button(intent: ToggleReminderCompletionIntent(reminderID: reminderID)) {
+                    checkmarkIcon(glyph: glyph)
+                }
+                .buttonStyle(.plain)
+                .invalidatableContent()
+            } else {
+                checkmarkIcon(glyph: glyph)
+            }
         }
-        .buttonStyle(.plain)
         .frame(width: width)
         .frame(maxHeight: .infinity)
-        // Hint to the system that the visual state may briefly lag the tap
-        // while the intent + snapshot round-trip resolves.
-        .invalidatableContent()
+    }
+
+    private func checkmarkIcon(glyph: CGFloat) -> some View {
+        Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
+            .font(.system(size: glyph, weight: .medium))
+            .foregroundStyle(tint.mix(with: .black, by: 0.10))
+            .contentTransition(.symbolEffect(.replace))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

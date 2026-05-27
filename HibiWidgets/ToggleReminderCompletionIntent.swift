@@ -31,6 +31,7 @@ struct ToggleReminderCompletionIntent: AppIntent {
 
     func perform() async throws -> some IntentResult {
         guard !reminderID.isEmpty else { return .result() }
+        guard PlusEntitlementStore().isPlus else { return .result() }
         guard EKEventStore.authorizationStatus(for: .reminder) == .fullAccess else {
             return .result()
         }
