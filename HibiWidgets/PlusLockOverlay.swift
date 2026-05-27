@@ -10,36 +10,21 @@ import SwiftUI
 struct PlusLockOverlay: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .grayscale(1)
-            .opacity(0.5)
+            .opacity(0.4)
+            .blur(radius: 3)
             .overlay {
-                VStack(spacing: 3) {
+                VStack(spacing: 4) {
                     Image(systemName: "lock.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(.primary)
-                    Text(verbatim: "Hibi Plus")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(.primary)
-                    Text("Unlock widgets in the app")
-                        .font(.system(size: 9))
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundStyle(.primary.opacity(0.7))
+                    Text("Purchase Hibi Plus to unlock")
+                        .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                 }
-                .padding(.vertical, 9)
-                .padding(.horizontal, 13)
-                .background(
-                    RoundedRectangle(cornerRadius: 13, style: .continuous)
-                        .fill(PaperTints.card1.opacity(0.92))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 13, style: .continuous)
-                                .strokeBorder(.primary.opacity(0.08), lineWidth: 0.5)
-                        }
-                        .shadow(color: .black.opacity(0.12), radius: 6, y: 2)
-                )
-                .padding(8)
             }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text("Locked. Unlock widgets with Hibi Plus in the app."))
+            .accessibilityLabel(Text("Locked. Purchase Hibi Plus to unlock."))
     }
 }
 
