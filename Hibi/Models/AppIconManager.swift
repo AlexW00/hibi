@@ -46,7 +46,12 @@ final class AppIconManager {
     static let icons: [AppIconOption] = {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(identifier: "UTC")!
-        let cutoff = cal.date(from: DateComponents(year: 2026, month: 7, day: 1))!
+        let cutoff = cal.date(from: DateComponents(year: 2026, month: 6, day: 1))!
+
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        formatter.timeStyle = .none
+        let cutoffString = formatter.string(from: cutoff)
 
         return [
             AppIconOption(
@@ -60,7 +65,7 @@ final class AppIconManager {
             AppIconOption(
                 id: "early-user",
                 displayName: "Early User",
-                subtitle: "Available to early users",
+                subtitle: "Available to users who downloaded Hibi before \(cutoffString)",
                 previewAssetName: "AppIconPreview-EarlyUser",
                 alternateIconName: "EarlyUser",
                 unlock: .beforeDate(cutoff)
@@ -111,6 +116,22 @@ final class AppIconManager {
                 subtitle: "Available for Hibi Plus users",
                 previewAssetName: "AppIconPreview-WoodStroke",
                 alternateIconName: "WoodStroke",
+                unlock: .plus
+            ),
+            AppIconOption(
+                id: "fluff",
+                displayName: "Fluff",
+                subtitle: "Available for Hibi Plus users",
+                previewAssetName: "AppIconPreview-Fluff",
+                alternateIconName: "Fluff",
+                unlock: .plus
+            ),
+            AppIconOption(
+                id: "kawaikosan",
+                displayName: "Kawaikosan",
+                subtitle: "Available for cute Hibi Plus users",
+                previewAssetName: "AppIconPreview-Kawaikosan",
+                alternateIconName: "Kawaikosan",
                 unlock: .plus
             ),
         ]

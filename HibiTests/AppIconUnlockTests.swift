@@ -34,7 +34,7 @@ final class AppIconUnlockTests: XCTestCase {
         let early = icon("early-user")
         // No recorded install date → locked.
         XCTAssertFalse(AppIconManager.isUnlocked(early, isPlus: false, installDate: nil))
-        // Installed before the 2026-07-01 cutoff → unlocked even without Plus.
+        // Installed before the 2026-06-01 cutoff → unlocked even without Plus.
         XCTAssertTrue(AppIconManager.isUnlocked(
             early, isPlus: false, installDate: date("2026-01-01T00:00:00Z")))
         // Installed after the cutoff → locked even *with* Plus (it's an

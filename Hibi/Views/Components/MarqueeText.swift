@@ -45,7 +45,9 @@ struct MarqueeText: View {
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
                 guard abs(width - containerWidth) > 0.5 else { return }
                 containerWidth = width
-                restart()
+            }
+            .onChange(of: overflows) { _, nowOverflows in
+                if nowOverflows { restart() }
             }
             .mask { maskShape }
     }
@@ -70,7 +72,6 @@ struct MarqueeText: View {
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
                 guard abs(width - textWidth) > 0.5 else { return }
                 textWidth = width
-                restart()
             }
     }
 
@@ -101,7 +102,6 @@ struct MarqueeText: View {
         animationToken += 1
         let token = animationToken
         animOffset = 0
-        guard overflows else { return }
         let cycle = textWidth + gap
         let duration = max(4, Double(cycle / pixelsPerSecond))
         DispatchQueue.main.asyncAfter(deadline: .now() + leadingPause) {

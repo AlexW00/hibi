@@ -37,27 +37,32 @@ private struct AppIconRow: View {
                     Text(option.displayName)
                         .font(.body)
                         .foregroundStyle(isUnlocked ? .primary : .secondary)
-                    Text(option.subtitle)
+                    MarqueeText(text: String(localized: option.subtitle), pixelsPerSecond: 13)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
 
                 Spacer()
 
-                if !isUnlocked {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 14))
-                        .foregroundStyle(.secondary)
-                } else if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.accent)
-                        .font(.title3)
-                }
+                trailingIcon
             }
             .padding(.vertical, 4)
         }
         .disabled(!isUnlocked)
         .tint(.primary)
+    }
+
+    @ViewBuilder
+    private var trailingIcon: some View {
+        if !isUnlocked {
+            Image(systemName: "lock.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(.secondary)
+        } else if isSelected {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.accent)
+                .font(.title3)
+        }
     }
 
     private var iconPreview: some View {

@@ -2,14 +2,16 @@
   "sourceLanguage": "en",
   "strings": {
     "%@, %@ %lld": {
+      "comment": "Widget accessibility label: weekday, month day (e.g. 'Monday, January 15').",
+      "extractionState": "manual",
       "localizations": {
-        "en": {
+        "de": {
           "stringUnit": {
             "state": "translated",
             "value": "%1$@, %2$@ %3$lld"
           }
         },
-        "de": {
+        "en": {
           "stringUnit": {
             "state": "translated",
             "value": "%1$@, %2$@ %3$lld"
@@ -69,9 +71,7 @@
             "value": "%1$@，%2$@%3$lld日"
           }
         }
-      },
-      "extractionState": "manual",
-      "comment": "Widget accessibility label: weekday, month day (e.g. 'Monday, January 15')."
+      }
     },
     "%lld / %lld": {
       "comment": "Calendars-visible vs total count, e.g. '3 / 12' in Settings.",
@@ -1150,6 +1150,76 @@
         }
       }
     },
+    "Available for cute Hibi Plus users": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verfügbar für süße Hibi Plus Nutzer"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available for cute Hibi Plus users"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disponible para usuarios lindos de Hibi Plus"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disponibile per i carini utenti di Hibi Plus"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "かわいいHibi Plusユーザー向け"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "귀여운 Hibi Plus 사용자를 위해"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tersedia untuk pengguna comel Hibi Plus"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disponível para usuários fofos do Hibi Plus"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可爱的Hibi Plus用户专属"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可愛的Hibi Plus用戶專屬"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可愛的Hibi Plus用戶專屬"
+          }
+        }
+      }
+    },
     "Available for everyone": {
       "localizations": {
         "de": {
@@ -1291,6 +1361,7 @@
       }
     },
     "Available to early users": {
+      "extractionState": "stale",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -1431,6 +1502,77 @@
         }
       }
     },
+    "Awaiting your stamp": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warte auf deinen Stempel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Awaiting your stamp"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esperando tu sello"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In attesa del tuo timbro"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スタンプを待っています"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스탬프를 기다리는 중"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menunggu setem anda"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aguardando seu carimbo"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待您的印章"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待您的印章"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待您的印章"
+          }
+        }
+      }
+    },
     "Buy Hibi Plus, %@ one-time": {
       "extractionState": "manual",
       "localizations": {
@@ -1499,123 +1641,6 @@
             "state": "translated",
             "value": "購買 Hibi Plus，%@ 一次性"
           }
-        }
-      }
-    },
-    "Locked. Purchase Hibi Plus to unlock.": {
-      "comment": "Accessibility label for a locked Hibi Plus home-screen widget.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": { "state": "translated", "value": "Gesperrt. Hibi Plus kaufen, um Widgets freizuschalten." }
-        },
-        "en": {
-          "stringUnit": { "state": "translated", "value": "Locked. Purchase Hibi Plus to unlock." }
-        },
-        "es": {
-          "stringUnit": { "state": "translated", "value": "Bloqueado. Compra Hibi Plus para desbloquear." }
-        },
-        "it": {
-          "stringUnit": { "state": "translated", "value": "Bloccato. Acquista Hibi Plus per sbloccare." }
-        },
-        "ja": {
-          "stringUnit": { "state": "translated", "value": "ロック中。Hibi Plusを購入してロックを解除できます。" }
-        },
-        "ko": {
-          "stringUnit": { "state": "translated", "value": "잠김. Hibi Plus를 구매하여 잠금 해제하세요." }
-        },
-        "ms": {
-          "stringUnit": { "state": "translated", "value": "Dikunci. Beli Hibi Plus untuk membuka kunci." }
-        },
-        "pt-BR": {
-          "stringUnit": { "state": "translated", "value": "Bloqueado. Adquira o Hibi Plus para desbloquear." }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": { "state": "translated", "value": "已锁定。购买 Hibi Plus 以解锁。" }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": { "state": "translated", "value": "已鎖定。購買 Hibi Plus 以解鎖。" }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": { "state": "translated", "value": "已鎖定。購買 Hibi Plus 以解鎖。" }
-        }
-      }
-    },
-    "Purchasing…": {
-      "comment": "Accessibility label while the StoreKit purchase sheet is in flight.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": { "state": "translated", "value": "Wird gekauft …" }
-        },
-        "en": {
-          "stringUnit": { "state": "translated", "value": "Purchasing…" }
-        },
-        "es": {
-          "stringUnit": { "state": "translated", "value": "Comprando…" }
-        },
-        "it": {
-          "stringUnit": { "state": "translated", "value": "Acquisto in corso…" }
-        },
-        "ja": {
-          "stringUnit": { "state": "translated", "value": "購入中…" }
-        },
-        "ko": {
-          "stringUnit": { "state": "translated", "value": "구매 중…" }
-        },
-        "ms": {
-          "stringUnit": { "state": "translated", "value": "Membeli…" }
-        },
-        "pt-BR": {
-          "stringUnit": { "state": "translated", "value": "Comprando…" }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": { "state": "translated", "value": "购买中…" }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": { "state": "translated", "value": "購買中…" }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": { "state": "translated", "value": "購買中…" }
-        }
-      }
-    },
-    "Purchase Hibi Plus to unlock": {
-      "comment": "Caption under the lock icon on a locked Hibi Plus home-screen widget.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": { "state": "translated", "value": "Hibi Plus kaufen zum Freischalten" }
-        },
-        "en": {
-          "stringUnit": { "state": "translated", "value": "Purchase Hibi Plus to unlock" }
-        },
-        "es": {
-          "stringUnit": { "state": "translated", "value": "Compra Hibi Plus para desbloquear" }
-        },
-        "it": {
-          "stringUnit": { "state": "translated", "value": "Acquista Hibi Plus per sbloccare" }
-        },
-        "ja": {
-          "stringUnit": { "state": "translated", "value": "Hibi Plusを購入してロック解除" }
-        },
-        "ko": {
-          "stringUnit": { "state": "translated", "value": "Hibi Plus 구매로 잠금 해제" }
-        },
-        "ms": {
-          "stringUnit": { "state": "translated", "value": "Beli Hibi Plus untuk membuka kunci" }
-        },
-        "pt-BR": {
-          "stringUnit": { "state": "translated", "value": "Adquira o Hibi Plus para desbloquear" }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": { "state": "translated", "value": "购买 Hibi Plus 以解锁" }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": { "state": "translated", "value": "購買 Hibi Plus 以解鎖" }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": { "state": "translated", "value": "購買 Hibi Plus 以解鎖" }
         }
       }
     },
@@ -1980,8 +2005,8 @@
       }
     },
     "Calendars & Reminders": {
-      "extractionState": "manual",
       "comment": "Settings row label for the calendar/reminder selection screen.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -2405,6 +2430,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "繼續"
+          }
+        }
+      }
+    },
+    "Custom stamp": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigener Stempel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom stamp"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sello personal"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timbro personale"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オリジナルスタンプ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "나만의 스탬프"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Setem peribadi"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carimbo personalizado"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "专属印章"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "專屬印章"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "專屬印章"
           }
         }
       }
@@ -3198,8 +3293,8 @@
       }
     },
     "Display your reminders alongside calendar events.": {
-      "extractionState": "manual",
       "comment": "Reminders toggle description in the search/settings context.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -4488,6 +4583,76 @@
         }
       }
     },
+    "Fluff": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flausch"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fluff"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pompón"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Batuffolo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ふわふわ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "뭉게뭉게"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gebu"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fofinho"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "棉花糖"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "棉花糖"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "棉花糖"
+          }
+        }
+      }
+    },
     "Full calendar access needed": {
       "comment": "Prompt title when the app only has write-only Calendar access.",
       "extractionState": "manual",
@@ -4991,6 +5156,148 @@
         }
       }
     },
+    "Hibi Plus stamp": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus-Stempel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus stamp"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sello de Hibi Plus"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timbro di Hibi Plus"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plusのスタンプ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus 스탬프"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Setem Hibi Plus"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carimbo do Hibi Plus"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus 印章"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus 印章"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus 印章"
+          }
+        }
+      }
+    },
+    "Hibi Plus stamp, dated %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus-Stempel, %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus stamp, dated %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sello de Hibi Plus, %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timbro di Hibi Plus, %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plusのスタンプ、%@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus 스탬프, %@"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Setem Hibi Plus, %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carimbo do Hibi Plus, %@"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus 印章，%@"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus 印章，%@"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus 印章，%@"
+          }
+        }
+      }
+    },
     "Hide past events": {
       "comment": "Upcoming Events widget — toggle in the long-press configuration sheet. Default off (the widget shows every event of the day). When on, only events that haven't ended yet are shown.",
       "extractionState": "manual",
@@ -5203,6 +5510,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "反轉滑動方向"
+          }
+        }
+      }
+    },
+    "Kawaikosan": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kawaikosan"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kawaikosan"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kawaikosan"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kawaikosan"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "かわいこさん"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "카와이코상"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kawaikosan"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kawaikosan"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可爱小姐"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可愛小姐"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可愛小姐"
           }
         }
       }
@@ -5489,6 +5866,78 @@
           "stringUnit": {
             "state": "translated",
             "value": "位置"
+          }
+        }
+      }
+    },
+    "Locked. Purchase Hibi Plus to unlock.": {
+      "comment": "Accessibility label for a locked Hibi Plus home-screen widget.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gesperrt. Hibi Plus kaufen, um Widgets freizuschalten."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locked. Purchase Hibi Plus to unlock."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloqueado. Compra Hibi Plus para desbloquear."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloccato. Acquista Hibi Plus per sbloccare."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ロック中。Hibi Plusを購入してロックを解除できます。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "잠김. Hibi Plus를 구매하여 잠금 해제하세요."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dikunci. Beli Hibi Plus untuk membuka kunci."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloqueado. Adquira o Hibi Plus para desbloquear."
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已锁定。购买 Hibi Plus 以解锁。"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已鎖定。購買 Hibi Plus 以解鎖。"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已鎖定。購買 Hibi Plus 以解鎖。"
           }
         }
       }
@@ -6859,8 +7308,8 @@
       }
     },
     "Overdue": {
-      "extractionState": "manual",
       "comment": "Badge shown on a reminder that is past its due date.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -7140,6 +7589,150 @@
           "stringUnit": {
             "state": "translated",
             "value": "逐步完成權限設定"
+          }
+        }
+      }
+    },
+    "Personalizing your Stamp": {
+      "comment": "Accessibility label for the purchase CTA while the stamp is being generated.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Stempel wird personalisiert"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizing your Stamp"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizando tu sello"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizzazione del tuo timbro"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スタンプをカスタマイズ中"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스탬프를 맞춤 설정 중"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memperibadikan setem anda"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizando seu carimbo"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在定制您的印章"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在自訂您的印章"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在自訂您的印章"
+          }
+        }
+      }
+    },
+    "Personalizing your Stamp…": {
+      "comment": "Shown on the purchase button while the stamp composite is being generated after purchase.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Stempel wird personalisiert…"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizing your Stamp…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizando tu sello…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizzazione del timbro…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スタンプをカスタマイズ中…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "스탬프를 맞춤 설정 중…"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memperibadikan setem anda…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizando seu carimbo…"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在定制您的印章…"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在自訂您的印章…"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在自訂您的印章…"
           }
         }
       }
@@ -7787,6 +8380,149 @@
         }
       }
     },
+    "Purchase Hibi Plus to receive your personalized stamp.": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaufe Hibi Plus, um deinen persönlichen Stempel zu erhalten."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Purchase Hibi Plus to receive your personalized stamp."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compra Hibi Plus para recibir tu sello personalizado."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acquista Hibi Plus per ricevere il tuo timbro personalizzato."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plusを購入して、あなただけのスタンプを受け取ろう。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus를 구입하면 나만의 스탬프를 받을 수 있습니다."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beli Hibi Plus untuk mendapatkan setem peribadi anda."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compre o Hibi Plus para receber seu carimbo personalizado."
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "购买 Hibi Plus，获取专属印章。"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購買 Hibi Plus，獲取專屬印章。"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購買 Hibi Plus，獲取專屬印章。"
+          }
+        }
+      }
+    },
+    "Purchase Hibi Plus to unlock": {
+      "comment": "Caption under the lock icon on a locked Hibi Plus home-screen widget.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus kaufen zum Freischalten"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Purchase Hibi Plus to unlock"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compra Hibi Plus para desbloquear"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acquista Hibi Plus per sbloccare"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plusを購入してロック解除"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hibi Plus 구매로 잠금 해제"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beli Hibi Plus untuk membuka kunci"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adquira o Hibi Plus para desbloquear"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "购买 Hibi Plus 以解锁"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購買 Hibi Plus 以解鎖"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購買 Hibi Plus 以解鎖"
+          }
+        }
+      }
+    },
     "Purchased. Thank you.": {
       "extractionState": "manual",
       "localizations": {
@@ -7854,6 +8590,78 @@
           "stringUnit": {
             "state": "translated",
             "value": "已購買。謝謝。"
+          }
+        }
+      }
+    },
+    "Purchasing…": {
+      "comment": "Accessibility label while the StoreKit purchase sheet is in flight.",
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wird gekauft …"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Purchasing…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprando…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acquisto in corso…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購入中…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "구매 중…"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Membeli…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprando…"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "购买中…"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購買中…"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購買中…"
           }
         }
       }
@@ -7931,8 +8739,8 @@
       }
     },
     "Recurring": {
-      "extractionState": "manual",
       "comment": "Accessibility label for the recurring event icon.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -8291,8 +9099,8 @@
       }
     },
     "Reminder ID": {
-      "extractionState": "manual",
       "comment": "AppIntent parameter title for the reminder identifier (not user-visible in normal use).",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -8363,8 +9171,8 @@
       }
     },
     "Reminders": {
-      "extractionState": "manual",
       "comment": "Section header or toggle label for reminders.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -8435,8 +9243,8 @@
       }
     },
     "Reminders — %@": {
-      "extractionState": "manual",
       "comment": "Section header in calendar selection: 'Reminders — iCloud' etc.",
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
@@ -9657,73 +10465,73 @@
         }
       }
     },
-    "Tap to find out more.": {
+    "Tap to find out more...": {
       "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tippen und mehr erfahren."
+            "value": "Tippen und mehr erfahren …"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tap to find out more."
+            "value": "Tap to find out more..."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Toca para saber más."
+            "value": "Toca para saber más…"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tocca per saperne di più."
+            "value": "Tocca per saperne di più…"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "タップしてくわしく見る。"
+            "value": "タップしてくわしく見る…"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "탭하여 자세히 알아보기."
+            "value": "탭하여 자세히 알아보기…"
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ketik untuk ketahui lebih lanjut."
+            "value": "Ketik untuk ketahui lebih lanjut…"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Toque para saber mais."
+            "value": "Toque para saber mais…"
           }
         },
         "zh-Hans-CN": {
           "stringUnit": {
             "state": "translated",
-            "value": "点击了解更多。"
+            "value": "点击了解更多……"
           }
         },
         "zh-Hant-HK": {
           "stringUnit": {
             "state": "translated",
-            "value": "點一下了解更多。"
+            "value": "點一下了解更多……"
           }
         },
         "zh-Hant-TW": {
           "stringUnit": {
             "state": "translated",
-            "value": "點一下了解更多。"
+            "value": "點一下了解更多……"
           }
         }
       }
@@ -10657,6 +11465,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "切換提醒事項"
+          }
+        }
+      }
+    },
+    "Uniquely yours.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einzigartig deins."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uniquely yours."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Único y tuyo."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unico, solo tuo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あなただけの一つ。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "오직 나만의 것."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unik milik anda."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Só seu."
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "独一无二。"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "獨一無二。"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "獨一無二。"
           }
         }
       }
@@ -11666,575 +12544,6 @@
         }
       }
     },
-    "Your support matters a lot.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deine Unterstützung bedeutet viel."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your support matters a lot."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tu apoyo significa mucho."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il tuo supporto conta molto."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "あなたのサポートがとても大切です。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "여러분의 응원이 큰 힘이 됩니다."
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sokongan anda sangat bererti."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seu apoio significa muito."
-          }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你的支持非常重要。"
-          }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你的支持非常重要。"
-          }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你的支持非常重要。"
-          }
-        }
-      }
-    },
-    "Uniquely yours.": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Einzigartig deins."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Uniquely yours."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Único y tuyo."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unico, solo tuo."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "あなただけの一つ。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "오직 나만의 것."
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unik milik anda."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Só seu."
-          }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "独一无二。"
-          }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "獨一無二。"
-          }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "獨一無二。"
-          }
-        }
-      }
-    },
-    "Awaiting your stamp": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Warte auf deinen Stempel"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Awaiting your stamp"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Esperando tu sello"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In attesa del tuo timbro"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スタンプを待っています"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "스탬프를 기다리는 중"
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Menunggu setem anda"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aguardando seu carimbo"
-          }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "等待您的印章"
-          }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "等待您的印章"
-          }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "等待您的印章"
-          }
-        }
-      }
-    },
-    "Generating your stamp": {
-      "extractionState": "manual",
-      "comment": "Accessibility label for the purchase CTA while the stamp is being generated.",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dein Stempel wird erstellt"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Generating your stamp"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Generando tu sello"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Creazione del tuo timbro"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スタンプを作成中"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "스탬프를 만드는 중"
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mencipta setem anda"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gerando seu carimbo"
-          }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在生成您的印章"
-          }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在產生您的印章"
-          }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在產生您的印章"
-          }
-        }
-      }
-    },
-    "Generating your stamp…": {
-      "comment": "Shown while the stamp composite is being generated.",
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dein Stempel wird erstellt…"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Generating your stamp…"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Generando tu sello…"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Generazione del timbro…"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スタンプを作成中…"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "스탬프 생성 중…"
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Menjana setem anda…"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gerando seu carimbo…"
-          }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在生成你的印章…"
-          }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在產生你的印章…"
-          }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在產生你的印章…"
-          }
-        }
-      }
-    },
-    "Hibi Plus stamp": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plus-Stempel"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plus stamp"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sello de Hibi Plus"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timbro di Hibi Plus"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plusのスタンプ"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plus 스탬프"
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Setem Hibi Plus"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Carimbo do Hibi Plus"
-          }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plus 印章"
-          }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plus 印章"
-          }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plus 印章"
-          }
-        }
-      }
-    },
-    "Hibi Plus stamp, dated %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plus-Stempel, %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plus stamp, dated %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sello de Hibi Plus, %@"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timbro di Hibi Plus, %@"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plusのスタンプ、%@"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plus 스탬프, %@"
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Setem Hibi Plus, %@"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Carimbo do Hibi Plus, %@"
-          }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plus 印章，%@"
-          }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plus 印章，%@"
-          }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plus 印章，%@"
-          }
-        }
-      }
-    },
-    "Purchase Hibi Plus to receive your personalized stamp.": {
-      "extractionState": "manual",
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kaufe Hibi Plus, um deinen persönlichen Stempel zu erhalten."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Purchase Hibi Plus to receive your personalized stamp."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compra Hibi Plus para recibir tu sello personalizado."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Acquista Hibi Plus per ricevere il tuo timbro personalizzato."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plusを購入して、あなただけのスタンプを受け取ろう。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hibi Plus를 구입하면 나만의 스탬프를 받을 수 있습니다."
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beli Hibi Plus untuk mendapatkan setem peribadi anda."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compre o Hibi Plus para receber seu carimbo personalizado."
-          }
-        },
-        "zh-Hans-CN": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "购买 Hibi Plus，获取专属印章。"
-          }
-        },
-        "zh-Hant-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "購買 Hibi Plus，獲取專屬印章。"
-          }
-        },
-        "zh-Hant-TW": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "購買 Hibi Plus，獲取專屬印章。"
-          }
-        }
-      }
-    },
     "your stamp": {
       "extractionState": "manual",
       "localizations": {
@@ -12306,72 +12615,144 @@
         }
       }
     },
-    "Custom stamp": {
+    "Your support matters a lot.": {
+      "extractionState": "manual",
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Eigener Stempel"
+            "value": "Deine Unterstützung bedeutet viel."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Custom stamp"
+            "value": "Your support matters a lot."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sello personal"
+            "value": "Tu apoyo significa mucho."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Timbro personale"
+            "value": "Il tuo supporto conta molto."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "オリジナルスタンプ"
+            "value": "あなたのサポートがとても大切です。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "나만의 스탬프"
+            "value": "여러분의 응원이 큰 힘이 됩니다."
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Setem peribadi"
+            "value": "Sokongan anda sangat bererti."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Carimbo personalizado"
+            "value": "Seu apoio significa muito."
           }
         },
         "zh-Hans-CN": {
           "stringUnit": {
             "state": "translated",
-            "value": "专属印章"
+            "value": "你的支持非常重要。"
           }
         },
         "zh-Hant-HK": {
           "stringUnit": {
             "state": "translated",
-            "value": "專屬印章"
+            "value": "你的支持非常重要。"
           }
         },
         "zh-Hant-TW": {
           "stringUnit": {
             "state": "translated",
-            "value": "專屬印章"
+            "value": "你的支持非常重要。"
+          }
+        }
+      }
+    },
+    "Available to users who downloaded Hibi before %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verfügbar für Nutzer, die Hibi vor dem %@ heruntergeladen haben"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available to users who downloaded Hibi before %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disponible para usuarios que descargaron Hibi antes del %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disponibile per chi ha scaricato Hibi prima del %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@より前にHibiをダウンロードしたユーザー向け"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 이전에 Hibi를 다운로드한 사용자에게 제공"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tersedia untuk pengguna yang memuat turun Hibi sebelum %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disponível para usuários que baixaram o Hibi antes de %@"
+          }
+        },
+        "zh-Hans-CN": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在%@之前下载Hibi的用户可用"
+          }
+        },
+        "zh-Hant-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在%@之前下載Hibi的用戶可用"
+          }
+        },
+        "zh-Hant-TW": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在%@之前下載Hibi的用戶可用"
           }
         }
       }

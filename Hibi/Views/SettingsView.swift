@@ -14,11 +14,12 @@ struct SettingsView: View {
     @Environment(WeatherStore.self) private var weatherStore
     @State private var whatsNewVersion: NoteletPresentedVersion?
     @State private var settingsDestination: SettingsDestination?
-    @State private var collapseProgress: CGFloat = 1
+    @State private var collapseProgress: CGFloat
 
     init(onReopenPermissions: @escaping () -> Void, expandPlus: Bool = false) {
         self.onReopenPermissions = onReopenPermissions
         self.expandPlus = expandPlus
+        _collapseProgress = State(initialValue: expandPlus ? 0 : 1)
     }
 
     enum Appearance: String, CaseIterable, Identifiable {
