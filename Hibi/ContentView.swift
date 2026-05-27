@@ -45,6 +45,7 @@ struct ContentView: View {
     /// present the onboarding sheet. Chained via `onChange(of: showSettings)`
     /// since a pushed screen has no sheet `onDismiss`.
     @State private var reopenOnboardingAfterSettings = false
+    @State private var expandPlusOnSettings = false
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearanceRaw: String = SettingsView.Appearance.system.rawValue
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
@@ -224,7 +225,8 @@ struct ContentView: View {
                 SettingsView(
                     onReopenPermissions: {
                         reopenOnboardingAfterSettings = true
-                    }
+                    },
+                    expandPlus: expandPlusOnSettings
                 )
             }
         }
@@ -232,9 +234,12 @@ struct ContentView: View {
             // Settings is a pushed screen now, so there's no sheet onDismiss to
             // chain on. When it pops with the latch set (user tapped "Review
             // permissions"), present the onboarding sheet over the root.
-            if !isShown, reopenOnboardingAfterSettings {
-                reopenOnboardingAfterSettings = false
-                showOnboarding = true
+            if !isShown {
+                expandPlusOnSettings = false
+                if reopenOnboardingAfterSettings {
+                    reopenOnboardingAfterSettings = false
+                    showOnboarding = true
+                }
             }
         }
         .environment(eventStore)
@@ -271,6 +276,9 @@ struct ContentView: View {
                 selection = .day
                 scrollToNowToken &+= 1
                 openEditor(forEventIdentifier: identifier)
+            case "plus":
+                expandPlusOnSettings = true
+                showSettings = true
             default:
                 break
             }
