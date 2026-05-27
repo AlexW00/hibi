@@ -201,10 +201,10 @@ struct ContentView: View {
                     onPickDay: { year, month, day in
                         displayedYear = year
                         displayedMonth = month
+                        selectionBinding.wrappedValue = .day
                         selectedYear = year
                         selectedMonth = month
                         selectedDay = day
-                        selection = .day
                     }
                 )
             }
@@ -219,10 +219,10 @@ struct ContentView: View {
                     onPickDay: { year, month, day in
                         displayedYear = year
                         displayedMonth = month
+                        selectionBinding.wrappedValue = .day
                         selectedYear = year
                         selectedMonth = month
                         selectedDay = day
-                        selection = .day
                     },
                     onTapEvent: openEditor(for:)
                 )

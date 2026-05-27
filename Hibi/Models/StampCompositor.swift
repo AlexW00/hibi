@@ -22,6 +22,12 @@ nonisolated enum StampCompositor {
             .appendingPathComponent("StampComposites", isDirectory: true)
     }
 
+    #if DEBUG
+    static func _test_clearMemoryCache() {
+        memoryCache.removeAllObjects()
+    }
+    #endif
+
     private static func diskURL(stampId: String, date: Date, px: Int) -> URL? {
         guard let dir = diskCacheDirectory else { return nil }
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
@@ -53,12 +59,21 @@ nonisolated enum StampCompositor {
     }
 
     private static func persistToDisk(_ image: CGImage, stampId: String, date: Date, px: Int) {
-        guard let url = diskURL(stampId: stampId, date: date, px: px),
-              let dest = CGImageDestinationCreateWithURL(
-                  url as CFURL, "public.png" as CFString, 1, nil)
+        guard let url = diskURL(stampId: stampId, date: date, px: px) else { return }
+        let tmpURL = url.appendingPathExtension("tmp")
+        guard let dest = CGImageDestinationCreateWithURL(
+                  tmpURL as CFURL, "public.png" as CFString, 1, nil)
         else { return }
         CGImageDestinationAddImage(dest, image, nil)
-        CGImageDestinationFinalize(dest)
+        guard CGImageDestinationFinalize(dest) else {
+            try? FileManager.default.removeItem(at: tmpURL)
+            return
+        }
+        do {
+            _ = try FileManager.default.replaceItemAt(url, withItemAt: tmpURL)
+        } catch {
+            try? FileManager.default.removeItem(at: tmpURL)
+        }
     }
 
     // MARK: - Composite

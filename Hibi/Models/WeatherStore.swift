@@ -17,7 +17,9 @@ final class WeatherStore: NSObject {
 
     private var weatherByDay: [DayKey: DayWeather] = [:]
     private var lastFetchLocation: CLLocation?
-    private var lastFetchAt: Date?
+    private(set) var lastFetchAt: Date?
+    private(set) var lastFailureAt: Date?
+    private(set) var isLocationPending = false
     private var inFlight: Task<Void, Never>?
 
     @ObservationIgnored private let manager = CLLocationManager()
@@ -80,16 +82,23 @@ final class WeatherStore: NSObject {
         if let last = lastFetchAt, Date().timeIntervalSince(last) < 30 * 60 {
             return
         }
+        if let fail = lastFailureAt, Date().timeIntervalSince(fail) < 5 * 60 {
+            return
+        }
         guard inFlight == nil else { return }
+        guard !isLocationPending else { return }
+        isLocationPending = true
         manager.requestLocation()
     }
 
     private func performFetch(location: CLLocation) {
+        isLocationPending = false
         inFlight?.cancel()
         inFlight = Task { [weak self] in
             guard let self else { return }
             await self.fetchAll(location: location)
-            await MainActor.run { self.inFlight = nil }
+            guard !Task.isCancelled else { return }
+            self.inFlight = nil
         }
     }
 
@@ -121,9 +130,10 @@ final class WeatherStore: NSObject {
     private func apply(weather: Weather?, placeName: String?, location: CLLocation) {
         if let placeName { self.locationName = placeName }
         lastFetchLocation = location
-        lastFetchAt = Date()
 
         guard let weather else { return }
+        lastFetchAt = Date()
+        lastFailureAt = nil
 
         var byDay: [DayKey: DayWeather] = [:]
         for day in weather.dailyForecast {
@@ -171,6 +181,24 @@ final class WeatherStore: NSObject {
 
     // MARK: - Mapping
 
+    #if DEBUG
+    func _test_setAccess(_ access: Bool) {
+        hasLocationAccess = access
+        locationAccessDenied = !access
+    }
+
+    func _test_simulateSuccessfulFetch() {
+        isLocationPending = false
+        lastFetchAt = Date()
+        lastFailureAt = nil
+    }
+
+    func _test_simulateLocationFailure() {
+        isLocationPending = false
+        lastFailureAt = Date()
+    }
+    #endif
+
     private static func code(for condition: WeatherCondition) -> WeatherCode {
         switch condition {
         case .clear, .mostlyClear, .hot:
@@ -213,7 +241,10 @@ extension WeatherStore: CLLocationManagerDelegate {
 
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
         Task { @MainActor [weak self] in
-            self?.log.error("Location fetch failed: \(error.localizedDescription, privacy: .public)")
+            guard let self else { return }
+            self.log.error("Location fetch failed: \(error.localizedDescription, privacy: .public)")
+            self.isLocationPending = false
+            self.lastFailureAt = Date()
         }
     }
 }

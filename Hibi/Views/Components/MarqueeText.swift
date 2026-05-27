@@ -49,6 +49,11 @@ struct MarqueeText: View {
             .onChange(of: overflows) { _, nowOverflows in
                 if nowOverflows { restart() }
             }
+            .onChange(of: textWidth) { old, new in
+                if Self.shouldRestart(overflows: overflows, oldTextWidth: old, newTextWidth: new) {
+                    restart()
+                }
+            }
             .mask { maskShape }
     }
 
@@ -96,6 +101,10 @@ struct MarqueeText: View {
         } else {
             Rectangle().fill(.black)
         }
+    }
+
+    static func shouldRestart(overflows: Bool, oldTextWidth: CGFloat, newTextWidth: CGFloat) -> Bool {
+        overflows && abs(newTextWidth - oldTextWidth) > 0.5
     }
 
     private func restart() {

@@ -281,9 +281,14 @@ final class EventStore {
 
         // Keep the Schedule widget in sync. The snapshot is for *today*, so
         // we only need to rewrite when the month we just loaded contains it.
+        // Defer the write if reminders haven't loaded yet for this month —
+        // reloadReminders will write it once both events and reminders are ready,
+        // so the widget never gets a stale snapshot with zero reminders.
         let todayComps = calendar.dateComponents([.year, .month], from: Date())
         if todayComps.year == year && todayComps.month == month {
-            writeEventsWidgetSnapshot()
+            if !hasReminderAccess || loadedReminderMonths.contains(key) {
+                writeEventsWidgetSnapshot()
+            }
         }
     }
 
@@ -328,8 +333,9 @@ final class EventStore {
             ending: monthEnd,
             calendars: visibleLists
         )
+        let completedLookbackStart = calendar.date(byAdding: .month, value: -3, to: monthStart) ?? monthStart
         let completedPredicate = ekStore.predicateForCompletedReminders(
-            withCompletionDateStarting: monthStart,
+            withCompletionDateStarting: completedLookbackStart,
             ending: monthEnd,
             calendars: visibleLists
         )
