@@ -9,7 +9,7 @@ description: How to create realistic rubber-stamp ink-transfer imperfections in 
 
 The stamp rendering pipeline has three stages:
 
-1. **StampConfig** (`Hibi/Models/StampConfig.swift`) — Deterministic seed from purchase date (Wang hash, 24-bit for Float safety). Selects which stamp definition to use via `seed % definitions.count`. The `stamps.json` file maps stampIds to date region configs.
+1. **StampConfig** (`Hibi/Models/StampConfig.swift`) — Deterministic seed, 24-bit for Float safety. **Production:** `seed(from: UUID)` — FNV-1a hash of the purchase UUID (the StoreKit transaction's `appAccountToken`), stable for the life of the purchase regardless of the displayed date. The date-based `seed(from: Date)` (Wang hash) is retained only for the DEBUG stamp-noise preview, which has no purchase UUID. The seed selects which stamp definition to use via `seed % definitions.count`; `stamps.json` maps stampIds to date region configs.
 
 2. **StampCompositor** (`Hibi/Models/StampCompositor.swift`) — Rasterizes mask PNG + date text into a single grayscale CGImage. Mask PNGs (256×256, 8-bit grayscale, **bright = ink**, dark = paper) live in `Hibi/Resources/StampMasks/`. **Channel contract:** R = ink coverage, **G = baked signed distance field**, B = coverage (unused), A = opaque. The SDF is computed from the final mask+text coverage (so text edges get edge effects too) via a separable Felzenszwalb–Huttenlocher Euclidean distance transform, then encoded into G.
 
