@@ -217,12 +217,18 @@ struct ContentView: View {
                     scrollToNowToken: scrollToNowToken,
                     tabSwitchToken: tabSwitchToken,
                     onPickDay: { year, month, day in
-                        displayedYear = year
-                        displayedMonth = month
-                        selectionBinding.wrappedValue = .day
+                        // Set the Day's own date *before* switching tabs: the
+                        // tab-switch binding realigns the shared title position
+                        // to `selected*`, so these must be current first. (The
+                        // Week scrolls `displayed*` without `selected*`, so a
+                        // post-switch order would leave the title on the month
+                        // scrolled away from rather than the tapped day's.)
                         selectedYear = year
                         selectedMonth = month
                         selectedDay = day
+                        displayedYear = year
+                        displayedMonth = month
+                        selectionBinding.wrappedValue = .day
                     },
                     onTapEvent: openEditor(for:)
                 )
