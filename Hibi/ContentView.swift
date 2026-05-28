@@ -190,6 +190,26 @@ struct ContentView: View {
         scrollToNowToken &+= 1
     }
 
+    /// Open an exact day (tapped in the Month grid or the Week stream) on the
+    /// Day tab. A tap names a precise date, so set the canonical state here and
+    /// switch straight to Day — deliberately *not* through `selectionBinding`,
+    /// whose `monthScrolled` / realignment heuristics exist to resolve ambiguous
+    /// tab-bar switches (which carry no target day) and would otherwise clobber
+    /// this explicit pick. `selected*` is the Day tab's date; `displayed*` (the
+    /// toolbar title + Month/Week sync) follows the picked month; clearing
+    /// `monthEntry` and bumping `tabSwitchToken` recenter the list tabs for when
+    /// the user returns to them.
+    private func selectDay(year: Int, month: Int, day: Int) {
+        selectedYear = year
+        selectedMonth = month
+        selectedDay = day
+        displayedYear = year
+        displayedMonth = month
+        monthEntry = nil
+        tabSwitchToken &+= 1
+        selection = .day
+    }
+
     private var tabContent: some View {
         TabView(selection: selectionBinding) {
             Tab("Month", systemImage: "square.grid.3x3", value: CalendarTab.month) {
@@ -199,12 +219,7 @@ struct ContentView: View {
                     scrollToNowToken: scrollToNowToken,
                     tabSwitchToken: tabSwitchToken,
                     onPickDay: { year, month, day in
-                        displayedYear = year
-                        displayedMonth = month
-                        selectionBinding.wrappedValue = .day
-                        selectedYear = year
-                        selectedMonth = month
-                        selectedDay = day
+                        selectDay(year: year, month: month, day: day)
                     }
                 )
             }
@@ -217,18 +232,7 @@ struct ContentView: View {
                     scrollToNowToken: scrollToNowToken,
                     tabSwitchToken: tabSwitchToken,
                     onPickDay: { year, month, day in
-                        // Set the Day's own date *before* switching tabs: the
-                        // tab-switch binding realigns the shared title position
-                        // to `selected*`, so these must be current first. (The
-                        // Week scrolls `displayed*` without `selected*`, so a
-                        // post-switch order would leave the title on the month
-                        // scrolled away from rather than the tapped day's.)
-                        selectedYear = year
-                        selectedMonth = month
-                        selectedDay = day
-                        displayedYear = year
-                        displayedMonth = month
-                        selectionBinding.wrappedValue = .day
+                        selectDay(year: year, month: month, day: day)
                     },
                     onTapEvent: openEditor(for:)
                 )
