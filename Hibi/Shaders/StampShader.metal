@@ -217,7 +217,7 @@ float worley(float2 p, uint seedOffsetU) {
     float2 specCenter = float2(0.5 + tilt.x * 0.5, 0.5 + tilt.y * 0.5);
     float d = distance(uv, specCenter);
     float hotspot = exp(-d * d * specFocus);
-    half3 specular = inkColor.rgb * half(hotspot * specStrength);
+    half3 specular = inkColor.rgb * half(hotspot * specStrength * 1.8);
 
     // --- Bump / emboss — unchanged; uses RAW coverage on both sides ---
     float pressure = 0.5 + supply * 0.6;

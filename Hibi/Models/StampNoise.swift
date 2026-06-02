@@ -96,7 +96,7 @@ enum StampNoise {
             case .rimDarkness:     0...1
             case .bleedWidth:      0...10
             case .bleedStrength:   0...1
-            case .specStrength:    0...1
+            case .specStrength:    0...3
             case .specFocus:       2...24
             case .bumpStrength:    0...2
             }
