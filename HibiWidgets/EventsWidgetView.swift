@@ -355,15 +355,21 @@ private struct HeroReminderCard: View {
         Color.pastelized(cgColor: reminder.tintRGB.cgColor)
     }
 
-    private var subtitle: String? {
-        var parts: [String] = []
+    private var topLabel: String? {
         if reminder.hasTime, let due = reminder.dueDate {
-            parts.append(timeFormat.string(from: due))
+            return timeFormat.string(from: due)
         }
+        if reminder.dueDate != nil {
+            return String(localized: "Today")
+        }
+        return nil
+    }
+
+    private var bottomLabel: String? {
         if reminder.isOverdue {
-            parts.append(String(localized: "Overdue"))
+            return String(localized: "Overdue")
         }
-        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+        return nil
     }
 
     var body: some View {
@@ -379,19 +385,27 @@ private struct HeroReminderCard: View {
             )
 
             VStack(alignment: .leading, spacing: 0) {
+                if let topLabel {
+                    Text(topLabel)
+                        .font(.system(size: isMedium ? 10 : 9, weight: .semibold, design: .monospaced))
+                        .tracking(0.4)
+                        .foregroundStyle(tint.mix(with: .black, by: 0.20))
+                }
+
                 Text(reminder.title)
                     .font(.appSerif(size: isMedium ? 22 : 16, italic: true, simple: useSimpleFont))
                     .foregroundStyle(.primary)
                     .strikethrough(reminder.isCompleted)
                     .tracking(-0.2)
                     .lineLimit(2)
+                    .padding(.top, isMedium ? 4 : 2)
 
                 Spacer(minLength: 0)
 
-                if let subtitle, !subtitle.isEmpty {
-                    Text(subtitle)
+                if let bottomLabel {
+                    Text(bottomLabel)
                         .font(.system(size: isMedium ? 11 : 9.5, weight: .semibold))
-                        .foregroundStyle(reminder.isOverdue ? Color.red.opacity(0.8) : .secondary)
+                        .foregroundStyle(Color.red.opacity(0.8))
                         .lineLimit(1)
                 }
             }
