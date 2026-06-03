@@ -66,6 +66,41 @@ to review the whole set, then drag the folders into App Store Connect.
    - Demo fixtures are localized by `Locale.preferredLanguages`, which fastlane
      sets per run — `zh-Hans` → Simplified, `zh-Hant` → Traditional, etc.
 
+## Transparent widget cutouts
+
+The two widget-gallery screens (`06-Widget-Schedule`, `07-Widget-Today`) are shot
+against a **chroma-key green** backdrop, because a device/simulator screen capture
+has no alpha channel (`WidgetGalleryView` renders pure sRGB green; the widget
+`chrome()` deliberately drops its drop shadow so the green keys out cleanly).
+
+**`scripts/remove_widget_backgrounds.py`** turns those into per-widget transparent
+PNGs. `scripts/screenshots.sh` offers to run it after a shoot (answer the
+`Extract transparent widget PNGs now?` prompt), but it's fully standalone and
+re-runnable against an existing `screenshots/` tree — no re-shooting needed:
+
+```sh
+python3 scripts/remove_widget_backgrounds.py                  # all locales
+python3 scripts/remove_widget_backgrounds.py --locales en-US  # one locale
+# EXTRACT_WIDGETS=1 ./scripts/screenshots.sh  → skip the prompt, always extract
+# EXTRACT_WIDGETS=0 ./scripts/screenshots.sh  → skip extraction entirely
+```
+
+It chroma-keys the green with a feathered alpha + green-despill (so the rounded
+widget corners get a clean edge, not a green halo), splits each screen into its
+two stacked widgets, crops tight, and writes:
+
+```
+screenshots-widgets/<locale>/Widget-Schedule-medium.png
+screenshots-widgets/<locale>/Widget-Schedule-large.png
+screenshots-widgets/<locale>/Widget-Today-small.png
+screenshots-widgets/<locale>/Widget-Today-large.png
+screenshots-widgets/<locale>/_preview.png   # cutouts over a checkerboard, to eyeball
+```
+
+Output lives in **`screenshots-widgets/`**, a sibling of `screenshots/` — kept
+outside fastlane's `output_directory` so `clear_previous_screenshots(true)` can't
+wipe it on the next run. Requires Pillow + numpy (`pip3 install Pillow numpy`).
+
 ## Customizing
 
 - **Which screens** → edit `ScreenshotUITests.swift` (add `snapshot("04-…")`

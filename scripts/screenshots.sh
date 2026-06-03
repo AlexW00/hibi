@@ -68,3 +68,24 @@ info "Using device: $DEVICE"
 fastlane snapshot --devices "$DEVICE"
 
 info "Done. Screenshots are in ./screenshots/ — open ./screenshots/screenshots.html to review."
+
+# --- 5. Transparent widget cutouts (optional, re-runnable) ------------------
+#
+# The widget-gallery screens are shot against a chroma-key green backdrop
+# (a screen capture has no alpha channel). scripts/remove_widget_backgrounds.py
+# keys that out into per-widget transparent PNGs under ./screenshots-widgets/.
+# It's fully standalone — re-run it any time without re-shooting.
+
+# EXTRACT_WIDGETS=1 / =0 skips the prompt (1 = yes, 0 = no). Default: ask.
+extract="${EXTRACT_WIDGETS:-}"
+if [ -z "$extract" ]; then
+  printf "\033[36mExtract transparent widget PNGs now? [Y/n] \033[0m"
+  read -r reply || reply="n"
+  case "$reply" in [Nn]*) extract=0 ;; *) extract=1 ;; esac
+fi
+
+if [ "$extract" = "1" ]; then
+  python3 scripts/remove_widget_backgrounds.py
+else
+  info "Skipped widget extraction. Run later: python3 scripts/remove_widget_backgrounds.py"
+fi

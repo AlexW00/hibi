@@ -31,6 +31,8 @@ fastlane/Preview.html
 fastlane/test_output
 # Generated App Store screenshots (regenerate via scripts/screenshots.sh)
 screenshots/
+# Transparent widget cutouts (regenerate via scripts/remove_widget_backgrounds.py)
+screenshots-widgets/
 # Third-party helper fetched on demand by scripts/screenshots.sh
 HibiUITests/SnapshotHelper.swift
 
