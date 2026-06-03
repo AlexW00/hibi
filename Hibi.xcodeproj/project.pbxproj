@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		01E205D39DCF280875995EC7 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5BBEBB3CADE5803F7EFD74 /* SnapshotHelper.swift */; };
-		420DD4C10FDE3A6C0F8BD140 /* ScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB8F046285CA9451FA58AA47 /* ScreenshotUITests.swift */; };
 		4B0450C42F94C6EF009EA06E /* Notelet in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0450C32F94C6EF009EA06E /* Notelet */; };
 		4B0451032F94C6EF009EA06E /* CalendarPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0451012F94C6EF009EA06E /* CalendarPermission */; };
 		4B0451042F94C6EF009EA06E /* LocationPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0451022F94C6EF009EA06E /* LocationPermission */; };
@@ -17,19 +15,11 @@
 		4B1507112FBEA5C200F49AFD /* HibiWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4B1507012FBEA5BF00F49AFD /* HibiWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5F4452BD25599684CD8DA8B2 /* ScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB8F046285CA9451FA58AA47 /* ScreenshotUITests.swift */; };
 		956EE77269E29FDA0E4E3848 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5BBEBB3CADE5803F7EFD74 /* SnapshotHelper.swift */; };
-		DED99A47B2230B8A6831A5B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE4BCA8FFEBBDE75524E28D3 /* Foundation.framework */; };
 		F2C399EFE3318F9D842F83E2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE4BCA8FFEBBDE75524E28D3 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		24236CF8EC789150B064C573 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4B802FC52F8F5453008F00F4 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4B802FCC2F8F5453008F00F4;
-			remoteInfo = Hibi;
-		};
-		33F940AEF21CCBBA826EF1A2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4B802FC52F8F5453008F00F4 /* Project object */;
 			proxyType = 1;
@@ -139,8 +129,8 @@
 		4B1507072FBEA5BF00F49AFD /* HibiWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				4B1507122FBEA5C200F49AFD /* Exceptions for "HibiWidgets" folder in "HibiWidgetsExtension" target */,
 				4B1507B02FC2000200F49AFD /* Exceptions for "HibiWidgets" folder in "Hibi" target */,
+				4B1507122FBEA5C200F49AFD /* Exceptions for "HibiWidgets" folder in "HibiWidgetsExtension" target */,
 			);
 			path = HibiWidgets;
 			sourceTree = "<group>";
@@ -207,7 +197,6 @@
 				CB8F046285CA9451FA58AA47 /* ScreenshotUITests.swift */,
 				FA5BBEBB3CADE5803F7EFD74 /* SnapshotHelper.swift */,
 			);
-			name = HibiUITests;
 			path = HibiUITests;
 			sourceTree = SOURCE_ROOT;
 		};
@@ -507,23 +496,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		12F109DB116210528675C95E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_STYLE = Automatic;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.weichart.hibi.HibiUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Hibi;
-			};
-			name = Debug;
-		};
 		2656EF37CF38B5293415CCAE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -857,24 +829,6 @@
 				TEST_TARGET_NAME = Hibi;
 			};
 			name = Debug;
-		};
-		ED6072771DF6CE9713AD8E90 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_STYLE = Automatic;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.weichart.hibi.HibiUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Hibi;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
