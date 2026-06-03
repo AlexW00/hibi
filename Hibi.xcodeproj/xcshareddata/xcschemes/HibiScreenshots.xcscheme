@@ -28,7 +28,7 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "2E99C71D4B5C7579C3CC7D05"
+               BlueprintIdentifier = "CC50348A7D61B820DF8F8672"
                BuildableName = "HibiUITests.xctest"
                BlueprintName = "HibiUITests"
                ReferencedContainer = "container:Hibi.xcodeproj">
@@ -46,7 +46,7 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "2E99C71D4B5C7579C3CC7D05"
+               BlueprintIdentifier = "CC50348A7D61B820DF8F8672"
                BuildableName = "HibiUITests.xctest"
                BlueprintName = "HibiUITests"
                ReferencedContainer = "container:Hibi.xcodeproj">
