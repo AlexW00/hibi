@@ -16,6 +16,12 @@ struct EventsWidgetView: View {
     /// gallery) — `\.widgetFamily` is read-only, so it can't be set via the
     /// environment. `nil` in the real widget, where the environment drives it.
     var familyOverride: WidgetFamily? = nil
+    /// Screenshot-gallery only: the large list's overflow fade is calibrated for
+    /// the common (smaller) large-widget height, so it fades a seventh row even
+    /// on the 6.9" Pro Max where seven rows actually fit. The gallery renders at
+    /// that guaranteed-tall size, so it opts out of the conservative fade.
+    /// Always `false` in the real widget — its rendering is unchanged.
+    var fillsTallContainer: Bool = false
 
     @Environment(\.widgetFamily) private var environmentFamily
     private var family: WidgetFamily { familyOverride ?? environmentFamily }
@@ -30,7 +36,7 @@ struct EventsWidgetView: View {
     private var content: some View {
         switch family {
         case .systemLarge:
-            EventsWidgetLargeBody(entry: entry)
+            EventsWidgetLargeBody(entry: entry, fillsTallContainer: fillsTallContainer)
         case .systemMedium:
             EventsWidgetBody(entry: entry, isMedium: true)
         default:
@@ -128,6 +134,7 @@ private struct EventsWidgetBody: View {
 
 private struct EventsWidgetLargeBody: View {
     let entry: EventsEntry
+    var fillsTallContainer: Bool = false
 
     var body: some View {
         let pad = WidgetMetrics.pad(isMedium: true)
@@ -150,7 +157,7 @@ private struct EventsWidgetLargeBody: View {
                     HeroReminderCard(reminder: reminder, isMedium: true)
                 }
             default:
-                LargeList(items: items, now: entry.date)
+                LargeList(items: items, now: entry.date, fillsTallContainer: fillsTallContainer)
             }
         }
         .padding(pad)
@@ -165,6 +172,11 @@ private struct EventsWidgetLargeBody: View {
 private struct LargeList: View {
     let items: [ScheduleItem]
     let now: Date
+    /// Screenshot gallery only: skip the conservative overflow fade because the
+    /// gallery renders at the tallest (Pro Max) large-widget size, where one
+    /// more row fits than the count-based heuristic assumes. See
+    /// `EventsWidgetView.fillsTallContainer`.
+    var fillsTallContainer: Bool = false
 
     var body: some View {
         let last = items.count - 1
@@ -173,7 +185,7 @@ private struct LargeList: View {
         // Conservative overflow heuristic: ~336pt usable height ÷ (48pt
         // row + 5pt gap) ≈ 6 full rows. Past that the stack pushes into
         // the bottom of the widget and the gradient mask fades it out.
-        let overflows = items.count > 6
+        let overflows = !fillsTallContainer && items.count > 6
 
         VStack(spacing: gap) {
             ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in

@@ -25,12 +25,14 @@ struct WidgetGalleryView: View {
         )
     }
 
-    /// Large Schedule widget: a fuller list (all reminders + three events).
+    /// Large Schedule widget: a full seven-row list — both today's reminders
+    /// plus five events (today's three + two widget-only extras) so the tile
+    /// fills cleanly without the trailing gap.
     private var scheduleLargeEntry: EventsEntry {
         EventsEntry(
             date: Date(),
             day: SampleData.todayDay, month: SampleData.todayMonth, year: SampleData.todayYear,
-            events: DemoFixtures.widgetEvents(limit: 3),
+            events: DemoFixtures.widgetLargeScheduleEvents(),
             reminders: DemoFixtures.widgetReminders()
         )
     }
@@ -61,7 +63,11 @@ struct WidgetGalleryView: View {
                         EventsWidgetView(entry: scheduleMediumEntry, familyOverride: .systemMedium)
                     }
                     chrome(width: 364, height: 382) {
-                        EventsWidgetView(entry: scheduleLargeEntry, familyOverride: .systemLarge)
+                        EventsWidgetView(
+                            entry: scheduleLargeEntry,
+                            familyOverride: .systemLarge,
+                            fillsTallContainer: true
+                        )
                     }
                 case .today:
                     chrome(width: 170, height: 170) {

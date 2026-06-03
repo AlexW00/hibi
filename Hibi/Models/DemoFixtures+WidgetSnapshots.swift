@@ -30,6 +30,32 @@ extension DemoFixtures {
         return limit.map { Array(mapped.prefix($0)) } ?? mapped
     }
 
+    /// The **large** Schedule widget's events: today's events plus two extra
+    /// curated events that exist *only* here, so the large tile fills its seven
+    /// rows in the screenshot gallery instead of leaving a gap below the live
+    /// three-event day. These are not inserted into the app's event map, so the
+    /// Day and Week views are unaffected.
+    static func widgetLargeScheduleEvents() -> [WidgetEventsSnapshot.Event] {
+        let today = dayInfo(offsetDays: 0)
+        func extra(_ id: String, _ sh: Int, _ sm: Int, _ eh: Int, _ em: Int,
+                   _ titleKey: String, _ tint: Color, loc: String?) -> WidgetEventsSnapshot.Event {
+            WidgetEventsSnapshot.Event(
+                id: id, title: DemoStrings.eventTitle(titleKey, resolvedLanguage),
+                location: loc.map { DemoStrings.location($0) },
+                startDate: date(today.y, today.m, today.d, h: sh, min: sm),
+                endDate: date(today.y, today.m, today.d, h: eh, min: em),
+                allDay: false, tintRGB: rgba(from: tint)
+            )
+        }
+        let extras = [
+            extra("demo-wlg-lunch", 12, 30, 13, 30, "lunch", peach, loc: "lumi"),
+            extra("demo-wlg-coffee", 16, 0, 16, 30, "coffee", sea, loc: "bluebottle"),
+        ]
+        return (widgetEvents() + extras).sorted {
+            ($0.startDate ?? .distantPast) < ($1.startDate ?? .distantPast)
+        }
+    }
+
     /// Today's demo reminders as widget-snapshot reminders, optionally capped.
     /// `pleasantOnly` drops completed / overdue items (nicer for the small
     /// curated medium widget).
