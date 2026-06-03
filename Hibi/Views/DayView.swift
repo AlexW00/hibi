@@ -110,7 +110,7 @@ struct DayView: View {
         self.onDateChange = onDateChange
         // Seed initial collapse state from preference. Read once at view
         // creation so the user can still drag freely during the session.
-        // Screenshot-only: -uiTestDayCollapsed forces the collapsed state.
+        // Screenshot-only: the dayCollapsed scene forces the collapsed state.
         let preferCompact = DemoEnvironment.dayCollapsedScreenshot
             || UserDefaults.standard.bool(forKey: "preferCompactDayView")
         self._scheduleProgress = State(initialValue: preferCompact ? 1 : 0)

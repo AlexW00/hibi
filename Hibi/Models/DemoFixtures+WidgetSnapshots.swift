@@ -1,45 +1,49 @@
 import SwiftUI
 import UIKit
 
-/// Builds the widget entry payloads from demo data for the in-app widget
-/// screenshot gallery (`WidgetGalleryView`). Mirrors what `EventStore` /
-/// `WeatherStore` write to the App Group, but constructed directly from
-/// `DemoFixtures` for today so the gallery doesn't depend on the live stores.
+/// Builds widget entry payloads from demo data for the in-app widget screenshot
+/// gallery (`WidgetGalleryView`). Mirrors what `EventStore` / `WeatherStore`
+/// write to the App Group, but constructed directly from `DemoFixtures` for
+/// today so the gallery doesn't depend on the live stores.
+///
+/// The `limit` parameters let the gallery curate per widget size — the medium
+/// Schedule widget shows fewer items so it doesn't overflow into the peek/fade
+/// state, while the large one shows more.
 extension DemoFixtures {
-    /// Today's demo events as widget-snapshot events.
-    static func widgetEvents() -> [WidgetEventsSnapshot.Event] {
-        let key = MonthKey(year: SampleData.todayYear, month: SampleData.todayMonth)
-        let todays = events[key]?[SampleData.todayDay] ?? []
-        return todays.map { e in
+    private static var todaysEvents: [CalendarEvent] {
+        events[MonthKey(year: SampleData.todayYear, month: SampleData.todayMonth)]?[SampleData.todayDay] ?? []
+    }
+
+    private static var todaysReminders: [CalendarReminder] {
+        reminders[MonthKey(year: SampleData.todayYear, month: SampleData.todayMonth)]?[SampleData.todayDay] ?? []
+    }
+
+    /// Today's demo events as widget-snapshot events, optionally capped.
+    static func widgetEvents(limit: Int? = nil) -> [WidgetEventsSnapshot.Event] {
+        let mapped = todaysEvents.map { e in
             WidgetEventsSnapshot.Event(
-                id: e.id,
-                title: e.title,
-                location: e.location,
-                startDate: e.startDate,
-                endDate: e.endDate,
-                allDay: e.allDay,
+                id: e.id, title: e.title, location: e.location,
+                startDate: e.startDate, endDate: e.endDate, allDay: e.allDay,
                 tintRGB: rgba(from: e.tint)
             )
         }
+        return limit.map { Array(mapped.prefix($0)) } ?? mapped
     }
 
-    /// Today's demo reminders as widget-snapshot reminders.
-    static func widgetReminders() -> [WidgetEventsSnapshot.Reminder] {
-        let key = MonthKey(year: SampleData.todayYear, month: SampleData.todayMonth)
-        let todays = reminders[key]?[SampleData.todayDay] ?? []
-        return todays.map { r in
+    /// Today's demo reminders as widget-snapshot reminders, optionally capped.
+    /// `pleasantOnly` drops completed / overdue items (nicer for the small
+    /// curated medium widget).
+    static func widgetReminders(limit: Int? = nil, pleasantOnly: Bool = false) -> [WidgetEventsSnapshot.Reminder] {
+        var source = todaysReminders
+        if pleasantOnly { source = source.filter { !$0.isCompleted && !$0.isOverdue } }
+        let mapped = source.map { r in
             WidgetEventsSnapshot.Reminder(
-                id: r.id,
-                reminderIdentifier: r.reminderIdentifier,
-                title: r.title,
-                dueDate: r.dueDate,
-                hasTime: r.hasTime,
-                isCompleted: r.isCompleted,
-                isOverdue: r.isOverdue,
-                isRecurring: r.isRecurring,
-                tintRGB: rgba(from: r.tint)
+                id: r.id, reminderIdentifier: r.reminderIdentifier, title: r.title,
+                dueDate: r.dueDate, hasTime: r.hasTime, isCompleted: r.isCompleted,
+                isOverdue: r.isOverdue, isRecurring: r.isRecurring, tintRGB: rgba(from: r.tint)
             )
         }
+        return limit.map { Array(mapped.prefix($0)) } ?? mapped
     }
 
     /// Today's demo weather as a widget weather snapshot.
