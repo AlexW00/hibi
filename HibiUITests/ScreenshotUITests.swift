@@ -49,20 +49,22 @@ final class ScreenshotUITests: XCTestCase {
         // The app opens on the Day tab, so the seeded Day-view states below need
         // no navigation after launch.
 
+        // Each special state is selected by a single -uiTestScene value.
+
         // 4 — Day with the paper torn mid-swipe (seeded; a real drag snaps back).
-        relaunch(app, args: baseArgs + ["-uiTestDayPeek"])
+        relaunch(app, args: baseArgs + ["-uiTestScene", "dayTear"])
         snapshot("04-Day-Tear")
 
         // 5 — Day collapsed (schedule expanded).
-        relaunch(app, args: baseArgs + ["-uiTestDayCollapsed"])
+        relaunch(app, args: baseArgs + ["-uiTestScene", "dayCollapsed"])
         snapshot("05-Day-Collapsed")
 
         // 6 — Schedule widget (medium + large), rendered in-app.
-        relaunch(app, args: baseArgs + ["-uiTestWidgetsSchedule"])
+        relaunch(app, args: baseArgs + ["-uiTestScene", "widgetsSchedule"])
         snapshot("06-Widget-Schedule")
 
         // 7 — Today's Page widget (small + large), rendered in-app.
-        relaunch(app, args: baseArgs + ["-uiTestWidgetsToday"])
+        relaunch(app, args: baseArgs + ["-uiTestScene", "widgetsToday"])
         snapshot("07-Widget-Today")
     }
 

@@ -68,7 +68,7 @@ State flow for the three tabs lives on `ContentView`: `displayedYear/Month`, `se
 - [WidgetEventsSnapshot.swift](Hibi/Models/WidgetEventsSnapshot.swift) / [WidgetWeatherSnapshot.swift](Hibi/Models/WidgetWeatherSnapshot.swift) — Codable today's-data blobs the app writes and the widgets read (each carries a capture timestamp for staleness checks).
 - [WhatsNewContent.swift](Hibi/Models/WhatsNewContent.swift) — changelog entries for the Notelet sheet; `version` must match `CFBundleShortVersionString`.
 - [SampleData.swift](Hibi/Models/SampleData.swift) — calendar math, month/day name tables, `AppFont`/`AppColor` constants.
-- [DemoFixtures.swift](Hibi/Models/DemoFixtures.swift) + [+English](Hibi/Models/DemoFixtures+English.swift) / [+German](Hibi/Models/DemoFixtures+German.swift) / [+Japanese](Hibi/Models/DemoFixtures+Japanese.swift) — hand-crafted localized events for screenshot days (DEBUG only); base enum routes to the per-language extension.
+- [DemoFixtures.swift](Hibi/Models/DemoFixtures.swift) — DEBUG demo-mode data for screenshots, **anchored to today** (not fixed dates): one curated highlight schedule (today = 4 events, then 3/2/1/0 nearby) + ambient filler for the Month grid, plus today-anchored reminders. Words live in [DemoStrings.swift](Hibi/Models/DemoStrings.swift) (all 6 demo languages in one file); weather in [+Weather](Hibi/Models/DemoFixtures+Weather.swift); widget-entry adapters in [+WidgetSnapshots](Hibi/Models/DemoFixtures+WidgetSnapshots.swift). See [docs/screenshots.md](docs/screenshots.md).
 
 ### Stamp pipeline (`Hibi/Models/` + `Hibi/Shaders/`)
 

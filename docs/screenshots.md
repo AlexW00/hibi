@@ -41,10 +41,13 @@ to review the whole set, then drag the folders into App Store Connect.
    | `01-Month` | Month tab | tab 0 |
    | `02-Week` | Week tab | tab 1 |
    | `03-Day` | Day tab | tab 2 |
-   | `04-Day-Tear` | Day, paper torn mid-swipe | `-uiTestDayPeek` seeds `DayView.dragY` |
-   | `05-Day-Collapsed` | Day, schedule expanded | `-uiTestDayCollapsed` seeds `scheduleProgress = 1` |
-   | `06-Widget-Schedule` | Schedule widget (medium + large) | `-uiTestWidgetsSchedule` → `WidgetGalleryView` |
-   | `07-Widget-Today` | Today's Page widget (small + large) | `-uiTestWidgetsToday` → `WidgetGalleryView` |
+   | `04-Day-Tear` | Day, paper torn mid-swipe | `-uiTestScene dayTear` seeds `DayView.dragY` |
+   | `05-Day-Collapsed` | Day, schedule expanded | `-uiTestScene dayCollapsed` seeds `scheduleProgress = 1` |
+   | `06-Widget-Schedule` | Schedule widget (medium + large) | `-uiTestScene widgetsSchedule` → `WidgetGalleryView` |
+   | `07-Widget-Today` | Today's Page widget (small + large) | `-uiTestScene widgetsToday` → `WidgetGalleryView` |
+
+   All special states key off a single `-uiTestScene <name>` arg, resolved once
+   in `DemoEnvironment.Scene` — so screenshot special-casing stays in one place.
 
    **Widgets** can't be screenshotted on the real Home Screen by XCUITest, so
    `WidgetGalleryView` hosts the actual `EventsWidgetView` / `TodaysPageWidgetView`
@@ -69,8 +72,11 @@ to review the whole set, then drag the folders into App Store Connect.
   after navigating). To shoot the Hibi Plus sheet, open Settings (the gear) and
   drill in before calling `snapshot`.
 - **Languages / device** → edit `fastlane/Snapfile`.
-- **Demo data** → edit `Hibi/Models/DemoFixtures*.swift` (events per locale,
-  `DemoFixtures+Reminders.swift`, `DemoFixtures+Weather.swift`).
+- **Demo data** → one today-anchored model in `Hibi/Models/DemoFixtures.swift`
+  (the `highlightEvents` schedule = the per-day event counts; `reminderSlots` =
+  reminders; ambient filler fills the Month grid). All words live in
+  `DemoStrings.swift` (every locale in one file); weather in
+  `DemoFixtures+Weather.swift`; widget entries in `DemoFixtures+WidgetSnapshots.swift`.
 
 ## Notes & limits
 
