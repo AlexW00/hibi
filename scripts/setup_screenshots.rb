@@ -4,9 +4,9 @@
 # Adds the HibiUITests UI-test target and a dedicated "HibiScreenshots" shared
 # scheme to Hibi.xcodeproj, compiling every Swift file in HibiUITests/.
 #
-# Idempotent + self-healing: each run removes any existing HibiUITests target
-# and recreates it cleanly, so a previously broken target can't linger. Driven
-# by scripts/screenshots.sh, but you can run it standalone:
+# Idempotent + self-healing: a valid committed target is left untouched (no
+# churn); a missing one is created; a broken one (empty PRODUCT_NAME) is
+# recreated. Driven by scripts/screenshots.sh, but you can run it standalone:
 #
 #   ruby scripts/setup_screenshots.rb
 #
@@ -27,64 +27,81 @@ project = Xcodeproj::Project.open(PROJECT_PATH)
 app_target = project.targets.find { |t| t.name == APP_TARGET }
 raise "Could not find the #{APP_TARGET} target" if app_target.nil?
 
-# Remove any existing UI-test target and recreate it cleanly every run. This
-# is self-healing: a target left half-configured by an older script version
-# (notably with an empty PRODUCT_NAME, which builds as ".xctest"/"-Runner.app"
-# and fails with "Multiple commands produce …/PlugIns/.xctest") gets rebuilt
-# from scratch with the correct settings.
+# A valid target has PRODUCT_NAME set in every config. An older script version
+# left it empty (builds as ".xctest"/"-Runner.app" → "Multiple commands produce
+# …/PlugIns/.xctest"); such a target is treated as broken and recreated.
 existing = project.targets.find { |t| t.name == UITEST_TARGET }
-if existing
-  puts "Removing existing #{UITEST_TARGET} target (clean recreate)…"
+broken = existing && existing.build_configurations.any? { |c|
+  c.build_settings["PRODUCT_NAME"].to_s.empty?
+}
+
+if broken
+  puts "Removing broken #{UITEST_TARGET} target (empty PRODUCT_NAME) to recreate…"
   existing.product_reference&.remove_from_project
   existing.remove_from_project
+  existing = nil
 end
 
-puts "Creating #{UITEST_TARGET} UI-test target…"
-ui_target = project.new_target(:ui_test_bundle, UITEST_TARGET, :ios, DEPLOYMENT,
-                               project.products_group, :swift)
+ui_target = existing
+created = false
 
-ui_target.build_configurations.each do |config|
-  # PRODUCT_NAME must be explicit — without it the bundle builds with an empty
-  # name and the build fails with "Multiple commands produce …/PlugIns/.xctest".
-  config.build_settings["PRODUCT_NAME"]                 = "$(TARGET_NAME)"
-  config.build_settings["PRODUCT_BUNDLE_IDENTIFIER"]    = BUNDLE_ID
-  config.build_settings["TEST_TARGET_NAME"]             = APP_TARGET
-  config.build_settings["GENERATE_INFOPLIST_FILE"]      = "YES"
-  config.build_settings["SWIFT_VERSION"]                = "5.0"
-  config.build_settings["IPHONEOS_DEPLOYMENT_TARGET"]   = DEPLOYMENT
-  config.build_settings["CODE_SIGN_STYLE"]              = "Automatic"
-  config.build_settings["TARGETED_DEVICE_FAMILY"]       = "1,2"
-  config.build_settings["SWIFT_EMIT_LOC_STRINGS"]       = "NO"
-  # Inherit DEVELOPMENT_TEAM etc. from the same xcconfig the app uses, so a
-  # physical-device run signs the same way. (Simulator runs don't need it.)
-  app_cfg = app_target.build_configurations.find { |c| c.name == config.name }
-  config.base_configuration_reference = app_cfg&.base_configuration_reference
+if ui_target.nil?
+  puts "Creating #{UITEST_TARGET} UI-test target…"
+  ui_target = project.new_target(:ui_test_bundle, UITEST_TARGET, :ios, DEPLOYMENT,
+                                 project.products_group, :swift)
+  created = true
+
+  ui_target.build_configurations.each do |config|
+    # PRODUCT_NAME must be explicit — see above.
+    config.build_settings["PRODUCT_NAME"]                 = "$(TARGET_NAME)"
+    config.build_settings["PRODUCT_BUNDLE_IDENTIFIER"]    = BUNDLE_ID
+    config.build_settings["TEST_TARGET_NAME"]             = APP_TARGET
+    config.build_settings["GENERATE_INFOPLIST_FILE"]      = "YES"
+    config.build_settings["SWIFT_VERSION"]                = "5.0"
+    config.build_settings["IPHONEOS_DEPLOYMENT_TARGET"]   = DEPLOYMENT
+    config.build_settings["CODE_SIGN_STYLE"]              = "Automatic"
+    config.build_settings["TARGETED_DEVICE_FAMILY"]       = "1,2"
+    config.build_settings["SWIFT_EMIT_LOC_STRINGS"]       = "NO"
+    # Inherit DEVELOPMENT_TEAM etc. from the same xcconfig the app uses, so a
+    # physical-device run signs the same way. (Simulator runs don't need it.)
+    app_cfg = app_target.build_configurations.find { |c| c.name == config.name }
+    config.base_configuration_reference = app_cfg&.base_configuration_reference
+  end
+
+  ui_target.add_dependency(app_target)
+else
+  puts "#{UITEST_TARGET} target already present and valid — syncing sources only."
 end
 
-ui_target.add_dependency(app_target)
-
-# --- Sync HibiUITests/*.swift into the target's compile sources -------------
+# --- Sync HibiUITests/*.swift into the target's compile sources (additive) ---
+# Additive so a committed target isn't churned: only files not already compiled
+# get added (e.g. SnapshotHelper.swift after a fresh fetch).
 
 group = project.main_group.find_subpath(UITEST_DIR, true)
 group.set_source_tree("SOURCE_ROOT")
 group.set_path(UITEST_DIR)
 
+compiled = ui_target.source_build_phase.files_references.map { |r| File.basename(r.real_path.to_s) }
 Dir.glob(File.join(File.dirname(__dir__), UITEST_DIR, "*.swift")).sort.each do |file|
   basename = File.basename(file)
+  next if compiled.include?(basename)
   ref = group.files.find { |f| f.display_name == basename } || group.new_reference(basename)
   ui_target.add_file_references([ref])
   puts "  + #{UITEST_DIR}/#{basename}"
 end
 
-# --- Shared scheme: HibiScreenshots (always rewritten for the fresh target) --
+# --- Shared scheme: HibiScreenshots (write only if missing or target recreated) --
 
-puts "Writing shared scheme #{SCHEME_NAME}…"
-scheme = Xcodeproj::XCScheme.new
-scheme.configure_with_targets(app_target, ui_target)
-# Demo mode is DEBUG-only — build/test/run Debug.
-scheme.test_action.build_configuration = "Debug"
-scheme.launch_action.build_configuration = "Debug"
-scheme.save_as(PROJECT_PATH, SCHEME_NAME, true)
+scheme_file = File.join(PROJECT_PATH, "xcshareddata", "xcschemes", "#{SCHEME_NAME}.xcscheme")
+if created || !File.exist?(scheme_file)
+  puts "Writing shared scheme #{SCHEME_NAME}…"
+  scheme = Xcodeproj::XCScheme.new
+  scheme.configure_with_targets(app_target, ui_target)
+  # Demo mode is DEBUG-only — build/test/run Debug.
+  scheme.test_action.build_configuration = "Debug"
+  scheme.launch_action.build_configuration = "Debug"
+  scheme.save_as(PROJECT_PATH, SCHEME_NAME, true)
+end
 
 project.save
 puts "Done. Target '#{UITEST_TARGET}' and scheme '#{SCHEME_NAME}' are ready."
