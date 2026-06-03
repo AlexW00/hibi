@@ -19,4 +19,22 @@ enum DemoEnvironment {
     /// Day-peek screenshot launch.
     static let dayPeekScreenshot: Bool =
         ProcessInfo.processInfo.arguments.contains("-uiTestDayPeek")
+
+    /// Seeds the Day view collapsed (schedule expanded) so that state can be
+    /// captured without dragging the separator.
+    static let dayCollapsedScreenshot: Bool =
+        ProcessInfo.processInfo.arguments.contains("-uiTestDayCollapsed")
+
+    /// Which widget the in-app gallery should render for a screenshot, if any.
+    /// The app shows `WidgetGalleryView` instead of `ContentView` when set.
+    enum WidgetGallery {
+        case schedule, today
+    }
+
+    static let widgetGallery: WidgetGallery? = {
+        let args = ProcessInfo.processInfo.arguments
+        if args.contains("-uiTestWidgetsSchedule") { return .schedule }
+        if args.contains("-uiTestWidgetsToday") { return .today }
+        return nil
+    }()
 }

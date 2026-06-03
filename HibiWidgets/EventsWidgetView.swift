@@ -12,8 +12,13 @@ import WidgetKit
 /// widget's tighter typographic footprint.
 struct EventsWidgetView: View {
     let entry: EventsEntry
+    /// Forces a family when hosted outside a widget (the in-app screenshot
+    /// gallery) — `\.widgetFamily` is read-only, so it can't be set via the
+    /// environment. `nil` in the real widget, where the environment drives it.
+    var familyOverride: WidgetFamily? = nil
 
-    @Environment(\.widgetFamily) private var family
+    @Environment(\.widgetFamily) private var environmentFamily
+    private var family: WidgetFamily { familyOverride ?? environmentFamily }
 
     private var isPlus: Bool { PlusEntitlementStore().isPlus }
 

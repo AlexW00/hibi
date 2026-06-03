@@ -32,8 +32,27 @@ to review the whole set, then drag the folders into App Store Connect.
    status bar override.
 
 3. **`HibiUITests/ScreenshotUITests.swift`** launches the app with
-   `-uiTestScreenshots` and captures the Day, Week, and Month tabs. Tabs are
-   tapped **by index**, not by (localized) label, so it works in every language.
+   `-uiTestScreenshots` and captures seven screens per locale, relaunching with
+   an extra flag for the seeded / gallery states. Tabs are tapped **by index**,
+   not by (localized) label, so it works in every language:
+
+   | File | What | How |
+   |---|---|---|
+   | `01-Month` | Month tab | tab 0 |
+   | `02-Week` | Week tab | tab 1 |
+   | `03-Day` | Day tab | tab 2 |
+   | `04-Day-Tear` | Day, paper torn mid-swipe | `-uiTestDayPeek` seeds `DayView.dragY` |
+   | `05-Day-Collapsed` | Day, schedule expanded | `-uiTestDayCollapsed` seeds `scheduleProgress = 1` |
+   | `06-Widget-Schedule` | Schedule widget (medium + large) | `-uiTestWidgetsSchedule` → `WidgetGalleryView` |
+   | `07-Widget-Today` | Today's Page widget (small + large) | `-uiTestWidgetsToday` → `WidgetGalleryView` |
+
+   **Widgets** can't be screenshotted on the real Home Screen by XCUITest, so
+   `WidgetGalleryView` hosts the actual `EventsWidgetView` / `TodaysPageWidgetView`
+   *inside the app* at real widget sizes, fed demo entries
+   (`DemoFixtures+WidgetSnapshots`). The widget view files are shared into the app
+   target via a membership exception in `project.pbxproj` (this project uses Xcode
+   16 synchronized folder groups). The Plus entitlement is flipped on for those
+   launches so the widgets render unlocked.
 
 4. The app reacts to `-uiTestScreenshots` via **`DemoEnvironment.isScreenshotRun`**:
    - `EventStore` / `WeatherStore` force **demo mode** on — curated events,
