@@ -44,9 +44,15 @@ struct WidgetGalleryView: View {
         )
     }
 
+    /// Chroma-key green for the widget backdrop. A device screen capture has no
+    /// alpha channel, so a *transparent* background isn't possible — instead we
+    /// render a pure, saturated green that's easy to key out later. It's far from
+    /// the widgets' pastel mint/sea tints, so keying won't eat the content.
+    private static let chromaGreen = Color(.sRGB, red: 0, green: 1, blue: 0)
+
     var body: some View {
         ZStack {
-            AppBackgroundGradient().ignoresSafeArea()
+            Self.chromaGreen.ignoresSafeArea()
 
             VStack(spacing: 26) {
                 switch kind {
@@ -79,6 +85,7 @@ struct WidgetGalleryView: View {
             .frame(width: width, height: height)
             .background(PaperTints.card1)
             .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-            .shadow(color: .black.opacity(0.14), radius: 12, x: 0, y: 6)
+            // No drop shadow: a soft shadow over the chroma-key green would
+            // leave a gray halo when the green is keyed out.
     }
 }
