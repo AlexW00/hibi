@@ -46,7 +46,8 @@ final class EventStore {
         self.hasReminderAccess = reminderStatus == .fullAccess
         self.reminderAccessDenied = reminderStatus == .denied
         #if DEBUG
-        self.isDemoMode = UserDefaults.standard.bool(forKey: Self.demoModeDefaultsKey)
+        self.isDemoMode = DemoEnvironment.isScreenshotRun
+            || UserDefaults.standard.bool(forKey: Self.demoModeDefaultsKey)
         #else
         self.isDemoMode = false
         #endif
@@ -93,18 +94,23 @@ final class EventStore {
         isDemoMode = enabled
         eventsByMonth = [:]
         loadedMonths = []
+        remindersByMonth = [:]
+        loadedReminderMonths = []
         if enabled {
             applyDemoFixtures()
         } else {
             for key in DemoFixtures.events.keys {
                 reload(year: key.year, month: key.month)
             }
+            reloadAllReminders()
         }
     }
 
     private func applyDemoFixtures() {
         eventsByMonth = DemoFixtures.events
         loadedMonths = Set(DemoFixtures.events.keys)
+        remindersByMonth = DemoFixtures.reminders
+        loadedReminderMonths = Set(DemoFixtures.reminders.keys)
         writeEventsWidgetSnapshot()
     }
 

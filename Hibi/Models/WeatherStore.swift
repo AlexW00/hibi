@@ -14,6 +14,10 @@ final class WeatherStore: NSObject {
     private(set) var hasLocationAccess: Bool
     private(set) var locationAccessDenied: Bool
     private(set) var locationName: String?
+    /// Demo mode mirrors `EventStore.isDemoMode`: serve synthesized demo weather
+    /// and a fixed city instead of hitting CoreLocation / WeatherKit, so
+    /// screenshots show a forecast without live access. DEBUG-only, like demo mode.
+    private(set) var isDemoMode: Bool = false
 
     private var weatherByDay: [DayKey: DayWeather] = [:]
     private var lastFetchLocation: CLLocation?
@@ -45,6 +49,32 @@ final class WeatherStore: NSObject {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyKilometer
+        #if DEBUG
+        if DemoEnvironment.isScreenshotRun || UserDefaults.standard.bool(forKey: "demoMode") {
+            applyDemoMode(true)
+        }
+        #endif
+    }
+
+    /// Toggle demo weather at runtime, alongside `EventStore.setDemoMode`.
+    func setDemoMode(_ enabled: Bool) {
+        #if !DEBUG
+        guard !enabled else { return }
+        #endif
+        applyDemoMode(enabled)
+        if !enabled { refresh() }
+    }
+
+    private func applyDemoMode(_ enabled: Bool) {
+        isDemoMode = enabled
+        if enabled {
+            locationName = DemoFixtures.demoCityName
+            weatherByDay = [:]
+        } else {
+            locationName = nil
+            weatherByDay = [:]
+            lastFetchAt = nil
+        }
     }
 
     // MARK: - Access
@@ -70,7 +100,10 @@ final class WeatherStore: NSObject {
     // MARK: - Query
 
     func weather(year: Int, month: Int, day: Int) -> DayWeather? {
-        weatherByDay[DayKey(year: year, month: month, day: day)]
+        if isDemoMode {
+            return DemoFixtures.demoWeather(year: year, month: month, day: day)
+        }
+        return weatherByDay[DayKey(year: year, month: month, day: day)]
     }
 
     // MARK: - Refresh
@@ -78,6 +111,7 @@ final class WeatherStore: NSObject {
     /// Fetches a fresh location + weather if the cache is stale.
     /// Safe to call repeatedly — self-throttles.
     func refresh() {
+        guard !isDemoMode else { return }
         guard hasLocationAccess else { return }
         if let last = lastFetchAt, Date().timeIntervalSince(last) < 30 * 60 {
             return

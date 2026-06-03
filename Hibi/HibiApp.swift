@@ -7,11 +7,21 @@ struct HibiApp: App {
         AppFont.registerFonts()
         AppGroup.migratePrefsIfNeeded()
         Self.markWhatsNewSeenOnFreshInstall()
+        // Screenshot-only: the widget gallery renders the Plus-gated widgets, so
+        // flip the App-Group entitlement on to show them unlocked. Scoped to the
+        // gallery launches so the regular screenshots keep their default state.
+        if DemoEnvironment.widgetGallery != nil {
+            PlusEntitlementStore().setIsPlus(true)
+        }
     }
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if let gallery = DemoEnvironment.widgetGallery {
+                WidgetGalleryView(kind: gallery)
+            } else {
+                ContentView()
+            }
         }
     }
 

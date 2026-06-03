@@ -312,7 +312,9 @@ struct ContentView: View {
         .environment(plusStore)
         .onOpenURL(perform: handleOpenURL)
         .noteletSheet(
-            notes: WhatsNewContent.allNotes,
+            // Suppress the changelog sheet during automated screenshots so it
+            // doesn't cover the screen on the fresh install each run starts from.
+            notes: DemoEnvironment.isScreenshotRun ? [] : WhatsNewContent.allNotes,
             version: .current,
             onDismiss: {
                 if needsOnboarding {
