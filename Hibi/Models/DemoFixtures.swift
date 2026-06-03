@@ -3,8 +3,9 @@ import SwiftUI
 
 /// Curated static events for debug demo mode (screenshots / App Store), Feb–Jun 2026.
 ///
-/// Events are locale-aware: English, German, and Japanese each get culturally
-/// appropriate fixtures so screenshots feel native in every language.
+/// Events are locale-aware: English, German, Japanese, Korean, and both
+/// Simplified and Traditional Chinese each get culturally appropriate fixtures
+/// so screenshots feel native in every language.
 ///
 /// **Sparse days (~1 in 6):** for each month, days where `day % 6 == 0` have no events,
 /// except **April 18** (SampleData "today") stays full for screenshots.
@@ -12,10 +13,20 @@ enum DemoFixtures {
     typealias EventMap = [MonthKey: [Int: [CalendarEvent]]]
 
     static let events: EventMap = {
-        let code = Locale.current.language.languageCode?.identifier ?? "en"
-        switch code {
+        // Resolve from `Locale.preferredLanguages` (the language the app actually
+        // renders in), not `Locale.current`, whose region is pinned to de_DE for
+        // calendar math — same source `AppFont.usesCJKSerif` reads, so demo text
+        // and the CJK serif font always agree.
+        let language = Locale(identifier: Locale.preferredLanguages.first ?? "en").language
+        switch language.languageCode?.identifier {
         case "ja": return makeJapaneseEvents()
+        case "ko": return makeKoreanEvents()
         case "de": return makeGermanEvents()
+        case "zh":
+            // Distinguish script: Traditional (Hant) for TW/HK, Simplified (Hans) otherwise.
+            return language.script?.identifier == "Hant"
+                ? makeChineseTraditionalEvents()
+                : makeChineseSimplifiedEvents()
         default:   return makeEnglishEvents()
         }
     }()
