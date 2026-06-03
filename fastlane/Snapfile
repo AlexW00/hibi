@@ -1,0 +1,34 @@
+# fastlane snapshot configuration — localized App Store screenshots.
+# Run via scripts/screenshots.sh (it picks the simulator and wires up the
+# HibiUITests target + HibiScreenshots scheme first).
+
+# Four App Store languages / five locale folders. Screenshots land in
+# ./screenshots/<locale>/. zh-Hans / zh-Hant select Simplified / Traditional
+# Chinese demo fixtures via the app's Locale.preferredLanguages resolution.
+languages([
+  "en-US",
+  "zh-Hans",
+  "zh-Hant",
+  "ja",
+  "ko"
+])
+
+# Default device. The 6.9" Pro Max matches the required App Store iPhone slot.
+# scripts/screenshots.sh overrides this with --devices when you pick one.
+devices(["iPhone 16 Pro Max"])
+
+# Dedicated scheme whose Test action runs only HibiUITests (created idempotently
+# by scripts/setup_screenshots.rb). Demo mode is DEBUG-only, so this builds Debug.
+scheme("HibiScreenshots")
+
+output_directory("./screenshots")
+clear_previous_screenshots(true)
+
+# Clean status bar (09:41, full battery/Wi-Fi) on the simulator.
+override_status_bar(true)
+
+# One simulator at a time keeps the demo animations deterministic.
+concurrent_simulators(false)
+
+# Only our screenshot test — never the unit tests.
+only_testing(["HibiUITests/ScreenshotUITests/testCaptureScreenshots"])

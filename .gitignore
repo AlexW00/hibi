@@ -25,11 +25,14 @@ xcuserdata/
 # Carthage (uncomment if you use Carthage)
 # Carthage/Build/
 
-# fastlane (uncomment if you add fastlane)
-# fastlane/report.xml
-# fastlane/Preview.html
-# fastlane/screenshots/**/*.png
-# fastlane/test_output
+# fastlane / screenshot automation (scripts/screenshots.sh)
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output
+# Generated App Store screenshots (regenerate via scripts/screenshots.sh)
+screenshots/
+# Third-party helper fetched on demand by scripts/screenshots.sh
+HibiUITests/SnapshotHelper.swift
 
 # macOS
 .DS_Store

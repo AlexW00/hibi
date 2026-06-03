@@ -134,6 +134,7 @@ XCTest. Compile-checked here; run on a device by the user.
 - `Config.xcconfig` (optionally includes the gitignored `Local.xcconfig`) + `Local.xcconfig.template` — developer `DEVELOPMENT_TEAM` only.
 - `scripts/bootstrap.sh` — copies the xcconfig template and installs the pre-commit hook.
 - `scripts/pre-commit` — blocks committing a hardcoded `DEVELOPMENT_TEAM` in `project.pbxproj`.
+- **Screenshots** (`scripts/screenshots.sh`, `scripts/setup_screenshots.rb`, `fastlane/`, `HibiUITests/`) — localized App Store screenshots via `fastlane snapshot` + a UI test driving demo mode in en-US / zh-Hans / zh-Hant / ja / ko. `-uiTestScreenshots` (see `DemoEnvironment`) forces demo mode (curated events/reminders/weather, no real data) and skips onboarding/What's New. macOS-only; see [docs/screenshots.md](docs/screenshots.md).
 - `docs/superpowers/{plans,specs}/` — design docs / implementation plans for recent features (widget, Plus settings, app-icon settings, scroll unification).
 
 ## Conventions & gotchas
