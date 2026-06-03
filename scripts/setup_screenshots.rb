@@ -33,25 +33,32 @@ if ui_target.nil?
   puts "Creating #{UITEST_TARGET} UI-test target…"
   ui_target = project.new_target(:ui_test_bundle, UITEST_TARGET, :ios, DEPLOYMENT,
                                  project.products_group, :swift)
-
-  ui_target.build_configurations.each do |config|
-    config.build_settings["PRODUCT_BUNDLE_IDENTIFIER"]    = BUNDLE_ID
-    config.build_settings["TEST_TARGET_NAME"]             = APP_TARGET
-    config.build_settings["GENERATE_INFOPLIST_FILE"]      = "YES"
-    config.build_settings["SWIFT_VERSION"]                = "5.0"
-    config.build_settings["IPHONEOS_DEPLOYMENT_TARGET"]   = DEPLOYMENT
-    config.build_settings["CODE_SIGN_STYLE"]              = "Automatic"
-    config.build_settings["TARGETED_DEVICE_FAMILY"]       = "1,2"
-    config.build_settings["SWIFT_EMIT_LOC_STRINGS"]       = "NO"
-    # Inherit DEVELOPMENT_TEAM etc. from the same xcconfig the app uses, so a
-    # physical-device run signs the same way. (Simulator runs don't need it.)
-    app_cfg = app_target.build_configurations.find { |c| c.name == config.name }
-    config.base_configuration_reference = app_cfg&.base_configuration_reference
-  end
-
-  ui_target.add_dependency(app_target)
 else
-  puts "#{UITEST_TARGET} target already exists — syncing sources."
+  puts "#{UITEST_TARGET} target already exists — syncing settings + sources."
+end
+
+# Always (re)apply build settings — idempotent, and repairs targets from older
+# script versions. PRODUCT_NAME is the critical one: without it the test bundle
+# builds as ".xctest" / "-Runner.app" (empty name), which fails with
+# "Multiple commands produce …/PlugIns/.xctest".
+ui_target.build_configurations.each do |config|
+  config.build_settings["PRODUCT_NAME"]                 = "$(TARGET_NAME)"
+  config.build_settings["PRODUCT_BUNDLE_IDENTIFIER"]    = BUNDLE_ID
+  config.build_settings["TEST_TARGET_NAME"]             = APP_TARGET
+  config.build_settings["GENERATE_INFOPLIST_FILE"]      = "YES"
+  config.build_settings["SWIFT_VERSION"]                = "5.0"
+  config.build_settings["IPHONEOS_DEPLOYMENT_TARGET"]   = DEPLOYMENT
+  config.build_settings["CODE_SIGN_STYLE"]              = "Automatic"
+  config.build_settings["TARGETED_DEVICE_FAMILY"]       = "1,2"
+  config.build_settings["SWIFT_EMIT_LOC_STRINGS"]       = "NO"
+  # Inherit DEVELOPMENT_TEAM etc. from the same xcconfig the app uses, so a
+  # physical-device run signs the same way. (Simulator runs don't need it.)
+  app_cfg = app_target.build_configurations.find { |c| c.name == config.name }
+  config.base_configuration_reference = app_cfg&.base_configuration_reference
+end
+
+unless ui_target.dependencies.any? { |d| d.target == app_target }
+  ui_target.add_dependency(app_target)
 end
 
 # --- Sync HibiUITests/*.swift into the target's compile sources -------------

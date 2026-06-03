@@ -26,20 +26,32 @@ final class ScreenshotUITests: XCTestCase {
 
         let tabBar = app.tabBars.firstMatch
         XCTAssertTrue(tabBar.waitForExistence(timeout: 15), "Tab bar never appeared")
+        // Tabs in ContentView order: Month = 0, Week = 1, Day = 2.
 
-        // The app opens on the Day tab — the hero shot. Give the paper stack and
-        // schedule a beat to settle before capturing.
-        sleep(3)
-        snapshot("01-Day")
+        // 1 — Month (current month).
+        tabBar.buttons.element(boundBy: 0).tap()
+        sleep(2)
+        snapshot("01-Month")
 
-        // Week tab.
+        // 2 — Week (current day).
         tabBar.buttons.element(boundBy: 1).tap()
         sleep(2)
         snapshot("02-Week")
 
-        // Month tab.
-        tabBar.buttons.element(boundBy: 0).tap()
+        // 3 — Day.
+        tabBar.buttons.element(boundBy: 2).tap()
         sleep(2)
-        snapshot("03-Month")
+        snapshot("03-Day")
+
+        // 4 — Day with the paper torn mid-swipe. The mid-tear is a transient
+        // gesture state with no resting point, so we relaunch with -uiTestDayPeek
+        // which seeds it statically (see DemoEnvironment / DayView.init). The app
+        // opens on the Day tab, so no navigation is needed.
+        app.terminate()
+        app.launchArguments += ["-uiTestDayPeek"]
+        app.launch()
+        XCTAssertTrue(app.wait(for: .runningForeground, timeout: 30))
+        sleep(3)
+        snapshot("04-Day-Tear")
     }
 }

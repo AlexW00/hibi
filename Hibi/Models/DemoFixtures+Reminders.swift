@@ -1,24 +1,25 @@
 import Foundation
 import SwiftUI
 
-/// Curated reminders for demo mode (screenshots). The *schedule* (which days,
-/// times, completed/overdue/recurring flags, tints) is shared across locales;
-/// only the titles are translated, so the Day-view schedule shows a natural mix
-/// of reminders above the events in every language.
+/// Curated reminders for demo mode (screenshots). The *schedule* (offsets from
+/// today, times, completed/overdue/recurring flags, tints) is shared across
+/// locales; only the titles are translated, so the Day-view schedule shows a
+/// natural mix of reminders above the events in every language.
 ///
-/// Concentrated in April 2026 around the demo anchor (April 18 = SampleData
-/// "today"), which is the hero Day screenshot.
+/// Anchored to **today** (`SampleData.today*`), not a fixed date, so the
+/// current-day Day and Week screenshots always show reminders regardless of
+/// when the run happens — the app opens on the real current day.
 extension DemoFixtures {
     typealias ReminderMap = [MonthKey: [Int: [CalendarReminder]]]
 
     static let reminders: ReminderMap = makeReminders()
 
-    /// One reminder in the curated schedule. `titleKey` indexes the per-language
-    /// title table; `dueDay` is the day it surfaces on (for overdue items this
-    /// is "today", later than the actual `dueMonth`/`dueDayActual`).
+    /// One reminder in the curated schedule. `offset` is the day it surfaces on,
+    /// in days from today; for an overdue item `dueOffset` is the earlier day it
+    /// was actually due. `titleKey` indexes the per-language title table.
     private struct ReminderSlot {
         let id: String
-        let dueDay: Int
+        let offset: Int
         /// Hour of day, or nil for an all-day (timeless) reminder.
         let hour: Int?
         let minute: Int
@@ -26,51 +27,62 @@ extension DemoFixtures {
         let isCompleted: Bool
         let isOverdue: Bool
         let isRecurring: Bool
+        let dueOffset: Int?
         let titleKey: String
-        /// Actual due date used for the timestamp (defaults to `dueDay` in April).
-        let dueDayActual: Int
 
-        init(_ id: String, day dueDay: Int, hour: Int? = nil, minute: Int = 0,
+        init(_ id: String, offset: Int, hour: Int? = nil, minute: Int = 0,
              tint: Color, completed: Bool = false, overdue: Bool = false,
-             recurring: Bool = false, dueDayActual: Int? = nil, _ titleKey: String) {
+             recurring: Bool = false, dueOffset: Int? = nil, _ titleKey: String) {
             self.id = id
-            self.dueDay = dueDay
+            self.offset = offset
             self.hour = hour
             self.minute = minute
             self.tint = tint
             self.isCompleted = completed
             self.isOverdue = overdue
             self.isRecurring = recurring
+            self.dueOffset = dueOffset
             self.titleKey = titleKey
-            self.dueDayActual = dueDayActual ?? dueDay
         }
     }
 
-    // All in April 2026.
     private static let reminderSlots: [ReminderSlot] = [
-        // Anchor day (April 18) — a varied stack above the day's events.
-        ReminderSlot("demo-rem-401", day: 18, tint: mint, recurring: true, "water_plants"),
-        ReminderSlot("demo-rem-402", day: 18, hour: 11, minute: 0, tint: sky, "call_dentist"),
-        ReminderSlot("demo-rem-403", day: 18, tint: coral, overdue: true, dueDayActual: 15, "tax_documents"),
-        ReminderSlot("demo-rem-404", day: 18, tint: butter, completed: true, "pick_up_parcel"),
+        // Today — a varied stack above the day's events.
+        ReminderSlot("demo-rem-401", offset: 0, tint: mint, recurring: true, "water_plants"),
+        ReminderSlot("demo-rem-402", offset: 0, hour: 11, minute: 0, tint: sky, "call_dentist"),
+        ReminderSlot("demo-rem-403", offset: 0, tint: coral, overdue: true, dueOffset: -3, "tax_documents"),
+        ReminderSlot("demo-rem-404", offset: 0, tint: butter, completed: true, "pick_up_parcel"),
         // Surrounding days — populate the Week view.
-        ReminderSlot("demo-rem-405", day: 15, hour: 17, minute: 30, tint: lilac, "dry_cleaning"),
-        ReminderSlot("demo-rem-406", day: 20, tint: rose, "birthday_gift"),
-        ReminderSlot("demo-rem-407", day: 22, hour: 9, minute: 0, tint: sea, recurring: true, "library_books"),
+        ReminderSlot("demo-rem-405", offset: -3, hour: 17, minute: 30, tint: lilac, "dry_cleaning"),
+        ReminderSlot("demo-rem-406", offset: 2, tint: rose, "birthday_gift"),
+        ReminderSlot("demo-rem-407", offset: 4, hour: 9, minute: 0, tint: sea, recurring: true, "library_books"),
     ]
+
+    /// (year, month, day) for `today + delta`, in the user's calendar.
+    private static func dayInfo(offsetDays delta: Int) -> (y: Int, m: Int, d: Int) {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = .current
+        let base = cal.date(from: DateComponents(
+            year: SampleData.todayYear, month: SampleData.todayMonth, day: SampleData.todayDay
+        )) ?? Date()
+        let shifted = cal.date(byAdding: .day, value: delta, to: base) ?? base
+        let c = cal.dateComponents([.year, .month, .day], from: shifted)
+        return (c.year ?? SampleData.todayYear, c.month ?? SampleData.todayMonth, c.day ?? SampleData.todayDay)
+    }
 
     private static func makeReminders() -> ReminderMap {
         let titles = reminderTitles(for: resolvedLanguage)
-        let key = MonthKey(year: 2026, month: 4)
-        var byDay: [Int: [CalendarReminder]] = [:]
+        var out: ReminderMap = [:]
 
         for slot in reminderSlots {
+            let surface = dayInfo(offsetDays: slot.offset)
+            let dueDayInfo = dayInfo(offsetDays: slot.dueOffset ?? slot.offset)
             let hasTime = slot.hour != nil
-            let due = date(2026, 4, slot.dueDayActual, h: slot.hour ?? 0, min: slot.minute)
+            let due = date(dueDayInfo.y, dueDayInfo.m, dueDayInfo.d, h: slot.hour ?? 0, min: slot.minute)
             let reminder = CalendarReminder(
                 id: slot.id,
                 reminderIdentifier: slot.id,
-                day: slot.dueDay,
+                day: surface.d,
                 dueDate: due,
                 hasTime: hasTime,
                 title: titles[slot.titleKey] ?? slot.titleKey,
@@ -79,18 +91,23 @@ extension DemoFixtures {
                 isOverdue: slot.isOverdue,
                 isRecurring: slot.isRecurring
             )
-            byDay[slot.dueDay, default: []].append(reminder)
+            let key = MonthKey(year: surface.y, month: surface.m)
+            out[key, default: [:]][surface.d, default: []].append(reminder)
         }
 
         // Incomplete first, then by due date — mirrors EventStore's ordering.
-        for d in byDay.keys {
-            byDay[d]?.sort { lhs, rhs in
-                if lhs.isCompleted != rhs.isCompleted { return !lhs.isCompleted }
-                return (lhs.dueDate ?? .distantPast) < (rhs.dueDate ?? .distantPast)
+        for (key, days) in out {
+            var sortedDays = days
+            for d in sortedDays.keys {
+                sortedDays[d]?.sort { lhs, rhs in
+                    if lhs.isCompleted != rhs.isCompleted { return !lhs.isCompleted }
+                    return (lhs.dueDate ?? .distantPast) < (rhs.dueDate ?? .distantPast)
+                }
             }
+            out[key] = sortedDays
         }
 
-        return [key: byDay]
+        return out
     }
 
     /// Naturally-written titles per language (not literal calques — see the

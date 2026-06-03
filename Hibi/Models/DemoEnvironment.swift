@@ -12,4 +12,11 @@ enum DemoEnvironment {
     /// True when the app was launched by the screenshot UI test.
     static let isScreenshotRun: Bool =
         ProcessInfo.processInfo.arguments.contains("-uiTestScreenshots")
+
+    /// Seeds the Day view's tear gesture at a fixed mid-swipe so the "pull to
+    /// tear" interaction can be captured statically (a real drag would snap back
+    /// or commit — there is no resting mid-tear state). Set only for the final
+    /// Day-peek screenshot launch.
+    static let dayPeekScreenshot: Bool =
+        ProcessInfo.processInfo.arguments.contains("-uiTestDayPeek")
 }

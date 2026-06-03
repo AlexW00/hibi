@@ -112,6 +112,11 @@ struct DayView: View {
         // creation so the user can still drag freely during the session.
         let preferCompact = UserDefaults.standard.bool(forKey: "preferCompactDayView")
         self._scheduleProgress = State(initialValue: preferCompact ? 1 : 0)
+        // Screenshot-only: freeze the tear gesture mid-swipe so the "pull to
+        // tear" interaction can be captured (a real drag snaps back / commits).
+        // Forward tear (tearDirection defaults to +1); the front page slides up,
+        // revealing the next day beneath.
+        self._dragY = State(initialValue: DemoEnvironment.dayPeekScreenshot ? -140 : 0)
     }
 
     var body: some View {
