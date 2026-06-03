@@ -45,7 +45,10 @@ ruby scripts/setup_screenshots.rb
 
 if [ -z "${DEVICE:-}" ]; then
   info "Available iPhone simulators:"
-  mapfile -t DEVICES < <(xcrun simctl list devices available \
+  DEVICES=()
+  while IFS= read -r line; do
+    [ -n "$line" ] && DEVICES+=("$line")
+  done < <(xcrun simctl list devices available \
     | grep -oE 'iPhone[^(]*' | sed 's/[[:space:]]*$//' | sort -u)
 
   if [ "${#DEVICES[@]}" -eq 0 ]; then
