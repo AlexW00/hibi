@@ -7,15 +7,28 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01E205D39DCF280875995EC7 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5BBEBB3CADE5803F7EFD74 /* SnapshotHelper.swift */; };
+		0CDD5DD7CCBC4C630FF9D7C4 /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5BBEBB3CADE5803F7EFD74 /* SnapshotHelper.swift */; };
+		420DD4C10FDE3A6C0F8BD140 /* ScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB8F046285CA9451FA58AA47 /* ScreenshotUITests.swift */; };
 		4B0450C42F94C6EF009EA06E /* Notelet in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0450C32F94C6EF009EA06E /* Notelet */; };
 		4B0451032F94C6EF009EA06E /* CalendarPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0451012F94C6EF009EA06E /* CalendarPermission */; };
 		4B0451042F94C6EF009EA06E /* LocationPermission in Frameworks */ = {isa = PBXBuildFile; productRef = 4B0451022F94C6EF009EA06E /* LocationPermission */; };
 		4B1507042FBEA5BF00F49AFD /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B1507032FBEA5BF00F49AFD /* WidgetKit.framework */; };
 		4B1507062FBEA5BF00F49AFD /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B1507052FBEA5BF00F49AFD /* SwiftUI.framework */; };
 		4B1507112FBEA5C200F49AFD /* HibiWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4B1507012FBEA5BF00F49AFD /* HibiWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		91442731E552C540A8F9C27F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE4BCA8FFEBBDE75524E28D3 /* Foundation.framework */; };
+		CE0BC66BB6FF5B120F722D1C /* ScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB8F046285CA9451FA58AA47 /* ScreenshotUITests.swift */; };
+		DED99A47B2230B8A6831A5B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE4BCA8FFEBBDE75524E28D3 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		33F940AEF21CCBBA826EF1A2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4B802FC52F8F5453008F00F4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4B802FCC2F8F5453008F00F4;
+			remoteInfo = Hibi;
+		};
 		4B15070F2FBEA5C200F49AFD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4B802FC52F8F5453008F00F4 /* Project object */;
@@ -24,6 +37,13 @@
 			remoteInfo = HibiWidgetsExtension;
 		};
 		4B20000B2FC2000000F49AFD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4B802FC52F8F5453008F00F4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4B802FCC2F8F5453008F00F4;
+			remoteInfo = Hibi;
+		};
+		D7A7D65E31D4324395AABD35 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4B802FC52F8F5453008F00F4 /* Project object */;
 			proxyType = 1;
@@ -47,6 +67,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		24723D41AACF3529EB03B608 /* HibiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HibiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B0451052F96B000009EA06E /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		4B1507012FBEA5BF00F49AFD /* HibiWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HibiWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B1507032FBEA5BF00F49AFD /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -54,6 +75,9 @@
 		4B2000022FC2000000F49AFD /* HibiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HibiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B20000C2FC2000000F49AFD /* Hibi.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Hibi.storekit; sourceTree = "<group>"; };
 		4B802FCD2F8F5453008F00F4 /* Hibi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hibi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB8F046285CA9451FA58AA47 /* ScreenshotUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ScreenshotUITests.swift; sourceTree = "<group>"; };
+		CE4BCA8FFEBBDE75524E28D3 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		FA5BBEBB3CADE5803F7EFD74 /* SnapshotHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -108,6 +132,8 @@
 		};
 		4B2000012FC2000000F49AFD /* HibiTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = HibiTests;
 			sourceTree = "<group>";
 		};
@@ -149,14 +175,33 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DA856C340717C7BF77E9C3CE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DED99A47B2230B8A6831A5B1 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		41E02B23BEB7DE621C5A3AFD /* HibiUITests */ = {
+			isa = PBXGroup;
+			children = (
+				CB8F046285CA9451FA58AA47 /* ScreenshotUITests.swift */,
+				FA5BBEBB3CADE5803F7EFD74 /* SnapshotHelper.swift */,
+			);
+			name = HibiUITests;
+			path = HibiUITests;
+			sourceTree = SOURCE_ROOT;
+		};
 		4B1507022FBEA5BF00F49AFD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				4B1507032FBEA5BF00F49AFD /* WidgetKit.framework */,
 				4B1507052FBEA5BF00F49AFD /* SwiftUI.framework */,
+				D23ECA4DF8A9F4FB3175B3C5 /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -171,6 +216,7 @@
 				4B2000012FC2000000F49AFD /* HibiTests */,
 				4B1507022FBEA5BF00F49AFD /* Frameworks */,
 				4B802FCE2F8F5453008F00F4 /* Products */,
+				41E02B23BEB7DE621C5A3AFD /* HibiUITests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -180,13 +226,40 @@
 				4B802FCD2F8F5453008F00F4 /* Hibi.app */,
 				4B1507012FBEA5BF00F49AFD /* HibiWidgetsExtension.appex */,
 				4B2000022FC2000000F49AFD /* HibiTests.xctest */,
+				24723D41AACF3529EB03B608 /* HibiUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		D23ECA4DF8A9F4FB3175B3C5 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				CE4BCA8FFEBBDE75524E28D3 /* Foundation.framework */,
+			);
+			name = iOS;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		2E99C71D4B5C7579C3CC7D05 /* HibiUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B8D476F2B22910FDF6AA67D6 /* Build configuration list for PBXNativeTarget "HibiUITests" */;
+			buildPhases = (
+				9E75EAE1B49DAB1D42A58C9C /* Sources */,
+				DA856C340717C7BF77E9C3CE /* Frameworks */,
+				CE06DF6F89E041E6E5DE71D2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DBAA14E2106F4E03EC9A336E /* PBXTargetDependency */,
+			);
+			name = HibiUITests;
+			productName = HibiUITests;
+			productReference = 24723D41AACF3529EB03B608 /* HibiUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		4B1507002FBEA5BF00F49AFD /* HibiWidgetsExtension */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4B1507132FBEA5C200F49AFD /* Build configuration list for PBXNativeTarget "HibiWidgetsExtension" */;
@@ -203,8 +276,6 @@
 				4B1507072FBEA5BF00F49AFD /* HibiWidgets */,
 			);
 			name = HibiWidgetsExtension;
-			packageProductDependencies = (
-			);
 			productName = HibiWidgetsExtension;
 			productReference = 4B1507012FBEA5BF00F49AFD /* HibiWidgetsExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -227,8 +298,6 @@
 				4B2000012FC2000000F49AFD /* HibiTests */,
 			);
 			name = HibiTests;
-			packageProductDependencies = (
-			);
 			productName = HibiTests;
 			productReference = 4B2000022FC2000000F49AFD /* HibiTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -313,6 +382,7 @@
 				4B802FCC2F8F5453008F00F4 /* Hibi */,
 				4B1507002FBEA5BF00F49AFD /* HibiWidgetsExtension */,
 				4B2000032FC2000000F49AFD /* HibiTests */,
+				2E99C71D4B5C7579C3CC7D05 /* HibiUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -333,6 +403,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4B802FCB2F8F5453008F00F4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CE06DF6F89E041E6E5DE71D2 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -384,6 +461,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9E75EAE1B49DAB1D42A58C9C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				420DD4C10FDE3A6C0F8BD140 /* ScreenshotUITests.swift in Sources */,
+				01E205D39DCF280875995EC7 /* SnapshotHelper.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -397,9 +483,65 @@
 			target = 4B802FCC2F8F5453008F00F4 /* Hibi */;
 			targetProxy = 4B20000B2FC2000000F49AFD /* PBXContainerItemProxy */;
 		};
+		DBAA14E2106F4E03EC9A336E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Hibi;
+			target = 4B802FCC2F8F5453008F00F4 /* Hibi */;
+			targetProxy = 33F940AEF21CCBBA826EF1A2 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		12F109DB116210528675C95E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.weichart.hibi.HibiUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Hibi;
+			};
+			name = Debug;
+		};
+		410B7D57486B7F0F4B1320D5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.weichart.hibi.HibiUITests;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Hibi;
+			};
+			name = Debug;
+		};
+		432F182A9D74C428896A46AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.weichart.hibi.HibiUITests;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Hibi;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		4B1507142FBEA5C200F49AFD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -699,6 +841,24 @@
 			};
 			name = Release;
 		};
+		ED6072771DF6CE9713AD8E90 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.weichart.hibi.HibiUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Hibi;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -734,6 +894,15 @@
 			buildConfigurations = (
 				4B802FD92F8F5454008F00F4 /* Debug */,
 				4B802FDA2F8F5454008F00F4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B8D476F2B22910FDF6AA67D6 /* Build configuration list for PBXNativeTarget "HibiUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ED6072771DF6CE9713AD8E90 /* Release */,
+				12F109DB116210528675C95E /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
