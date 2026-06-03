@@ -631,7 +631,7 @@ struct DayView: View {
                                 DayEventRow(
                                     event: e,
                                     progress: e.progress(
-                                        at: ctx.date,
+                                        at: DemoEnvironment.screenshotNow ?? ctx.date,
                                         useDemoTimeOfDay: eventStore.isDemoMode,
                                         listYear: sd.year,
                                         listMonth: sd.month,

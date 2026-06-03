@@ -324,7 +324,7 @@ private struct StreamDayRow: View {
                                 let absIdx = reminders.count + idx
                                 eventButton(
                                     event: event,
-                                    now: ctx.date,
+                                    now: DemoEnvironment.screenshotNow ?? ctx.date,
                                     edges: EventRowEdges(top: absIdx == 0, bottom: absIdx == lastIdx)
                                 )
                             }

@@ -49,6 +49,22 @@ enum DemoEnvironment {
         }
     }
 
+    /// A frozen "now" for screenshot runs: **today at 09:41**, matching the
+    /// faked status-bar time fastlane sets. Event progress fills are otherwise a
+    /// function of real wall-clock time, so a screenshot's "in-progress" bar
+    /// would fill differently every run; freezing it here makes the Week/Day
+    /// fills deterministic and identical across runs and locales. `nil` outside
+    /// screenshot runs so interactive DEBUG demo mode keeps a live clock.
+    static var screenshotNow: Date? {
+        guard isScreenshotRun else { return nil }
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = .current
+        return cal.date(from: DateComponents(
+            year: SampleData.todayYear, month: SampleData.todayMonth, day: SampleData.todayDay,
+            hour: 9, minute: 41
+        ))
+    }
+
     // MARK: - Helpers
 
     private static func argValue(_ flag: String) -> String? {

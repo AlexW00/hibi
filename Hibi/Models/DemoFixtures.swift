@@ -11,7 +11,7 @@ import SwiftUI
 ///
 /// One source of truth, three layers:
 ///  - **Highlight window** (`highlightEvents`, today ± a few days): a hand-tuned
-///    schedule with a deliberate per-day count (today = 4, then 3 / 2 / 1 / 0 on
+///    schedule with a deliberate per-day count (today = 3, then 2 / 2 / 1 / 0 on
 ///    nearby days) — this is what the Day and Week screenshots show.
 ///  - **Ambient filler**: one event every other day across ± ~10 weeks so the
 ///    Month grid has dots and far Week scrolling isn't empty. Titles are reused
@@ -104,17 +104,19 @@ enum DemoFixtures {
                   titleKey: titleKey, tint: tint, locationKey: nil, recurring: false)
     }
 
-    /// Deliberate per-day counts: today = 4, +1 = 3, −1 = 2, +2 = 1, +3 = 0, …
+    /// Deliberate per-day counts: today = 3, +1 = 2, −1 = 2, +2 = 1, +3 = 0, …
     private static let highlightEvents: [EventSpec] = [
-        // Today — a full but realistic day, all timed ("normal") events.
+        // Today — a light, legible day that tells a done / in-progress / upcoming
+        // story against the frozen 09:41 screenshot clock (see
+        // `DemoEnvironment.screenshotNow`): the morning run reads as finished,
+        // the design review (09:00–10:30) is mid-progress (~half filled at 09:41),
+        // and dinner is still ahead (empty).
         timed(0, 7, 30, 8, 15, "run", mint),
-        timed(0, 10, 0, 10, 30, "standup", sky, loc: "zoom"),
-        timed(0, 15, 0, 16, 0, "review", lilac, loc: "studio"),
+        timed(0, 9, 0, 10, 30, "review", lilac, loc: "studio"),
         timed(0, 19, 30, 21, 30, "dinner", rose, loc: "saffron"),
-        // +1 — three.
+        // +1 — two.
         timed(1, 12, 30, 13, 30, "lunch", peach, loc: "lumi"),
         timed(1, 16, 0, 16, 30, "coffee", sea, loc: "bluebottle"),
-        timed(1, 18, 30, 19, 30, "yoga", mint, loc: "studionorth", recurring: true),
         // −1 — two.
         timed(-1, 11, 0, 11, 45, "haircut", sea, loc: "salon"),
         timed(-1, 17, 30, 18, 15, "grocery", butter, loc: "market"),
@@ -215,9 +217,9 @@ enum DemoFixtures {
     }
 
     private static let reminderSlots: [ReminderSlot] = [
+        // Today — two reminders: one pleasant incomplete (also what the medium
+        // widget's `pleasantOnly` filter surfaces) and one completed.
         ReminderSlot("demo-rem-401", offset: 0, tint: mint, recurring: true, "water_plants"),
-        ReminderSlot("demo-rem-402", offset: 0, hour: 11, minute: 0, tint: sky, "call_dentist"),
-        ReminderSlot("demo-rem-403", offset: 0, tint: coral, overdue: true, dueOffset: -3, "tax_documents"),
         ReminderSlot("demo-rem-404", offset: 0, tint: butter, completed: true, "pick_up_parcel"),
         ReminderSlot("demo-rem-405", offset: -1, hour: 17, minute: 30, tint: lilac, "dry_cleaning"),
         ReminderSlot("demo-rem-406", offset: 2, tint: rose, "birthday_gift"),
