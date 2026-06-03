@@ -206,7 +206,10 @@ struct SettingsView: View {
             settingsSection("Debug") {
                 Toggle(isOn: Binding(
                     get: { eventStore.isDemoMode },
-                    set: { eventStore.setDemoMode($0) }
+                    set: {
+                        eventStore.setDemoMode($0)
+                        weatherStore.setDemoMode($0)
+                    }
                 )) {
                     Label("Demo Mode", systemImage: "wand.and.stars")
                 }

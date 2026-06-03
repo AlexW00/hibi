@@ -12,22 +12,38 @@ import SwiftUI
 enum DemoFixtures {
     typealias EventMap = [MonthKey: [Int: [CalendarEvent]]]
 
-    static let events: EventMap = {
-        // Resolve from `Locale.preferredLanguages` (the language the app actually
-        // renders in), not `Locale.current`, whose region is pinned to de_DE for
-        // calendar math — same source `AppFont.usesCJKSerif` reads, so demo text
-        // and the CJK serif font always agree.
+    /// The language the curated fixtures (events, reminders, weather city) are
+    /// written in. Shared by `events`, `reminders`, and `weather` so they always
+    /// agree on a single resolved language.
+    enum Language {
+        case english, german, japanese, korean, chineseSimplified, chineseTraditional
+    }
+
+    /// Resolve from `Locale.preferredLanguages` (the language the app actually
+    /// renders in), not `Locale.current`, whose region is pinned to de_DE for
+    /// calendar math — same source `AppFont.usesCJKSerif` reads, so demo text
+    /// and the CJK serif font always agree.
+    static let resolvedLanguage: Language = {
         let language = Locale(identifier: Locale.preferredLanguages.first ?? "en").language
         switch language.languageCode?.identifier {
-        case "ja": return makeJapaneseEvents()
-        case "ko": return makeKoreanEvents()
-        case "de": return makeGermanEvents()
+        case "ja": return .japanese
+        case "ko": return .korean
+        case "de": return .german
         case "zh":
             // Distinguish script: Traditional (Hant) for TW/HK, Simplified (Hans) otherwise.
-            return language.script?.identifier == "Hant"
-                ? makeChineseTraditionalEvents()
-                : makeChineseSimplifiedEvents()
-        default:   return makeEnglishEvents()
+            return language.script?.identifier == "Hant" ? .chineseTraditional : .chineseSimplified
+        default:   return .english
+        }
+    }()
+
+    static let events: EventMap = {
+        switch resolvedLanguage {
+        case .japanese:           return makeJapaneseEvents()
+        case .korean:             return makeKoreanEvents()
+        case .german:             return makeGermanEvents()
+        case .chineseSimplified:  return makeChineseSimplifiedEvents()
+        case .chineseTraditional: return makeChineseTraditionalEvents()
+        case .english:            return makeEnglishEvents()
         }
     }()
 
