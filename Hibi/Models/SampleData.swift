@@ -153,3 +153,39 @@ extension Font {
         return .custom(italic ? AppFont.serifItalic : AppFont.serifRegular, size: size)
     }
 }
+
+extension AppFont {
+    /// How far (in points) the Today's-Page **small widget** numeral must be
+    /// lifted so the day number — and the today-underline pinned to its bottom
+    /// — land where they do in Latin locales.
+    ///
+    /// The small widget anchors its content from the top. In a CJK locale the
+    /// numeral renders in Noto Serif JP, whose line box has a much deeper
+    /// ascent than Instrument Serif (≈1.15em vs ≈0.99em) and is taller overall.
+    /// Digits sit on the baseline, so that extra ascent is empty space *above*
+    /// the glyph: the top-anchored numeral, and the underline bottom-pinned to
+    /// it, get shoved down toward the perforation. Subtracting this difference
+    /// (as a negative top padding) re-seats the block at the Latin position.
+    ///
+    /// Metrics are read live from the registered faces via CoreText, so the
+    /// value tracks the actual fonts rather than hard-coded ratios. Returns 0
+    /// for Latin / system (`simple`) faces, leaving non-CJK locales untouched.
+    ///
+    /// - Parameters:
+    ///   - numeralSize: point size of the day numeral.
+    ///   - weekdaySize: point size of the weekday line above it — its taller
+    ///     CJK line box also pushes the numeral down, so it's folded in here.
+    static func cjkNumeralTopCompensation(numeralSize: CGFloat, weekdaySize: CGFloat, simple: Bool) -> CGFloat {
+        guard !simple, usesCJKSerif else { return 0 }
+        func ascent(_ name: String, _ size: CGFloat) -> CGFloat {
+            CTFontGetAscent(CTFontCreateWithName(name as CFString, size, nil))
+        }
+        func lineHeight(_ name: String, _ size: CGFloat) -> CGFloat {
+            let f = CTFontCreateWithName(name as CFString, size, nil)
+            return CTFontGetAscent(f) + CTFontGetDescent(f) + CTFontGetLeading(f)
+        }
+        let numeralAscentGap = ascent(serifJP, numeralSize) - ascent(serifRegular, numeralSize)
+        let weekdayLineGap = lineHeight(serifJP, weekdaySize) - lineHeight(serifRegular, weekdaySize)
+        return max(0, numeralAscentGap + weekdayLineGap)
+    }
+}

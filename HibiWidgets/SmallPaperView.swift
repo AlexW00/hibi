@@ -48,6 +48,12 @@ struct SmallPaperView: View {
                                 .offset(y: -8)
                         }
                     }
+                    // CJK serif faces have a far deeper ascent than Instrument
+                    // Serif; in this top-anchored layout that empty space above
+                    // the baseline would otherwise push the numeral and its
+                    // underline down toward the perforation. Lift them back to
+                    // the Latin position. No-op in Latin / system-font locales.
+                    .padding(.top, -AppFont.cjkNumeralTopCompensation(numeralSize: 84, weekdaySize: 14, simple: useSimpleFont))
                 Spacer(minLength: 0)
             }
         }
