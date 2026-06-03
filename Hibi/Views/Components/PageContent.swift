@@ -91,6 +91,8 @@ struct PageContent: View {
             Text(verbatim: "\(MonthNames.full[month - 1]) · \(String(year))")
                 .font(.appSerif(size: 13, italic: true, simple: useSimpleFont))
                 .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
                 .padding(.top, 2)
                 .frame(height: 18 * chromeFade)
                 .opacity(chromeFade)
