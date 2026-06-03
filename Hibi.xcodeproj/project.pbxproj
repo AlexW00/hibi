@@ -88,6 +88,20 @@
 			);
 			target = 4B1507002FBEA5BF00F49AFD /* HibiWidgetsExtension */;
 		};
+		4B1507B02FC2000200F49AFD /* Exceptions for "HibiWidgets" folder in "Hibi" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				EventsEntry.swift,
+				EventsWidgetView.swift,
+				LargePaperView.swift,
+				PlusLockOverlay.swift,
+				SmallPaperView.swift,
+				TodaysPageEntry.swift,
+				TodaysPageWidgetView.swift,
+				ToggleReminderCompletionIntent.swift,
+			);
+			target = 4B802FCC2F8F5453008F00F4 /* Hibi */;
+		};
 		4B1507202FC0000000F49AFD /* Exceptions for "Hibi" folder in "HibiWidgetsExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -126,6 +140,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				4B1507122FBEA5C200F49AFD /* Exceptions for "HibiWidgets" folder in "HibiWidgetsExtension" target */,
+				4B1507B02FC2000200F49AFD /* Exceptions for "HibiWidgets" folder in "Hibi" target */,
 			);
 			path = HibiWidgets;
 			sourceTree = "<group>";

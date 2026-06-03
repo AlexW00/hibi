@@ -3,8 +3,12 @@ import WidgetKit
 
 struct TodaysPageWidgetView: View {
     let entry: TodaysPageEntry
+    /// Forces a family when hosted outside a widget (the in-app screenshot
+    /// gallery) — `\.widgetFamily` is read-only. `nil` in the real widget.
+    var familyOverride: WidgetFamily? = nil
 
-    @Environment(\.widgetFamily) private var family
+    @Environment(\.widgetFamily) private var environmentFamily
+    private var family: WidgetFamily { familyOverride ?? environmentFamily }
 
     private var isPlus: Bool { PlusEntitlementStore().isPlus }
 

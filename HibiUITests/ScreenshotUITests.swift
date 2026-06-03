@@ -20,38 +20,58 @@ final class ScreenshotUITests: XCTestCase {
         let app = XCUIApplication()
         setupSnapshot(app)
         app.launchArguments += ["-uiTestScreenshots"]
-        app.launch()
+        // Snapshot adds the per-run locale args (-AppleLanguages/-AppleLocale) to
+        // launchArguments; capture them as the base so each relaunch keeps the
+        // locale while swapping only our screenshot flag.
+        let baseArgs = app.launchArguments
 
+        // --- Tab screenshots (one launch) ---
+        app.launchArguments = baseArgs
+        app.launch()
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 30))
 
         let tabBar = app.tabBars.firstMatch
         XCTAssertTrue(tabBar.waitForExistence(timeout: 15), "Tab bar never appeared")
         // Tabs in ContentView order: Month = 0, Week = 1, Day = 2.
 
-        // 1 — Month (current month).
-        tabBar.buttons.element(boundBy: 0).tap()
+        tabBar.buttons.element(boundBy: 0).tap()   // 1 — Month (current month)
         sleep(2)
         snapshot("01-Month")
 
-        // 2 — Week (current day).
-        tabBar.buttons.element(boundBy: 1).tap()
+        tabBar.buttons.element(boundBy: 1).tap()   // 2 — Week (current day)
         sleep(2)
         snapshot("02-Week")
 
-        // 3 — Day.
-        tabBar.buttons.element(boundBy: 2).tap()
+        tabBar.buttons.element(boundBy: 2).tap()   // 3 — Day
         sleep(2)
         snapshot("03-Day")
 
-        // 4 — Day with the paper torn mid-swipe. The mid-tear is a transient
-        // gesture state with no resting point, so we relaunch with -uiTestDayPeek
-        // which seeds it statically (see DemoEnvironment / DayView.init). The app
-        // opens on the Day tab, so no navigation is needed.
+        // The app opens on the Day tab, so the seeded Day-view states below need
+        // no navigation after launch.
+
+        // 4 — Day with the paper torn mid-swipe (seeded; a real drag snaps back).
+        relaunch(app, args: baseArgs + ["-uiTestDayPeek"])
+        snapshot("04-Day-Tear")
+
+        // 5 — Day collapsed (schedule expanded).
+        relaunch(app, args: baseArgs + ["-uiTestDayCollapsed"])
+        snapshot("05-Day-Collapsed")
+
+        // 6 — Schedule widget (medium + large), rendered in-app.
+        relaunch(app, args: baseArgs + ["-uiTestWidgetsSchedule"])
+        snapshot("06-Widget-Schedule")
+
+        // 7 — Today's Page widget (small + large), rendered in-app.
+        relaunch(app, args: baseArgs + ["-uiTestWidgetsToday"])
+        snapshot("07-Widget-Today")
+    }
+
+    @MainActor
+    private func relaunch(_ app: XCUIApplication, args: [String]) {
         app.terminate()
-        app.launchArguments += ["-uiTestDayPeek"]
+        app.launchArguments = args
         app.launch()
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 30))
         sleep(3)
-        snapshot("04-Day-Tear")
     }
 }
