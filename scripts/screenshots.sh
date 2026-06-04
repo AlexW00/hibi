@@ -17,6 +17,55 @@ cd "$(dirname "$0")/.."
 err() { printf "\033[31m%s\033[0m\n" "$*" >&2; }
 info() { printf "\033[36m%s\033[0m\n" "$*"; }
 
+# --- App Store Connect size normalisation -----------------------------------
+#
+# App Store Connect only accepts a fixed list of iPhone screenshot pixel sizes.
+# Simulator captures come out at the device's *native* size (iPhone 16 =
+# 1179 × 2556, iPhone 16 Pro Max = 1320 × 2868), neither of which is on that
+# list — so a raw upload gets rejected. We normalise every PNG under
+# ./screenshots/ to the 6.5" portrait slot, 1242 × 2688: the accepted size
+# closest to the capture (near-identical ~0.46 aspect ratio, smallest rescale).
+#
+# Cover-scale + centre-crop, so nothing is stretched — at most a couple of
+# pixels are shaved off the top/bottom. Landscape captures (none today, but
+# just in case) map to the 2688 × 1242 slot. Uses macOS's built-in `sips`, so
+# no extra dependency. Idempotent: an already-1242 × 2688 image is left as-is.
+APPSTORE_PORTRAIT_W=1242
+APPSTORE_PORTRAIT_H=2688
+
+normalize_appstore_sizes() {
+  command -v sips >/dev/null 2>&1 || { err "sips not found (ships with macOS) — can't resize screenshots."; return 1; }
+
+  local count=0 skipped=0
+  while IFS= read -r -d '' png; do
+    local w h tw th
+    w=$(sips -g pixelWidth  "$png" | awk '/pixelWidth/  {print $2}')
+    h=$(sips -g pixelHeight "$png" | awk '/pixelHeight/ {print $2}')
+    [ -n "$w" ] && [ -n "$h" ] || { err "  ! couldn't read pixel size of $png — skipping."; continue; }
+
+    # Match the App Store slot's orientation to the capture's.
+    if [ "$h" -ge "$w" ]; then tw=$APPSTORE_PORTRAIT_W; th=$APPSTORE_PORTRAIT_H
+    else                       tw=$APPSTORE_PORTRAIT_H; th=$APPSTORE_PORTRAIT_W; fi
+
+    if [ "$w" = "$tw" ] && [ "$h" = "$th" ]; then skipped=$((skipped + 1)); continue; fi
+
+    # Cover-scale: resample on whichever axis leaves the *other* axis >= target
+    # (height-after-width-resample = h·tw/w  ⇒  compare h·tw vs th·w), then
+    # centre-crop to the exact target. sips -c takes <height> <width>.
+    if [ "$(( h * tw ))" -ge "$(( th * w ))" ]; then
+      sips --resampleWidth  "$tw" "$png" >/dev/null
+    else
+      sips --resampleHeight "$th" "$png" >/dev/null
+    fi
+    sips -c "$th" "$tw" "$png" >/dev/null
+    count=$((count + 1))
+  done < <(find screenshots -type f -name '*.png' -print0)
+
+  local note=""
+  [ "$skipped" -gt 0 ] && note=" ($skipped already correct)"
+  info "Resized $count screenshot(s) to ${APPSTORE_PORTRAIT_W}×${APPSTORE_PORTRAIT_H} for App Store Connect${note}."
+}
+
 # --- Preconditions ----------------------------------------------------------
 
 command -v xcrun >/dev/null 2>&1 || { err "Xcode command-line tools required (xcrun not found)."; exit 1; }
@@ -67,7 +116,7 @@ info "Using device: $DEVICE"
 
 fastlane snapshot --devices "$DEVICE"
 
-info "Done. Screenshots are in ./screenshots/ — open ./screenshots/screenshots.html to review."
+info "Captured. Screenshots are in ./screenshots/ — open ./screenshots/screenshots.html to review."
 
 # --- 5. Transparent widget cutouts (optional, re-runnable) ------------------
 #
@@ -89,3 +138,14 @@ if [ "$extract" = "1" ]; then
 else
   info "Skipped widget extraction. Run later: python3 scripts/remove_widget_backgrounds.py"
 fi
+
+# --- 6. Normalise to an App Store Connect pixel size ------------------------
+#
+# Last, so the steps above (and any later standalone widget extraction) work on
+# the native-resolution captures. This rewrites ./screenshots/ in place to the
+# accepted 1242 × 2688 size. (screenshots-widgets/ is intentionally left alone —
+# those transparent cutouts are widget-sized source art, not upload candidates.)
+
+normalize_appstore_sizes
+
+info "Done. ./screenshots/ is ready to drag into App Store Connect."

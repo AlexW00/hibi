@@ -25,7 +25,9 @@ to review the whole set, then drag the folders into App Store Connect.
      hand-edited `project.pbxproj`),
    - lists available iPhone **simulators** and lets you pick one (or set
      `DEVICE="iPhone 16 Pro Max"` to skip the menu),
-   - runs `fastlane snapshot`.
+   - runs `fastlane snapshot`,
+   - **normalises every PNG in `screenshots/` to `1242 × 2688`** — see
+     [App Store sizing](#app-store-sizing) below.
 
 2. **`fastlane/Snapfile`** holds the language list, the default device
    (6.9" Pro Max = the required App Store iPhone size), the scheme, and a clean
@@ -66,6 +68,24 @@ to review the whole set, then drag the folders into App Store Connect.
    - The onboarding and "What's New" sheets are suppressed.
    - Demo fixtures are localized by `Locale.preferredLanguages`, which fastlane
      sets per run — `zh-Hans` → Simplified, `zh-Hant` → Traditional, etc.
+
+## App Store sizing
+
+App Store Connect only accepts a fixed list of iPhone screenshot **pixel
+sizes**, and the simulator's native capture isn't on it — iPhone 16 captures at
+`1179 × 2556`, the 16 Pro Max at `1320 × 2868` — so a raw upload is rejected. As
+its final step `scripts/screenshots.sh` rewrites every PNG under `screenshots/`
+in place to **`1242 × 2688`** (the accepted 6.5" portrait slot — the closest
+size to the capture, ~0.46 aspect ratio either way, so the smallest rescale).
+
+It's a **cover-scale + centre-crop** via macOS's built-in `sips` (no extra
+dependency): the image is scaled until it covers the target, then centre-cropped
+to exact size — so nothing is stretched, at most a couple of pixels are shaved
+off the top/bottom. The step is idempotent (an already-`1242 × 2688` file is
+left untouched) and runs *after* widget extraction, so the green-screen keying
+still works on the native-resolution captures. `screenshots-widgets/` is left
+alone — those transparent cutouts are widget-sized source art, not direct upload
+candidates.
 
 ## Transparent widget cutouts
 
