@@ -33,15 +33,36 @@ final class PlusStore {
     /// Localized, ready-to-display price (e.g. "$4.99"). `nil` until the
     /// product loads; the purchase button shows a spinner while it's `nil`
     /// rather than a placeholder, so a wrong-currency price is never shown.
+    ///
+    /// Guarded against a stale storefront: in Sandbox/TestFlight the product
+    /// metadata can resolve against a different storefront than the one used at
+    /// checkout (e.g. a Eurozone "5,99 €" shown while the account purchases in
+    /// JPY at ¥800). If the cached product was fetched under a storefront other
+    /// than the *current* one, we report `nil` (the button shows its spinner)
+    /// instead of a wrong-currency price, and the storefront observer re-fetches
+    /// so the correct price appears once it loads.
     var displayPrice: String? {
         #if DEBUG
         if debugSuppressPrice { return nil }
         #endif
-        return product?.displayPrice
+        guard let product else { return nil }
+        if let currentStorefrontID, currentStorefrontID != productStorefrontID {
+            return nil
+        }
+        return product.displayPrice
     }
+
+    /// `id` of the App Store storefront the cached `product` was fetched under.
+    /// Compared against `currentStorefrontID` so a price from a stale storefront
+    /// is never shown. `nil` until the first successful product load.
+    private var productStorefrontID: String?
+    /// `id` of the current App Store storefront, refreshed when it resolves or
+    /// changes. `nil` until StoreKit reports one.
+    private var currentStorefrontID: String?
 
     private let entitlement: PlusEntitlementStore
     private var updatesTask: Task<Void, Never>?
+    private var storefrontTask: Task<Void, Never>?
 
     init(entitlement: PlusEntitlementStore = PlusEntitlementStore()) {
         self.entitlement = entitlement
@@ -60,6 +81,18 @@ final class PlusStore {
                 }
             }
         }
+        // Observe storefront changes so the displayed price never goes stale:
+        // when the account's storefront resolves late (common on first launch in
+        // TestFlight) or changes mid-session, re-fetch the product so its
+        // currency matches the one used at checkout.
+        if storefrontTask == nil {
+            storefrontTask = Task { [weak self] in
+                for await storefront in Storefront.updates {
+                    await self?.storefrontChanged(to: storefront.id)
+                }
+            }
+        }
+        Task { currentStorefrontID = await Storefront.current?.id }
         Task { await loadProduct() }
         Task { await refreshEntitlement() }
     }
@@ -68,11 +101,23 @@ final class PlusStore {
         do {
             let products = try await Product.products(for: [PlusProduct.id])
             product = products.first
+            // Record the storefront this price belongs to, so `displayPrice` can
+            // detect (and suppress) a price left over from a different one.
+            productStorefrontID = await Storefront.current?.id
+            currentStorefrontID = productStorefrontID
         } catch {
             #if DEBUG
             print("[PlusStore] product load failed: \(error)")
             #endif
         }
+    }
+
+    /// React to an App Store storefront change: remember the new storefront and
+    /// re-fetch the product so its price reflects the new region's currency.
+    private func storefrontChanged(to id: String) async {
+        currentStorefrontID = id
+        guard id != productStorefrontID else { return }
+        await loadProduct()
     }
 
     /// Recompute the entitlement from StoreKit's current entitlements. This is
