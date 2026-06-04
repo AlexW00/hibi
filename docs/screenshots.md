@@ -32,7 +32,7 @@ to review the whole set, then drag the folders into App Store Connect.
    status bar override.
 
 3. **`HibiUITests/ScreenshotUITests.swift`** launches the app with
-   `-uiTestScreenshots` and captures seven screens per locale, relaunching with
+   `-uiTestScreenshots` and captures eight screens per locale, relaunching with
    an extra flag for the seeded / gallery states. Tabs are tapped **by index**,
    not by (localized) label, so it works in every language:
 
@@ -45,6 +45,7 @@ to review the whole set, then drag the folders into App Store Connect.
    | `05-Day-Collapsed` | Day, schedule expanded | `-uiTestScene dayCollapsed` seeds `scheduleProgress = 1` |
    | `06-Widget-Schedule` | Schedule widget (medium + large) | `-uiTestScene widgetsSchedule` → `WidgetGalleryView` |
    | `07-Widget-Today` | Today's Page widget (small + large) | `-uiTestScene widgetsToday` → `WidgetGalleryView` |
+   | `08-Widget-Home` | Home Screen mock: big day widget + medium Events (3 events) on the blurred iOS 26 wallpaper | `-uiTestScene widgetsHome` → `WidgetGalleryView` |
 
    All special states key off a single `-uiTestScene <name>` arg, resolved once
    in `DemoEnvironment.Scene` — so screenshot special-casing stays in one place.
@@ -100,6 +101,27 @@ screenshots-widgets/<locale>/_preview.png   # cutouts over a checkerboard, to ey
 Output lives in **`screenshots-widgets/`**, a sibling of `screenshots/` — kept
 outside fastlane's `output_directory` so `clear_previous_screenshots(true)` can't
 wipe it on the next run. Requires Pillow + numpy (`pip3 install Pillow numpy`).
+
+## On-wallpaper Home Screen mock (`08-Widget-Home`)
+
+Unlike the green-screen widget shots (`06`/`07`, which are raw material for the
+transparent-cutout pipeline above), `08-Widget-Home` is a **finished,
+directly-uploadable** App Store screenshot. `WidgetGalleryView`'s `.home` case
+renders the **big day widget** (large Today's Page) above the **medium Events
+widget** (3 events) over the **iOS 26 wallpaper, slightly blurred** — with real
+drop shadows, since there's no green to key out. It lands in
+`screenshots/<locale>/` like the tab shots and needs no post-processing.
+
+The wallpaper is a loose bundle resource,
+`Hibi/Resources/ScreenshotWallpaper.jpg` (kept out of a `Screenshots/`-named
+folder so the fastlane `screenshots/` `.gitignore` rule doesn't swallow it).
+It's **only needed for screenshots**, so it's **excluded from Release builds** via
+`EXCLUDED_SOURCE_FILE_NAMES[config=Release]` in `Config.xcconfig` — present in
+Debug (the `HibiScreenshots` scheme builds Debug), absent from the App Store
+binary. `WidgetGalleryView.wallpaper` loads it nil-safely, so a Release build
+still compiles and falls back to a plain backdrop. To swap the wallpaper, drop a
+new `ScreenshotWallpaper.jpg` in that folder (or rename and update both the
+`Config.xcconfig` exclusion and the `Bundle.main.url(forResource:)` lookup).
 
 ## Customizing
 

@@ -148,10 +148,17 @@ struct WidgetGalleryView: View {
     private func chrome<V: View>(
         width: CGFloat, height: CGFloat, shadow: Bool = false, @ViewBuilder _ content: () -> V
     ) -> some View {
-        content()
+        let tile = content()
             .frame(width: width, height: height)
             .background(PaperTints.card1)
             .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-            .shadow(color: shadow ? .black.opacity(0.28) : .clear, radius: 18, x: 0, y: 10)
+        // Shadow is opt-in: the chroma-key (`.schedule`/`.today`) path takes no
+        // `.shadow` at all, so those cutouts key out exactly as before; only the
+        // `.home` mock over the opaque wallpaper gets a home-screen drop shadow.
+        if shadow {
+            tile.shadow(color: .black.opacity(0.28), radius: 18, x: 0, y: 10)
+        } else {
+            tile
+        }
     }
 }
