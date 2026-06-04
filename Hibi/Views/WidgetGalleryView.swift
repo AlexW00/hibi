@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import WidgetKit
 
 /// Screenshot-only screen that renders the home-screen widgets *inside* the app
@@ -37,6 +38,17 @@ struct WidgetGalleryView: View {
         )
     }
 
+    /// Medium Events widget for the Home Screen mock: a clean three-event list
+    /// (no reminders), so the tile reads as "the events widget, 3 events".
+    private var homeMediumEntry: EventsEntry {
+        EventsEntry(
+            date: Date(),
+            day: SampleData.todayDay, month: SampleData.todayMonth, year: SampleData.todayYear,
+            events: DemoFixtures.widgetEvents(limit: 3),
+            reminders: []
+        )
+    }
+
     private var todayEntry: TodaysPageEntry {
         TodaysPageEntry(
             date: Date(),
@@ -52,13 +64,25 @@ struct WidgetGalleryView: View {
     /// the widgets' pastel mint/sea tints, so keying won't eat the content.
     private static let chromaGreen = Color(.sRGB, red: 0, green: 1, blue: 0)
 
+    /// The iOS 26 wallpaper backing the Home Screen mock (`.home`). Loaded from a
+    /// loose bundle resource that is excluded from Release builds (see
+    /// `Config.xcconfig` / `docs/screenshots.md`), so `nil` outside Debug — the
+    /// mock then falls back to a plain backdrop rather than crashing.
+    private static let wallpaper: Image? = {
+        guard
+            let url = Bundle.main.url(forResource: "ScreenshotWallpaper", withExtension: "jpg"),
+            let ui = UIImage(contentsOfFile: url.path)
+        else { return nil }
+        return Image(uiImage: ui)
+    }()
+
     var body: some View {
         ZStack {
-            Self.chromaGreen.ignoresSafeArea()
+            background
 
-            VStack(spacing: 26) {
-                switch kind {
-                case .schedule:
+            switch kind {
+            case .schedule:
+                VStack(spacing: 26) {
                     chrome(width: 364, height: 170) {
                         EventsWidgetView(entry: scheduleMediumEntry, familyOverride: .systemMedium)
                     }
@@ -69,7 +93,9 @@ struct WidgetGalleryView: View {
                             fillsTallContainer: true
                         )
                     }
-                case .today:
+                }
+            case .today:
+                VStack(spacing: 26) {
                     chrome(width: 170, height: 170) {
                         TodaysPageWidgetView(entry: todayEntry, familyOverride: .systemSmall)
                     }
@@ -77,21 +103,55 @@ struct WidgetGalleryView: View {
                         TodaysPageWidgetView(entry: todayEntry, familyOverride: .systemLarge)
                     }
                 }
+            case .home:
+                // Home Screen mock: big day widget (large Today's Page) above the
+                // medium Events widget, on the blurred wallpaper — with real drop
+                // shadows, since over an opaque wallpaper there's no green to key.
+                VStack(spacing: 28) {
+                    chrome(width: 364, height: 382, shadow: true) {
+                        TodaysPageWidgetView(entry: todayEntry, familyOverride: .systemLarge)
+                    }
+                    chrome(width: 364, height: 170, shadow: true) {
+                        EventsWidgetView(entry: homeMediumEntry, familyOverride: .systemMedium)
+                    }
+                }
             }
         }
     }
 
-    /// Wraps a widget view in its real-size shell: paper background, rounded
-    /// widget corner, and a soft drop shadow so it reads as a home-screen tile.
+    /// Chroma-key green for `.schedule`/`.today` (keyed out later); the blurred
+    /// iOS 26 wallpaper for the `.home` mock.
+    @ViewBuilder
+    private var background: some View {
+        switch kind {
+        case .schedule, .today:
+            Self.chromaGreen.ignoresSafeArea()
+        case .home:
+            // A black base backs the slight blur's softened edges (and is the
+            // whole backdrop in Release, where the wallpaper resource is absent).
+            Color.black.ignoresSafeArea()
+            if let wallpaper = Self.wallpaper {
+                wallpaper
+                    .resizable()
+                    .scaledToFill()
+                    .blur(radius: 14)
+                    .scaleEffect(1.08) // hide the blur's translucent edge bleed
+                    .ignoresSafeArea()
+            }
+        }
+    }
+
+    /// Wraps a widget view in its real-size shell: paper background and rounded
+    /// widget corner. `shadow` adds a soft home-screen drop shadow — opt-in,
+    /// because over the chroma-key green it would leave a gray halo when keyed.
     @ViewBuilder
     private func chrome<V: View>(
-        width: CGFloat, height: CGFloat, @ViewBuilder _ content: () -> V
+        width: CGFloat, height: CGFloat, shadow: Bool = false, @ViewBuilder _ content: () -> V
     ) -> some View {
         content()
             .frame(width: width, height: height)
             .background(PaperTints.card1)
             .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-            // No drop shadow: a soft shadow over the chroma-key green would
-            // leave a gray halo when the green is keyed out.
+            .shadow(color: shadow ? .black.opacity(0.28) : .clear, radius: 18, x: 0, y: 10)
     }
 }

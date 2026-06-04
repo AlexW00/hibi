@@ -3,3 +3,11 @@
 // Xcode will simply prompt you to pick a signing team.
 
 #include? "Local.xcconfig"
+
+// Screenshot-only assets: the iOS 26 wallpaper used by WidgetGalleryView's
+// in-app Home Screen mock (-uiTestScene widgetsHome) is bundled in Debug builds
+// (the HibiScreenshots scheme builds Debug) but excluded from Release / App
+// Store builds — it's only needed for generating marketing screenshots.
+// EXCLUDED_SOURCE_FILE_NAMES is the only per-configuration membership lever for
+// the synchronized Hibi/ folder group. See docs/screenshots.md.
+EXCLUDED_SOURCE_FILE_NAMES[config=Release] = ScreenshotWallpaper.jpg

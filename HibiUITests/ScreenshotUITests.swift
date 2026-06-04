@@ -66,6 +66,12 @@ final class ScreenshotUITests: XCTestCase {
         // 7 — Today's Page widget (small + large), rendered in-app.
         relaunch(app, args: baseArgs + ["-uiTestScene", "widgetsToday"])
         snapshot("07-Widget-Today")
+
+        // 8 — Home Screen mock: big day widget over the medium Events widget on
+        // the blurred iOS 26 wallpaper. A finished, directly-uploadable shot (not
+        // a green-screen cutout) — see docs/screenshots.md.
+        relaunch(app, args: baseArgs + ["-uiTestScene", "widgetsHome"])
+        snapshot("08-Widget-Home")
     }
 
     @MainActor

@@ -21,6 +21,7 @@ enum DemoEnvironment {
         case dayCollapsed    // Day view, schedule expanded
         case widgetsSchedule // in-app gallery: Schedule widget
         case widgetsToday    // in-app gallery: Today's Page widget
+        case widgetsHome     // in-app gallery: Home Screen mock over wallpaper
     }
 
     static let scene: Scene? = {
@@ -37,7 +38,7 @@ enum DemoEnvironment {
     /// Seeds the Day view collapsed (schedule expanded).
     static var dayCollapsedScreenshot: Bool { scene == .dayCollapsed }
 
-    enum WidgetGallery { case schedule, today }
+    enum WidgetGallery { case schedule, today, home }
 
     /// Which widget the in-app gallery should render, if any. When set, `HibiApp`
     /// shows `WidgetGalleryView` instead of `ContentView`.
@@ -45,6 +46,7 @@ enum DemoEnvironment {
         switch scene {
         case .widgetsSchedule: return .schedule
         case .widgetsToday:    return .today
+        case .widgetsHome:     return .home
         default:               return nil
         }
     }

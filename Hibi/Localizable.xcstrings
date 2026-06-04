@@ -512,7 +512,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aufgeräumtere Tagesansicht"
+            "value" : "Mehr Ordnung in der Tagesansicht"
           }
         },
         "en" : {
@@ -1759,7 +1759,7 @@
         "ms" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Menunggu setem anda"
+            "value" : "Menunggu cop anda"
           }
         },
         "pt-BR" : {
@@ -5521,7 +5521,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hibi war schon immer kostenlos. Mit Hibi Plus kannst du es jetzt unterstützen. Als Dankeschön erhältst du Widgets, App-Symbole und deinen eigenen, persönlichen Stempel!"
+            "value" : "Hibi war schon immer kostenlos. Mit Hibi Plus kannst du es jetzt unterstützen. Als Dankeschön erhältst du Widgets, App-Symbole und deinen eigenen, persönlichen Hanko-Stempel!"
           }
         },
         "en" : {
@@ -5533,13 +5533,13 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hibi siempre ha sido gratis. Ahora puedes apoyarlo con Hibi Plus. Como agradecimiento, obtienes widgets, iconos de app y tu propio sello personal."
+            "value" : "Hibi siempre ha sido gratis. Ahora puedes apoyarlo con Hibi Plus. Como agradecimiento, obtienes widgets, iconos de app y tu propio sello Hanko."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hibi è sempre stato gratuito. Ora puoi sostenerlo con Hibi Plus. Come ringraziamento, ottieni widget, icone app e ricevi il tuo timbro personale!"
+            "value" : "Hibi è sempre stato gratuito. Ora puoi sostenerlo con Hibi Plus. Come ringraziamento, ottieni widget, icone app e ricevi il tuo timbro Hanko!"
           }
         },
         "ja" : {
@@ -5551,19 +5551,19 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hibi는 언제나 무료였습니다. 이제 Hibi Plus로 응원하실 수 있습니다. 감사의 뜻으로 위젯과 앱 아이콘, 그리고 나만의 스탬프를 드립니다!"
+            "value" : "Hibi는 언제나 무료였습니다. 이제 Hibi Plus로 응원하실 수 있습니다. 감사의 뜻으로 위젯과 앱 아이콘, 그리고 나만의 한코 도장을 드립니다!"
           }
         },
         "ms" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hibi sentiasa percuma. Kini anda boleh menyokongnya dengan Hibi Plus. Sebagai tanda terima kasih, anda mendapat widget, ikon app, dan menerima setem peribadi anda sendiri!"
+            "value" : "Hibi sentiasa percuma. Kini anda boleh menyokongnya dengan Hibi Plus. Sebagai tanda terima kasih, anda mendapat widget, ikon app, dan menerima cop Hanko peribadi anda sendiri!"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O Hibi sempre foi gratuito. Agora você pode apoiá-lo com o Hibi Plus. Como agradecimento, você ganha widgets, ícones do app e recebe seu próprio carimbo pessoal!"
+            "value" : "O Hibi sempre foi gratuito. Agora você pode apoiá-lo com o Hibi Plus. Como agradecimento, você ganha widgets, ícones do app e recebe seu próprio carimbo Hanko!"
           }
         },
         "zh-Hans-CN" : {
@@ -8433,7 +8433,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Papel que inclina"
+            "value" : "Papel que se inclina"
           }
         },
         "zh-Hans-CN" : {
@@ -8713,7 +8713,7 @@
         "ms" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Memperibadikan setem anda"
+            "value" : "Memperibadikan cop anda"
           }
         },
         "pt-BR" : {
@@ -8785,7 +8785,7 @@
         "ms" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Memperibadikan setem anda…"
+            "value" : "Memperibadikan cop anda…"
           }
         },
         "pt-BR" : {
@@ -9499,7 +9499,7 @@
         "ms" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Beli Hibi Plus untuk mendapatkan setem peribadi anda."
+            "value" : "Beli Hibi Plus untuk mendapatkan cop peribadi anda."
           }
         },
         "pt-BR" : {
@@ -14026,7 +14026,7 @@
         "ms" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "setem anda"
+            "value" : "cop anda"
           }
         },
         "pt-BR" : {
