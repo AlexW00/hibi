@@ -706,9 +706,12 @@ struct HibiPlusView: View {
     private let expandOnAppear: Bool
     private var expanded: Bool { collapseProgress < 0.5 }
 
-    init(collapseProgress: Binding<CGFloat>, expandPlus: Bool = false) {
+    init(collapseProgress: Binding<CGFloat>, expandPlus: Bool = false, isPurchased: Bool) {
         _collapseProgress = collapseProgress
-        _frontIndex = State(initialValue: expandPlus ? 1 : 0)
+        // Default the front card by purchase state: non-purchasers see the Hibi
+        // Plus pitch (feature card), purchasers see their earned stamp. Avoids
+        // the confusing empty "awaiting your stamp" slot on first open.
+        _frontIndex = State(initialValue: isPurchased ? 0 : 1)
         expandOnAppear = expandPlus
     }
     private var chromeFade: Double {

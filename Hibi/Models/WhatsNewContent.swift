@@ -6,9 +6,16 @@ import UIKit
 ///
 /// `version` must match `CFBundleShortVersionString` so Notelet's `.current`
 /// presentation records the changelog as seen. We currently ship
-/// `MARKETING_VERSION = 1.10`.
+/// `MARKETING_VERSION = 2.0`.
 enum WhatsNewContent {
     static let version = "2.0"
+
+    /// Looks up a bundled `.mp4` used for media slides. Lives in
+    /// `Hibi/Resources/` so the file-system-synchronized group bundles it.
+    /// Returns `nil` (slide skipped) rather than crashing if the clip is missing.
+    private static func videoURL(_ name: String) -> URL? {
+        Bundle.main.url(forResource: name, withExtension: "mp4")
+    }
 
     /// Single page, dark "Continue" button to match the app's monochrome chrome.
     static var configuration: NoteletConfiguration {
@@ -45,18 +52,63 @@ enum WhatsNewContent {
     }
 
     static var latest: NoteletVersionNotes {
-        notes(version, [
+        var items: [NoteletVersionNoteItem] = []
+
+        // Slide 1 — Widgets
+        if let url = videoURL("widgets") {
+            items.append(.media(
+                kind: .video,
+                url: url,
+                title: "Widgets, finally",
+                description: "Hibi now has iOS widgets: put your events and reminders right on your Home Screen."
+            ))
+        }
+
+        // Slide 2 — App Icons
+        if let url = videoURL("icons") {
+            items.append(.media(
+                kind: .video,
+                url: url,
+                title: "App Icons",
+                description: "Eight fresh app icons to match your Home Screen: from porcelain to pixel sun."
+            ))
+        }
+
+        // Slide 3 — Support Hibi
+        if let url = videoURL("stamp") {
+            items.append(.media(
+                kind: .video,
+                url: url,
+                title: "Support Hibi",
+                description: "Hibi has always been free. With Hibi Plus you can now support it. As a thank-you, you get widgets, app icons and receive your own personal Hanko stamp!"
+            ))
+        }
+
+        // Slide 4 — More improvements (free for everyone)
+        items.append(.list(title: "Other changes", rows: [
             .init(
-                symbolSystemName: "rectangle.expand.vertical",
-                title: "Expandable schedule",
-                description: "Pull the Schedule handle down to collapse the day's paper stack and see more of your events at once."
+                symbolSystemName: "move.3d",
+                title: "Paper that tilts",
+                description: "Tilt your phone and the paper stack leans with you."
             ),
             .init(
-                symbolSystemName: "calendar.badge.clock",
-                title: "Updates at midnight",
-                description: "If you leave the app open overnight, the highlighted day now advances to the new day at midnight."
+                symbolSystemName: "calendar.day.timeline.left",
+                title: "New event design",
+                description: "Events have a cleaner, rounded shape, and back-to-back ones flow together."
             ),
-        ])
+            .init(
+                symbolSystemName: "sparkles",
+                title: "A tidier Day view",
+                description: "Cleaned up the Day view so your schedule has more room to breathe."
+            ),
+            .init(
+                symbolSystemName: "arrow.left.arrow.right",
+                title: "Smoother switching",
+                description: "Moving between Month, Week, and Day has fewer jumps."
+            ),
+        ]))
+
+        return NoteletVersionNotes(version: version, items: items)
     }
 
     static var v1_9: NoteletVersionNotes {

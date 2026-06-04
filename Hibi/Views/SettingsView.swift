@@ -12,9 +12,11 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(EventStore.self) private var eventStore
     @Environment(WeatherStore.self) private var weatherStore
+    @Environment(PlusStore.self) private var plusStore
     @State private var whatsNewVersion: NoteletPresentedVersion?
     @State private var settingsDestination: SettingsDestination?
     @State private var collapseProgress: CGFloat
+    @AppStorage("settingsTipSeen", store: AppGroup.defaults) private var settingsTipSeen: Bool = false
 
     init(onReopenPermissions: @escaping () -> Void, expandPlus: Bool = false) {
         self.onReopenPermissions = onReopenPermissions
@@ -44,7 +46,7 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HibiPlusView(collapseProgress: $collapseProgress, expandPlus: expandPlus)
+            HibiPlusView(collapseProgress: $collapseProgress, expandPlus: expandPlus, isPurchased: plusStore.isPlus)
                 .background(Color(.systemGroupedBackground))
                 .zIndex(1)
 
@@ -234,6 +236,17 @@ struct SettingsView: View {
 
                 settingsDivider
                 PlusDebugRow()
+
+                settingsDivider
+                Toggle(isOn: Binding(
+                    get: { !settingsTipSeen },
+                    set: { settingsTipSeen = !$0 }
+                )) {
+                    Label("Show Settings badge", systemImage: "circlebadge.fill")
+                }
+                .tint(.black)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
             }
             #endif
         }
@@ -278,7 +291,13 @@ struct SettingsView: View {
     }
 
     private var settingsDivider: some View {
-        Divider().padding(.leading, 16)
+        // Explicit hairline rather than `Divider()`: inside this custom VStack
+        // (rows that don't all force full width) a bare Divider can collapse to
+        // zero length and vanish — e.g. between the About-section link rows.
+        Rectangle()
+            .fill(Color(.separator))
+            .frame(height: 0.5)
+            .padding(.leading, 16)
     }
 
     private func settingsNavRow(

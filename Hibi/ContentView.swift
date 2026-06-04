@@ -49,6 +49,9 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearanceRaw: String = SettingsView.Appearance.system.rawValue
     @AppStorage("useSimpleFont", store: AppGroup.defaults) private var useSimpleFont: Bool = false
+    /// One-time discovery nudge: a red dot on the Settings button until the user
+    /// opens Settings once (where Hibi Plus, icons, and the stamp live).
+    @AppStorage("settingsTipSeen", store: AppGroup.defaults) private var settingsTipSeen: Bool = false
 
     private var selectionBinding: Binding<CalendarTab> {
         Binding(
@@ -267,6 +270,15 @@ struct ContentView: View {
                         showSettings = true
                     } label: {
                         Image(systemName: "gearshape")
+                            .overlay(alignment: .topTrailing) {
+                                if !settingsTipSeen {
+                                    Circle()
+                                        .fill(.red)
+                                        .frame(width: 7, height: 7)
+                                        .offset(x: 4, y: -3)
+                                        .accessibilityHidden(true)
+                                }
+                            }
                     }
                 }
                 ToolbarItem(placement: .principal) {
@@ -297,6 +309,7 @@ struct ContentView: View {
             // Settings is a pushed screen now, so there's no sheet onDismiss to
             // chain on. When it pops with the latch set (user tapped "Review
             // permissions"), present the onboarding sheet over the root.
+            if isShown { settingsTipSeen = true }
             if !isShown {
                 expandPlusOnSettings = false
                 if reopenOnboardingAfterSettings {

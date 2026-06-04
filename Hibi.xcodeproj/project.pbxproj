@@ -137,8 +137,6 @@
 		};
 		4B2000012FC2000000F49AFD /* HibiTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = HibiTests;
 			sourceTree = "<group>";
 		};

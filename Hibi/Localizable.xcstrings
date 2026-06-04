@@ -505,6 +505,78 @@
         }
       }
     },
+    "A tidier Day view" : {
+      "comment" : "What's New 2.0 — Day view cleanup row title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufgeräumtere Tagesansicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A tidier Day view"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una vista de Día más ordenada"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una vista Giorno più ordinata"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すっきりした日表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "더 깔끔해진 일 보기"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paparan Hari yang lebih kemas"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma visualização de Dia mais organizada"
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更整洁的单日视图"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更整潔的單日檢視"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更整潔的單日檢視"
+          }
+        }
+      }
+    },
     "About" : {
       "comment" : "Settings section header for app info: more apps from the developer and the Apple Weather attribution.",
       "extractionState" : "manual",
@@ -978,6 +1050,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ikon app"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ícones do app"
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App 图标"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App 圖示"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App 圖示"
+          }
+        }
+      }
+    },
+    "App Icons" : {
+      "comment" : "What's New 2.0 — app icons slide title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App-Symbole"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Icons"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iconos de app"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Icone app"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリアイコン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱 아이콘"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ikon App"
           }
         },
         "pt-BR" : {
@@ -2357,6 +2501,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "選擇攝氏或華氏、12 小時或 24 小時制，或交給系統決定。"
+          }
+        }
+      }
+    },
+    "Cleaned up the Day view so your schedule has more room to breathe." : {
+      "comment" : "What's New 2.0 — Day view cleanup row description.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Tagesansicht wurde aufgeräumt, damit dein Tagesplan mehr Luft zum Atmen hat."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleaned up the Day view so your schedule has more room to breathe."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La vista de Día se ha simplificado para que tu agenda tenga más espacio para respirar."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La vista Giorno è stata semplificata per dare più spazio alla tua agenda."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日表示を整理して、スケジュールにゆとりが生まれました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일 보기를 정리해 일정에 여유 공간이 생겼습니다."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paparan Hari telah dikemaskan supaya jadual anda mempunyai lebih ruang."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A visualização de Dia foi simplificada para que sua agenda tenha mais espaço para respirar."
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "整理了单日视图，让你的日程更有呼吸空间。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "整理了單日檢視，讓你的行程更有呼吸空間。"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "整理了單日檢視，讓你的行程更有呼吸空間。"
           }
         }
       }
@@ -3862,6 +4078,78 @@
         }
       }
     },
+    "Eight fresh app icons to match your Home Screen: from porcelain to pixel sun." : {
+      "comment" : "What's New 2.0 — app icons slide description.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acht frische App-Symbole für deinen Home-Bildschirm: von Porzellan bis Pixelsonne."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eight fresh app icons to match your Home Screen: from porcelain to pixel sun."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocho nuevos iconos de app para tu pantalla de inicio: de la porcelana al sol de píxeles."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otto nuove icone app per la tua schermata Home: dalla porcellana al sole di pixel."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホーム画面に映える、8種類の新しいアプリアイコン。陶磁器からピクセルの太陽まで。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "홈 화면에 어울리는 새로운 앱 아이콘 8종. 도자기부터 픽셀 태양까지."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lapan ikon app baharu untuk skrin utama anda: daripada porselin hingga matahari piksel."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oito novos ícones de app para combinar com sua tela inicial: da porcelana ao sol de pixels."
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "八款全新 App 图标，搭配你的主屏幕：从瓷器到像素太阳。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "八款全新 App 圖示，搭配你的主畫面：從瓷器到像素太陽。"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "八款全新 App 圖示，搭配你的主畫面：從瓷器到像素太陽。"
+          }
+        }
+      }
+    },
     "Enable calendar access in Settings to see your events." : {
       "comment" : "Prompt body when Calendar access is denied / restricted.",
       "extractionState" : "manual",
@@ -4074,6 +4362,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "事件同步修復"
+          }
+        }
+      }
+    },
+    "Events have a cleaner, rounded shape, and back-to-back ones flow together." : {
+      "comment" : "What's New 2.0 — event pill shape row description.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Termine haben jetzt eine klarere, abgerundete Form, und aufeinanderfolgende verschmelzen miteinander."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Events have a cleaner, rounded shape, and back-to-back ones flow together."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los eventos tienen una forma más limpia y redondeada, y los consecutivos se unen entre sí."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gli eventi hanno una forma più pulita e arrotondata, e quelli consecutivi si uniscono."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予定はすっきりとした丸みのある形になり、連続する予定はひとつにつながって見えます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일정이 더 깔끔한 둥근 모양으로 바뀌고, 연이은 일정은 하나로 이어집니다."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acara kini berbentuk lebih kemas dan bulat, dan acara berturut-turut mengalir bersama."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os eventos têm um formato mais limpo e arredondado, e os consecutivos se unem."
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活动采用更简洁的圆角外观，连续的活动会自然连成一片。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活動採用更俐落的圓角外觀，連續的活動會自然連成一片。"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活動採用更俐落的圓角外觀，連續的活動會自然連成一片。"
           }
         }
       }
@@ -5150,6 +5510,150 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "標題與提示現在改用大小寫混排，不再全大寫；日卡片也全程符合 App 的編輯字體風格。"
+          }
+        }
+      }
+    },
+    "Hibi has always been free. With Hibi Plus you can now support it. As a thank-you, you get widgets, app icons and receive your own personal Hanko stamp!" : {
+      "comment" : "What's New 2.0 — support / Hibi Plus slide description.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi war schon immer kostenlos. Mit Hibi Plus kannst du es jetzt unterstützen. Als Dankeschön erhältst du Widgets, App-Symbole und deinen eigenen, persönlichen Stempel!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi has always been free. With Hibi Plus you can now support it. As a thank-you, you get widgets, app icons and receive your own personal Hanko stamp!"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi siempre ha sido gratis. Ahora puedes apoyarlo con Hibi Plus. Como agradecimiento, obtienes widgets, iconos de app y tu propio sello personal."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi è sempre stato gratuito. Ora puoi sostenerlo con Hibi Plus. Come ringraziamento, ottieni widget, icone app e ricevi il tuo timbro personale!"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibiはずっと無料です。Hibi Plusで、いま応援できます。お礼として、ウィジェットやアプリアイコン、そしてあなただけのはんこを手に入れられます！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi는 언제나 무료였습니다. 이제 Hibi Plus로 응원하실 수 있습니다. 감사의 뜻으로 위젯과 앱 아이콘, 그리고 나만의 스탬프를 드립니다!"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi sentiasa percuma. Kini anda boleh menyokongnya dengan Hibi Plus. Sebagai tanda terima kasih, anda mendapat widget, ikon app, dan menerima setem peribadi anda sendiri!"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Hibi sempre foi gratuito. Agora você pode apoiá-lo com o Hibi Plus. Como agradecimento, você ganha widgets, ícones do app e recebe seu próprio carimbo pessoal!"
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 一直以来都是免费的。现在你可以通过 Hibi Plus 支持它。作为答谢，你将获得小组件、App 图标，以及专属于你的个人印章！"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 一直以來都是免費的。現在你可以透過 Hibi Plus 支持它。作為謝禮，你將獲得小工具、App 圖示，以及專屬於你的個人印章！"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 一直以來都是免費的。現在你可以透過 Hibi Plus 支持它。作為謝禮，你將獲得小工具、App 圖示，以及專屬於你的個人印章！"
+          }
+        }
+      }
+    },
+    "Hibi now has iOS widgets: put your events and reminders right on your Home Screen." : {
+      "comment" : "What's New 2.0 — widgets slide description.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi hat jetzt iOS-Widgets: deine Termine und Erinnerungen direkt auf dem Home-Bildschirm."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi now has iOS widgets: put your events and reminders right on your Home Screen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi ahora tiene widgets de iOS: lleva tus eventos y recordatorios directamente a tu pantalla de inicio."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi ora ha i widget iOS: porta i tuoi eventi e promemoria direttamente sulla schermata Home."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HibiにiOSウィジェットが登場。予定とリマインダーをホーム画面にそのまま表示できます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이제 Hibi에 iOS 위젯이 있습니다. 일정과 미리 알림을 홈 화면에 바로 띄워 보세요."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi kini mempunyai widget iOS: letak acara dan peringatan anda terus di skrin utama."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Hibi agora tem widgets do iOS: coloque seus eventos e lembretes direto na tela inicial."
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 现在支持 iOS 小组件：把你的活动和提醒事项直接放在主屏幕上。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 現在支援 iOS 小工具：把你的活動和提醒事項直接放在主畫面上。"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 現在支援 iOS 小工具：把你的活動和提醒事項直接放在主畫面上。"
           }
         }
       }
@@ -6731,6 +7235,78 @@
         }
       }
     },
+    "Moving between Month, Week, and Day has fewer jumps." : {
+      "comment" : "What's New 2.0 — tab switching row description.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Wechsel zwischen Monat, Woche und Tag springt jetzt weniger."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moving between Month, Week, and Day has fewer jumps."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambiar entre Mes, Semana y Día tiene menos saltos."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il passaggio tra Mese, Settimana e Giorno ha meno scatti."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月・週・日の切り替え時のガタつきが減りました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "월, 주, 일 사이를 전환할 때 흔들림이 줄었습니다."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bertukar antara Bulan, Minggu dan Hari kini kurang melonjak."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alternar entre Mês, Semana e Dia tem menos saltos."
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在月、周、日之间切换时的跳动更少了。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在月、週、日之間切換時的跳動更少了。"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在月、週、日之間切換時的跳動更少了。"
+          }
+        }
+      }
+    },
     "Multi-day events" : {
       "comment" : "What's New 1.1 — multi-day events feature title.",
       "extractionState" : "manual",
@@ -6943,6 +7519,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新的返回動畫"
+          }
+        }
+      }
+    },
+    "New event design" : {
+      "comment" : "What's New 2.0 — event pill shape row title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neues Termin-Design"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New event design"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo diseño de eventos"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuovo design degli eventi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予定の新しいデザイン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새로운 일정 디자인"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reka bentuk acara baharu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo design de eventos"
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全新活动样式"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全新活動樣式"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全新活動樣式"
           }
         }
       }
@@ -7592,6 +8240,78 @@
         }
       }
     },
+    "Other changes" : {
+      "comment" : "What's New 2.0 — title of the misc improvements list slide.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weitere Änderungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other changes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otros cambios"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Altre modifiche"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "その他の変更"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기타 변경 사항"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perubahan lain"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Outras mudanças"
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "其他更改"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "其他變更"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "其他變更"
+          }
+        }
+      }
+    },
     "Overdue" : {
       "comment" : "Badge shown on a reminder that is past its due date.",
       "extractionState" : "manual",
@@ -7660,6 +8380,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已逾期"
+          }
+        }
+      }
+    },
+    "Paper that tilts" : {
+      "comment" : "What's New 2.0 — gyro parallax row title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Papier, das sich neigt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paper that tilts"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Papel que se inclina"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carta che si inclina"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "傾く紙"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기울어지는 종이"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kertas yang condong"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Papel que inclina"
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会倾斜的纸张"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "會傾斜的紙張"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "會傾斜的紙張"
           }
         }
       }
@@ -10606,6 +11398,78 @@
         }
       }
     },
+    "Smoother switching" : {
+      "comment" : "What's New 2.0 — tab switching row title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flüssigeres Wechseln"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smoother switching"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambios más fluidos"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passaggio più fluido"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "より滑らかな切り替え"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "더 부드러운 전환"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Penukaran lebih lancar"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Troca mais suave"
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更流畅的切换"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更流暢的切換"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更流暢的切換"
+          }
+        }
+      }
+    },
     "Suggest a Feature" : {
       "comment" : "Settings About row label: opens GitHub Discussions to suggest or request a new feature.",
       "extractionState" : "manual",
@@ -10674,6 +11538,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "建議新功能"
+          }
+        }
+      }
+    },
+    "Support Hibi" : {
+      "comment" : "What's New 2.0 — support / Hibi Plus slide title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi unterstützen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Support Hibi"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apoya a Hibi"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sostieni Hibi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibiをサポート"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hibi 응원하기"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sokong Hibi"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apoie o Hibi"
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支持 Hibi"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支持 Hibi"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支持 Hibi"
           }
         }
       }
@@ -11462,6 +12398,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "主題"
+          }
+        }
+      }
+    },
+    "Tilt your phone and the paper stack leans with you." : {
+      "comment" : "What's New 2.0 — gyro parallax row description.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neige dein Telefon und der Papierstapel kippt mit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tilt your phone and the paper stack leans with you."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inclina tu teléfono y la pila de papel se inclina contigo."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inclina il telefono e la pila di carta si inclina con te."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スマホを傾けると、紙の束も一緒に傾きます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "휴대폰을 기울이면 종이 더미도 함께 기울어집니다."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Condongkan telefon anda dan timbunan kertas turut condong bersama anda."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incline o telefone e a pilha de papel se inclina junto."
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "倾斜手机，纸叠也会跟着你一起倾斜。"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "傾斜手機，紙疊也會跟著你一起傾斜。"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "傾斜手機，紙疊也會跟著你一起傾斜。"
           }
         }
       }
@@ -12614,6 +13622,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "小工具"
+          }
+        }
+      }
+    },
+    "Widgets, finally" : {
+      "comment" : "What's New 2.0 — widgets slide title.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widgets, endlich"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widgets, finally"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widgets, por fin"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widget, finalmente"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ついに、ウィジェット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "위젯, 드디어"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widget, akhirnya"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widgets, enfim"
+          }
+        },
+        "zh-Hans-CN" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "小组件，终于来了"
+          }
+        },
+        "zh-Hant-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "小工具，終於來了"
+          }
+        },
+        "zh-Hant-TW" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "小工具，終於來了"
           }
         }
       }
