@@ -41,14 +41,16 @@ gesture handling that SwiftUI gives us free — and the tear-off animation, para
 schedule collapse are already healthy SwiftUI. Instead the page is a **ZStack of three
 independently rendered layers**, each using the cheapest technology that achieves its look:
 
-1. **Paper layer (bottom)** — procedural texture **baked once** to a mipmapped texture
-   (offscreen Metal render or compute pass at page resolution), per
-   (texture preset × color × ruling × size-bucket × light/dark appearance). Displayed as an
-   image fill; a *small live* layer effect samples a baked depth/normal map for the
-   tilt-reactive specular (same `MotionStore` input as the stamp). Rationale: Apple GPUs are
-   TBDR — per-fragment multi-octave noise every frame on a mostly-static background is wasted
-   battery; bake-once converts it to cheap texture sampling (this is also the research
-   report's core recommendation).
+1. **Paper layer (bottom)** — procedural texture **baked once** as color-independent
+   *fields* in a mipmapped multi-channel texture (grain/formation luminance field, ruling
+   mask, height/depth for specular), keyed by (texture preset × ruling × size-bucket) only.
+   Paper **color is not baked**: it's a dynamic tone (à la `PaperTints`) composited live with
+   the fields — so color changes are instant and never re-bake, and the same fields serve
+   light and dark appearance. A *small live* layer effect does the tint composite and samples
+   the depth channel for the tilt-reactive specular (same `MotionStore` input as the stamp).
+   Rationale: Apple GPUs are TBDR — per-fragment multi-octave noise every frame on a
+   mostly-static background is wasted battery; bake-once converts it to cheap texture
+   sampling (this is also the research report's core recommendation).
 2. **Drawing layer (middle)** — committed strokes rendered into a cached raster; the
    in-progress stroke drawn live on top; an ink layer effect (noise-perturbed edges,
    absorbency darkening) reads the *paper's* baked fields so ink and paper stay coupled.
@@ -102,11 +104,15 @@ exits edit mode via the same confirmation path.
 
 ## 3. Hard problems & how we'll handle them
 
-1. **Bake pipeline correctness across appearances.** Every texture/color must be designed
-   *twice* — the dark theme is intentionally near-black (`#242424` front card), where cream
-   textures and pastel paper colors behave completely differently. Bake per appearance and
-   review both from the first texture onward; treat "texture invisible or muddy in dark
-   mode" as a design blocker, not a bug to patch later.
+1. **Dark-mode application of textures.** Texture fields are appearance-neutral, but *how
+   they're applied* is not: on cream, texture reads as slight darkening; on the
+   intentionally near-black dark paper (`#242424` front card) darkening is invisible, so the
+   composite needs per-appearance polarity/amplitude (texture must *lighten* on dark paper),
+   tuned per preset — and amplitudes that are tasteful on cream are imperceptible or
+   banding-prone (OLED black crush) near black. Plus a design decision per preset: what does
+   e.g. "Kraft" *mean* on the high-contrast black paper (dark-brown paper vs. black with a
+   warm accent)? Cheap to implement (a small per-appearance parameter block per preset), but
+   review both appearances on-device from the first preset onward.
 2. **Aliasing of fine ruling/texture under resize.** Lines/grid/dots near pixel pitch will
    moiré, especially during the continuous compact-mode resize and on the small back cards.
    Mitigate with mipmapped bakes + band-limiting (fade ruling amplitude as on-screen pitch
@@ -183,11 +189,11 @@ edit → change → undo → save → persist → re-render — is real end-to-e
 
 ### Stage 2 — Paper rendering engine (Metal)
 The bake pipeline: offscreen render of the noise layer stack (per research report) into
-mipmapped textures keyed by preset/color/ruling/size-bucket/appearance, with async bake +
-caching; depth/normal map + tilt-specular layer effect; band-limited ruling; texture preset
-catalog (Smooth, Linen, Kraft, News, Vellum per mock); integration with the three-card
-stack, tear, and parallax; on-device perf/battery validation; dark-appearance variants of
-every preset.
+mipmapped multi-channel field textures keyed by preset/ruling/size-bucket, with async bake +
+caching; live tint composite (dynamic paper tone × fields, per-appearance polarity/amplitude
+block per preset); depth/normal channel + tilt-specular layer effect; band-limited ruling;
+texture preset catalog (Smooth, Linen, Kraft, News, Vellum per mock); integration with the
+three-card stack, tear, and parallax; on-device perf/battery validation in both appearances.
 *Risk focus: this is the new-tech stage — budget for shader iteration and a device test
 matrix; everything after it only consumes the pipeline.*
 
