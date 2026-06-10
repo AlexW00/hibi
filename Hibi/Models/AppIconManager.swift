@@ -127,11 +127,11 @@ final class AppIconManager {
                 unlock: .plus
             ),
             AppIconOption(
-                id: "kawaikosan",
-                displayName: "Kawaikosan",
-                subtitle: "Available for cute Hibi Plus users",
-                previewAssetName: "AppIconPreview-Kawaikosan",
-                alternateIconName: "Kawaikosan",
+                id: "heart",
+                displayName: "Heart",
+                subtitle: "Available for Hibi Plus users",
+                previewAssetName: "AppIconPreview-Heart",
+                alternateIconName: "Heart",
                 unlock: .plus
             ),
         ]

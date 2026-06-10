@@ -1295,6 +1295,7 @@
       }
     },
     "Available for cute Hibi Plus users" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -5514,6 +5515,9 @@
         }
       }
     },
+    "Heart" : {
+
+    },
     "Hibi has always been free. With Hibi Plus you can now support it. As a thank-you, you get widgets, app icons and receive your own personal Hanko stamp!" : {
       "comment" : "What's New 2.0 — support / Hibi Plus slide description.",
       "extractionState" : "manual",
@@ -6232,6 +6236,7 @@
       }
     },
     "Kawaikosan" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
