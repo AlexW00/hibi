@@ -18,6 +18,7 @@ enum AppGroup {
         static let snapshot = "widget.todaysPage.snapshot.v1"
         static let eventsSnapshot = "widget.events.snapshot.v2"
         static let didMigratePrefs = "didMigratePrefsToAppGroup_v1"
+        static let paperSnapshot = "widget.paper.snapshot.v1"
     }
 
     /// One-time migration: copy known preference keys from `.standard` into
