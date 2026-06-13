@@ -97,7 +97,7 @@ final class SyncedSettingsStore {
     // MARK: One-time seed-up of pre-existing local values
 
     func seedUpIfNeeded() {
-        guard appGroupDefaults?.bool(forKey: Self.seedFlagKey) != true else { return }
+        guard standardDefaults.bool(forKey: Self.seedFlagKey) != true else { return }
         for setting in Self.registry {
             guard let home = defaults(for: setting.home) else { continue }
             if kvStore.object(forKey: setting.key) == nil,
@@ -105,7 +105,7 @@ final class SyncedSettingsStore {
                 kvStore.set(local, forKey: setting.key)
             }
         }
-        appGroupDefaults?.set(true, forKey: Self.seedFlagKey)
+        standardDefaults.set(true, forKey: Self.seedFlagKey)
     }
 
     // MARK: Remote-change classification
@@ -120,7 +120,10 @@ final class SyncedSettingsStore {
 
     // MARK: Lifecycle / observers
 
+    private var started = false
     func start() {
+        guard !started else { return }
+        started = true
         let nc = NotificationCenter.default
 
         // Remote KVS changes → pull down (KVS wins), reload widgets / nudge EventStore.

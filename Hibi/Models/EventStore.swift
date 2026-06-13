@@ -23,6 +23,7 @@ final class EventStore {
     private var loadedMonths: Set<MonthKey> = []
     private var loadedReminderMonths: Set<MonthKey> = []
     @ObservationIgnored nonisolated(unsafe) private var observerToken: NSObjectProtocol?
+    @ObservationIgnored nonisolated(unsafe) private var hiddenSyncObserverToken: NSObjectProtocol?
 
     static let hiddenIDsDefaultsKey = "hiddenCalendarIDs"
     private static let demoModeDefaultsKey = "demoMode"
@@ -57,7 +58,7 @@ final class EventStore {
         if isDemoMode {
             applyDemoFixtures()
         }
-        NotificationCenter.default.addObserver(
+        hiddenSyncObserverToken = NotificationCenter.default.addObserver(
             forName: .hibiHiddenCalendarsDidSyncRemotely,
             object: nil,
             queue: .main
@@ -123,6 +124,9 @@ final class EventStore {
 
     deinit {
         if let token = observerToken {
+            NotificationCenter.default.removeObserver(token)
+        }
+        if let token = hiddenSyncObserverToken {
             NotificationCenter.default.removeObserver(token)
         }
     }
@@ -236,7 +240,7 @@ final class EventStore {
         } else {
             hiddenCalendarIDs.remove(id)
         }
-        UserDefaults.standard.set(Array(hiddenCalendarIDs), forKey: Self.hiddenIDsDefaultsKey)
+        UserDefaults.standard.set(Array(hiddenCalendarIDs).sorted(), forKey: Self.hiddenIDsDefaultsKey)
         reloadAll()
         reloadAllReminders()
     }
