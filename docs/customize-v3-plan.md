@@ -133,6 +133,32 @@ individual stamp there. Not placed via these editors.
 - **Camera path:** post-capture, the photo feeds the **same auto-extract sticker preview** as the
   gallery path — one merged flow.
 
+## Persistence & iCloud sync
+
+Customizations and settings **must survive uninstall/reinstall and sync across the user's
+devices** — they can't just live on one device. Hibi has no database today (state is in
+`@Observable` stores backed by `UserDefaults` + the App Group), so this is a **new sync
+layer**. Three data kinds map to three Apple stores:
+
+| Data kind | Store | Schema to deploy? |
+|---|---|---|
+| **Settings** (units, time format, appearance, hidden calendars) | `NSUbiquitousKeyValueStore` | ❌ None |
+| **Calendar customizations** (paper style, structural widgets, per-day ink/text/stickers) | **SwiftData + CloudKit** | ✅ Yes — and **additive-only forever** |
+| **Sticker library** (≤500 cut-outs + style payload) | Same SwiftData store; image via `.externalStorage` → CKAsset | ✅ Same container |
+
+Key consequences for design:
+- **No `@Attribute(.unique)`** under CloudKit → per-day records (keyed by date) and stickers
+  dedupe at the app layer, not via a uniqueness constraint.
+- **Every property optional/defaulted; relationships optional + inverse + not ordered** →
+  store an explicit `zIndex` for z-order (CloudKit relationships aren't ordered).
+- **Derived caches don't sync** — the sticker SDF composite / baked finishes are rebuilt on
+  device (same as `StampCompositor`); only the compressed cut-out + style payload sync.
+- **Operational gotcha:** the CloudKit schema must be **manually deployed to Production
+  before every release** (add to the release checklist) or data silently fails to sync.
+
+**→ Full plan, model sketch, model constraints, deployment workflow, entitlements, and open
+decisions: [customize-v3-sync.md](customize-v3-sync.md).**
+
 ## Future
 
 - Custom images as paper background.
