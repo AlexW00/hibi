@@ -193,6 +193,14 @@ and must be **generalized, not duplicated**:
 - Every animated shader needs a **Reduce Motion / Low Power** fallback to a fixed-angle static
   gradient (finishes never vanish, just stop moving).
 
+**Validated research basis for paper & ink shaders (read before the relevant craft stage):**
+- [`docs/paper-shaders-research.md`](../../paper-shaders-research.md) — paper-texture stack (Stages 3, 10). Authoritative for fBm formation/grain/tooth, the per-texture preset table (§L), fBm conventions (lacunarity≈2, gain≈0.5, 3–5 octaves, detune+rotate — §E), laid-line aliasing/band-limiting (§I), and contrast calibration (low single-digit % luminance, warm cream — §G).
+- [`docs/ink-shaders-research.md`](../../ink-shaders-research.md) — ink/mark stack over glyph SDFs (Stages 6 text, 7 draw, possibly 10). The 4 core ops (threshold-perturb, domain-warp, dilate/erode by absorbency, alpha/darkness mod), per-instrument presets, and the SDF "field-breaking" AA caveat.
+
+**Two cross-cutting mandates from that research (apply in every craft stage):**
+1. **BAKE, don't evaluate-per-frame.** Apple GPUs are TBDR; per-fragment multi-octave fBm every frame is the wrong default for a mostly-static calendar surface. Bake the noise to a **mipmapped offscreen texture** (per style / per zoom-bucket), disk/mem-cached exactly like `StampCompositor`, then sample cheaply; keep only small genuinely-dynamic terms (tilt specular) live. This is also what lets the **widget** (Stage 10, no live shaders) reuse the same baked surface.
+2. **Paper and ink stacks are LINKED — one shared paper-field set.** Build the paper field (formation, tooth/height, fiber-direction, absorbency, show-through) **once in Stage 3** as a shared, baked resource; ink stages **read** it (pencil/marker grain = glyph alpha × paper tooth; wet-ink feathering follows the paper fiber-direction field — the Aslannejad & Hassanizadeh "spider-leg" wicking). Do **not** re-derive paper noise inside the ink shaders.
+
 ### 1.7 Test strategy (high-value, low-complexity — no UI/E2E)
 
 Mirror the existing pattern: pure-logic unit tests on formatters / caches / seeds / state machines
@@ -322,9 +330,15 @@ sets texture / ruling / colour; the choice dresses **every** page and the widget
     (dots/grid) are day-pad concepts that don't obviously belong on a month grid; a global **tint**
     might reasonably extend to the app background. Default assumed here: **day pages only** (texture
     + ruling + tint), Month/Week unchanged. Resize this stage if that's wrong.
-- **Craft:** texture tilt (depthmap + slight specular), `MotionStore`-driven, generalizing the stamp
-  specular approach; reference `SWGrainGradient` for paper grain. The shader receives the
-  scheme-resolved tint (§1.4) and re-renders on appearance change. Reduce-Motion → static texture.
+- **Craft (per [`paper-shaders-research.md`](../../paper-shaders-research.md)):** **bake** the paper
+  field (warm base + formation fBm + per-texture grain/tooth) to a **mipmapped, disk/mem-cached texture**
+  (like `StampCompositor`) — the §1.6 "bake, don't evaluate-per-frame" mandate — and build it as the
+  **shared paper-field set** Stages 6/7/10 reuse (expose the tooth/height channel now; fiber-direction/
+  absorbency are additive in Stage 7). Map textures to the research preset table (§L); fBm conventions
+  per §E; contrast in the low single-digit % around warm cream (§G); band-limit/mipmap to avoid laid-line
+  moiré (§I). A small **tilt specular** term stays live (`MotionStore`, generalizing the stamp specular);
+  the shader receives the scheme-resolved tint (§1.4) and re-renders on appearance change.
+  Reduce-Motion / Low Power → tilt off (baked texture still shows).
 
 **Widget flow:** serialize the chosen texture/ruling/tint **tokens** into the App Group snapshot;
 `WidgetCenter` reload on commit. (How the widget *renders* the substrate — and resolves tokens for its
@@ -415,8 +429,12 @@ sync.
 
 **Scope:** style editor only (no keyboard in the tray) — Font · B/I/U · effect (none / background /
 outline) · colour = dynamic **"primary"** (no black+white pair) plus tints. Type-on-page interaction.
-Persist `TextObject` (string + `stylePayload` + transform + zIndex). **Craft:** noise shader to make
-the font read like real ink (generalize stamp ink-noise; Reduce-Motion fallback).
+Persist `TextObject` (string + `stylePayload` + transform + zIndex). **Craft (per
+[`ink-shaders-research.md`](../../ink-shaders-research.md)):** make the font read like real ink via
+the ink ops over the glyph SDF/mask — primarily SDF **threshold perturbation** + low-freq **pooling**/
+edge-distance darkening — **modulated by the active paper** and reusing the Stage 3 shared paper-field
+(don't re-derive paper noise). Mind the SDF "field-breaking" AA caveat (recompute the smoothing
+footprint). Reduce-Motion fallback.
 
 **Widget flow:** text objects are already in the day's `DayCustomization` → reach the App Group via
 Stage 5; widget rendering = Stage 10 (static, no ink-noise animation).
@@ -434,8 +452,12 @@ Stage 5; widget rendering = Stage 10 (static, no ink-noise animation).
 **Depends on:** Stage 5. (Parallelizable with Stage 6.)
 
 **Scope:** **one marker** (single type) with ink colours + **eraser** (rubber-topped-pencil object) +
-**size slider**. **Craft:** ink-simulation shader; **haptic feedback by paper type**; strokes past
-the compact core handled in-app. Reduce-Motion fallback.
+**size slider**. **Craft (per [`ink-shaders-research.md`](../../ink-shaders-research.md)):** the marker
+is the wet-ink preset — feathering (domain-warp along the paper **fiber-direction field** from Stage 3),
+bleed/dilation by **absorbency**, and pooling/edge-darkening — all modulated by the active paper and
+**reading the Stage 3 shared paper-field** (this is where fiber-direction/absorbency fields get added to
+that shared engine). **Haptic feedback by paper type**; strokes past the compact core handled in-app.
+Reduce-Motion fallback.
 
 > **Stage-level decision to make at brainstorming time:** ink capture/storage. Default lean — capture
 > strokes as Codable point arrays (`.externalStorage`) and render via the Metal ink shader, since
@@ -551,6 +573,13 @@ snapshot render per timeline entry), and a tight memory/time budget. So the rich
 - Likely answer: **A for the substrate + structural widgets** (cheap, token-driven, scheme-native) and
   consider **B only if** the daily sticker finishes prove too expensive to even statically render in
   the extension. Decide with a memory/perf check.
+- **Lever from [`paper-shaders-research.md`](../../paper-shaders-research.md) §H/§I:** the Stage-3 paper
+  texture is **already baked to a (mipmapped) texture**, and the bake is shader-light + motion-free —
+  exactly what the widget needs. So "A" for the substrate can **reuse the baked paper field** (sample
+  the same cached texture, or re-bake at widget size) rather than inventing a separate widget texture
+  path. This is a third, cheaper option the bake architecture unlocks: **A′ — widget samples the baked
+  paper surface** (tilt specular simply omitted). Resolve light/dark by baking/sampling per
+  `\.colorScheme`.
 
 **Scope:** implement the chosen render path in `TodaysPageWidget` / `SmallPaperView` / `LargePaperView`;
 ensure **light/dark token resolution in the widget process**; make `PaperSubstrate` (and any finish
