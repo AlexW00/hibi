@@ -43,7 +43,16 @@ enum CloudKitSchemaTool {
         // tracking, which an in-memory ("/dev/null") store can reject at loadPersistentStores.
         let storeURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("HibiCustomizationSchema.sqlite")
+        // Clear any leftover store from a prior run (its options/config may differ) so each
+        // bring-up starts clean. SQLite leaves -wal/-shm sidecars too.
+        for suffix in ["", "-wal", "-shm"] {
+            try? FileManager.default.removeItem(at: URL(fileURLWithPath: storeURL.path + suffix))
+        }
         let desc = NSPersistentStoreDescription(url: storeURL)
+        // REQUIRED for NSPersistentCloudKitContainer — without history tracking the CloudKit
+        // mirror never initializes and initializeCloudKitSchema() silently does nothing.
+        desc.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+        desc.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         desc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
             containerIdentifier: CustomizationContainer.cloudKitContainerID
         )

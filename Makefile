@@ -1,5 +1,9 @@
-# Override on the command line or via the environment: `make ck-check APPLE_TEAM_ID=ABCDE12345`
-APPLE_TEAM_ID ?= YOURTEAMID
+# Team ID is read from the gitignored Local.xcconfig (DEVELOPMENT_TEAM = …).
+# Override explicitly with: `make ck-export APPLE_TEAM_ID=ABCDE12345`
+APPLE_TEAM_ID ?= $(shell sed -n 's/^[[:space:]]*DEVELOPMENT_TEAM[[:space:]]*=[[:space:]]*//p' Local.xcconfig 2>/dev/null)
+ifeq ($(strip $(APPLE_TEAM_ID)),)
+APPLE_TEAM_ID := YOURTEAMID
+endif
 CONTAINER_ID := iCloud.com.weichart.hibi
 
 ck-export:
