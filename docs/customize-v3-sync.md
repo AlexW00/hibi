@@ -130,6 +130,13 @@ the saved alpha image *is* the result").
 
 This is the real homework and the #1 silent-failure trap. **Two recurring obligations.**
 
+> **The concrete workflow that removes ~90% of this risk** — schema-as-code + a CI release
+> gate, the additive-only migration hierarchy, `initializeCloudKitSchema()` mechanics, and
+> CloudKit Console monitoring — is in
+> [customize-v3-cloudkit-schema-ops.md](customize-v3-cloudkit-schema-ops.md). Read it before
+> implementing Stage 2 or touching the release checklist. The sections below state the trap;
+> that doc states the fix.
+
 ### 4a. Deploy Development → Production before every release
 
 - Development env auto-creates schema just-in-time as you write data in Xcode →
