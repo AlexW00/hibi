@@ -49,6 +49,10 @@
 	<string>Hibi uses your location to show local weather and sunrise/sunset on each day.</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
 	<string>Hibi would like to access your Reminders so it can display them alongside your events.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

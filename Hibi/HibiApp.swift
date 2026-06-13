@@ -1,8 +1,11 @@
 import Notelet
+import SwiftData
 import SwiftUI
 
 @main
 struct HibiApp: App {
+    let customizationContainer: ModelContainer
+
     init() {
         AppFont.registerFonts()
         AppGroup.migratePrefsIfNeeded()
@@ -13,15 +16,24 @@ struct HibiApp: App {
         if DemoEnvironment.widgetGallery != nil {
             PlusEntitlementStore().setIsPlus(true)
         }
+        do {
+            customizationContainer = try CustomizationContainer.make()
+        } catch {
+            fatalError("Failed to create customization container: \(error)")
+        }
     }
 
     var body: some Scene {
         WindowGroup {
-            if let gallery = DemoEnvironment.widgetGallery {
-                WidgetGalleryView(kind: gallery)
-            } else {
-                ContentView()
+            Group {
+                if let gallery = DemoEnvironment.widgetGallery {
+                    WidgetGalleryView(kind: gallery)
+                } else {
+                    ContentView()
+                }
             }
+            .modelContainer(customizationContainer)
+            .environment(CustomizationStore(context: customizationContainer.mainContext))
         }
     }
 
