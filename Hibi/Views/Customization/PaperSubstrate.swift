@@ -1,5 +1,15 @@
 import SwiftUI
 
+/// Pure gate for the live tilt-specular `.layerEffect`.
+///
+/// Reduce Motion or Low Power Mode → `false`: the baked paper texture still shows;
+/// only the per-frame moving highlight is omitted (we drop the `.layerEffect`
+/// entirely rather than passing tilt `(0,0)`, since the paper shader is *only* the
+/// highlight — a `(0,0)` pass would keep running it for a static centred glint).
+func paperTiltEnabled(reduceMotion: Bool, lowPower: Bool) -> Bool {
+    !(reduceMotion || lowPower)
+}
+
 /// The reusable paper-card primitive.
 ///
 /// Layers (bottom to top):
@@ -32,9 +42,32 @@ struct PaperSubstrate: View {
     var chromeAmount: Double = 1
     var cornerRadius: CGFloat = 18
 
+    // MARK: - Tint token (drives baking)
+
+    /// Optional tint token. When set, `PaperSubstrate` self-bakes the paper field
+    /// (Task 3) keyed by `(texture, tint, scheme, size-bucket)` and re-bakes on any
+    /// change. Callers that already have a token (DayView/wizard) pass it; callers
+    /// that only have a resolved `fill` (or want the Task-2 gradient floor) leave it
+    /// `nil` and may inject `bakedTexture` directly.
+    var tint: PaperTint? = nil
+
     // MARK: - Body
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.displayScale) private var displayScale
+
+    /// The self-baked paper field, recomputed on geometry/token/scheme change.
+    @State private var selfBaked: Image? = nil
+    /// Last-measured point side (square bucket basis) used to drive re-baking.
+    @State private var measuredSide: CGFloat = 0
+
+    /// Live device tilt for the specular highlight. Started/stopped with the view's
+    /// lifetime and only consulted when the `.layerEffect` is applied.
+    @State private var motion = MotionStore()
+
+    /// The texture image to draw: an explicit override (preview/tests) wins, else the
+    /// self-baked field, else nil → gradient floor.
+    private var resolvedTexture: Image? { bakedTexture ?? selfBaked }
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius)
@@ -44,14 +77,11 @@ struct PaperSubstrate: View {
             shape.fill(fill)
 
             // ── Layer 2: texture ────────────────────────────────────────────
-            // When a baked texture is provided (Task 3), draw it as a resizable image.
-            // Until then, use a cheap static gradient placeholder so every texture
-            // reads as visually distinct even without Metal.
-            if let bakedTexture {
-                bakedTexture
-                    .resizable()
-                    .scaledToFill()
-                    .clipShape(shape)
+            // Baked paper field (override or self-baked) drawn as a resizable image;
+            // until a bake is available, the cheap static gradient placeholder is the
+            // floor so every texture reads as distinct even without Metal.
+            if let resolvedTexture {
+                textureLayer(image: resolvedTexture, shape: shape)
             } else {
                 TexturePlaceholder(texture: texture, shape: shape)
             }
@@ -59,10 +89,6 @@ struct PaperSubstrate: View {
             // ── Layer 3: ruling ─────────────────────────────────────────────
             RulingCanvas(ruling: ruling)
                 .clipShape(shape)
-
-            // ── Layer 4 (Task 3): tilt specular ─────────────────────────────
-            // tiltEnabled is stored so Task 3 can gate the .layerEffect here.
-            // No-op for Task 2.
 
             // ── Layer 5: chrome ─────────────────────────────────────────────
             if chromeAmount > 0 {
@@ -92,8 +118,103 @@ struct PaperSubstrate: View {
             }
         }
         .clipShape(shape)
+        // Measure the laid-out side so we can bake at the right pixel bucket.
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            max(proxy.size.width, proxy.size.height)
+        } action: { side in
+            if abs(side - measuredSide) > 1 {
+                measuredSide = side
+                rebake()
+            }
+        }
+        .onChange(of: bakeIdentity) { _, _ in rebake() }
+        .onAppear {
+            rebake()
+            if tiltEnabled { motion.start() }
+        }
+        .onDisappear { motion.stop() }
+        .onChange(of: tiltEnabled) { _, on in
+            if on { motion.start() } else { motion.stop() }
+        }
         // NOTE: shadows are intentionally left for callers (DayView manages its
         // own shadow parameters per card depth and drag progress).
+    }
+
+    // MARK: - Texture layer (+ gated live tilt specular)
+
+    /// Draws the baked texture image and, when `tiltEnabled`, layers the live
+    /// tilt-specular `.layerEffect` over it. When `tiltEnabled` is false the effect
+    /// is OMITTED entirely (Reduce Motion / Low Power) — the baked texture still shows.
+    @ViewBuilder
+    private func textureLayer<S: Shape>(image: Image, shape: S) -> some View {
+        let img = image
+            .resizable()
+            .scaledToFill()
+            .clipShape(shape)
+
+        if tiltEnabled {
+            img.layerEffect(
+                ShaderLibrary.paperTiltSpecular(
+                    .float2(Float(measuredSide), Float(measuredSide)),
+                    .float2(Float(motion.tiltX), Float(motion.tiltY)),
+                    // Scheme-resolved tint so an appearance flip re-renders the glint
+                    // colour (research roadmap §1.4) instead of keeping a stale scheme.
+                    .color(fill),
+                    .float(0.10)
+                ),
+                maxSampleOffset: .zero
+            )
+        } else {
+            img
+        }
+    }
+
+    // MARK: - Baking
+
+    /// Identity that, when changed, forces a re-bake. Scheme is included so an
+    /// appearance flip re-bakes (and a light + dark variant coexist in the cache).
+    private var bakeIdentity: String {
+        let schemeFlag = colorScheme == .dark ? 1 : 0
+        let tintRaw = tint?.rawValue ?? -1
+        return "\(texture.rawValue)-\(tintRaw)-\(schemeFlag)"
+    }
+
+    /// Bakes (or fetches from cache) the paper field for the current
+    /// `(texture, tint, scheme, size-bucket)`. No-op when no `tint` token is provided
+    /// (the caller is using the gradient floor or an explicit `bakedTexture`).
+    ///
+    /// A cache hit resolves synchronously (instant, like HibiPlusView's cached-stamp
+    /// fast path). A cold bake (~megapixel × multi-octave fBm) runs off-main to avoid
+    /// hitching, then publishes back on the main actor.
+    private func rebake() {
+        guard let tint, measuredSide > 0 else { return }
+        let px = PaperFieldBaker.sizeBucket(pointSide: measuredSide, displayScale: displayScale)
+        let scheme = PaperFieldBaker.scheme(for: colorScheme)
+        let scale = displayScale
+
+        // Fast path: cache hit → set immediately, no flicker.
+        let key = PaperFieldBaker.Key(textureRaw: texture.rawValue, tintRaw: tint.rawValue,
+                                      scheme: scheme.rawValue, px: px)
+        if let cached = PaperFieldBaker.cachedField(key) {
+            selfBaked = Image(decorative: cached, scale: scale)
+            return
+        }
+
+        // Cold path: bake off-main, then publish (PaperFieldBaker is `nonisolated`).
+        let texture = self.texture
+        let requested = "\(bakeIdentity)-\(px)"
+        Task.detached(priority: .userInitiated) {
+            let image = PaperFieldBaker.bakedImage(
+                texture: texture, tint: tint, scheme: scheme,
+                px: px, displayScale: scale
+            )
+            await MainActor.run {
+                // Only adopt if the inputs still match (avoid a stale async result
+                // overwriting a newer bake after a fast token/scheme/size change).
+                let current = "\(bakeIdentity)-\(PaperFieldBaker.sizeBucket(pointSide: measuredSide, displayScale: scale))"
+                if requested == current { selfBaked = image }
+            }
+        }
     }
 }
 
@@ -215,7 +336,11 @@ private struct LinenPatternView: View {
                             PaperSubstrate(
                                 texture: texture,
                                 ruling: ruling,
-                                fill: AdaptivePalette.paperFill(tint)
+                                fill: AdaptivePalette.paperFill(tint),
+                                // Pass the token so the substrate self-bakes the
+                                // procedural paper field (Task 3) — visually
+                                // inspectable here instead of the gradient floor.
+                                tint: tint
                             )
                             .frame(width: 140, height: 160)
                             .shadow(
