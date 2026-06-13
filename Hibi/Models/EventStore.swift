@@ -57,6 +57,13 @@ final class EventStore {
         if isDemoMode {
             applyDemoFixtures()
         }
+        NotificationCenter.default.addObserver(
+            forName: .hibiHiddenCalendarsDidSyncRemotely,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.reloadHiddenCalendarsFromDefaults() }
+        }
         observerToken = NotificationCenter.default.addObserver(
             forName: .EKEventStoreChanged,
             object: ekStore,
@@ -204,6 +211,19 @@ final class EventStore {
     func isHidden(_ calendar: EKCalendar) -> Bool {
         guard !isDemoMode else { return false }
         return hiddenCalendarIDs.contains(calendar.calendarIdentifier)
+    }
+
+    /// Re-reads the hidden-calendar set from standard defaults and re-applies
+    /// filtering. Called when a remote KVS change syncs `hiddenCalendarIDs` to
+    /// this device. Reuses the same reloadAll() path as local hidden-calendar
+    /// changes, which re-filters all loaded months, rewrites the widget snapshot,
+    /// and reloads widget timelines.
+    func reloadHiddenCalendarsFromDefaults() {
+        let ids = (UserDefaults.standard.array(forKey: Self.hiddenIDsDefaultsKey) as? [String]) ?? []
+        let newSet = Set(ids)
+        guard newSet != hiddenCalendarIDs else { return }
+        hiddenCalendarIDs = newSet
+        reloadAll()
     }
 
     func setCalendar(_ calendar: EKCalendar, hidden: Bool) {

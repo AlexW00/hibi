@@ -38,6 +38,7 @@ struct ContentView: View {
     @State private var clock = Clock()
     @State private var appIconManager = AppIconManager()
     @State private var plusStore = PlusStore()
+    @State private var syncedSettings = SyncedSettingsStore()
     @State private var editorMode: EventEditorSheet.Mode?
     @State private var showOnboarding = false
     @State private var needsOnboarding = false
@@ -351,7 +352,10 @@ struct ContentView: View {
                 onContinue: { }
             )
         }
-        .task { performInitialSetup() }
+        .task {
+            syncedSettings.start()
+            performInitialSetup()
+        }
         .onChange(of: displayedYear) { _, _ in
             eventStore.ensureLoaded(year: displayedYear, month: displayedMonth)
         }
