@@ -89,10 +89,15 @@ nonisolated enum PaperFieldBaker {
     /// Fast synchronous lookup: memory cache → disk cache. Returns nil on miss.
     static func cachedField(_ key: Key) -> CGImage? {
         guard key.px > 0 else { return nil }
-
         let cacheKeyString = cacheKey(key)
         if let hit = memoryCache.object(forKey: cacheKeyString) { return hit.image }
+        return diskField(key)
+    }
 
+    /// Disk-only lookup: reads from disk and populates the memory cache on hit.
+    /// Does NOT pre-check the memory cache — callers that need mem→disk order
+    /// should call `cachedField` instead.
+    private static func diskField(_ key: Key) -> CGImage? {
         guard let url = diskURL(key),
               let provider = CGDataProvider(url: url as CFURL),
               let image = CGImage(pngDataProviderSource: provider,
@@ -100,7 +105,7 @@ nonisolated enum PaperFieldBaker {
                                   intent: .defaultIntent)
         else { return nil }
 
-        memoryCache.setObject(CGImageWrapper(image), forKey: cacheKeyString)
+        memoryCache.setObject(CGImageWrapper(image), forKey: cacheKey(key))
         return image
     }
 
@@ -117,8 +122,11 @@ nonisolated enum PaperFieldBaker {
         guard key.px > 0 else { return nil }
 
         let cacheKeyString = cacheKey(key)
+        // Memory cache — single hit, no second check.
         if let cached = memoryCache.object(forKey: cacheKeyString) { return cached.image }
-        if let onDisk = cachedField(key) { return onDisk }
+        // Disk cache — diskField (no memory pre-check) so the cold-memory/warm-disk
+        // path hits NSCache exactly once total.
+        if let onDisk = diskField(key) { return onDisk }
 
         guard let image = render(texture: texture, tint: tint, scheme: scheme, px: key.px)
         else { return nil }
@@ -130,7 +138,9 @@ nonisolated enum PaperFieldBaker {
 
     private static func persistToDisk(_ image: CGImage, key: Key) {
         guard let url = diskURL(key) else { return }
-        let tmpURL = url.appendingPathExtension("tmp")
+        // Use a UUID-suffixed .tmp so two tasks baking the same key concurrently
+        // don't race on a shared temporary file path.
+        let tmpURL = url.appendingPathExtension("\(UUID().uuidString).tmp")
         guard let dest = CGImageDestinationCreateWithURL(
                   tmpURL as CFURL, "public.png" as CFString, 1, nil)
         else { return }

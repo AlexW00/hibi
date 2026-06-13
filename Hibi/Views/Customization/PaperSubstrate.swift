@@ -60,6 +60,9 @@ struct PaperSubstrate: View {
     @State private var selfBaked: Image? = nil
     /// Last-measured point side (square bucket basis) used to drive re-baking.
     @State private var measuredSide: CGFloat = 0
+    /// Handle for the in-flight cold bake. Cancelled at the start of every `rebake()`
+    /// and on `onDisappear` so a stale result can never clobber a newer one.
+    @State private var bakeTask: Task<Void, Never>? = nil
 
     /// Live device tilt for the specular highlight. Started/stopped with the view's
     /// lifetime and only consulted when the `.layerEffect` is applied.
@@ -132,7 +135,11 @@ struct PaperSubstrate: View {
             rebake()
             if tiltEnabled { motion.start() }
         }
-        .onDisappear { motion.stop() }
+        .onDisappear {
+            bakeTask?.cancel()
+            bakeTask = nil
+            motion.stop()
+        }
         .onChange(of: tiltEnabled) { _, on in
             if on { motion.start() } else { motion.stop() }
         }
@@ -186,7 +193,19 @@ struct PaperSubstrate: View {
     /// A cache hit resolves synchronously (instant, like HibiPlusView's cached-stamp
     /// fast path). A cold bake (~megapixel × multi-octave fBm) runs off-main to avoid
     /// hitching, then publishes back on the main actor.
+    ///
+    /// Task cancellation makes recency authoritative regardless of finish order:
+    /// any in-flight task is cancelled before starting a new one, and the
+    /// `MainActor.run` closure re-checks `Task.isCancelled` (serialised on the main
+    /// actor) so a stale result queued before cancellation still cannot clobber a
+    /// newer synchronous result.
     private func rebake() {
+        // Cancel any in-flight cold bake FIRST — before the guard and before the
+        // cache-hit fast path, so even a cache hit that returns early won't be
+        // clobbered by a stale task that was already in flight.
+        bakeTask?.cancel()
+        bakeTask = nil
+
         guard let tint, measuredSide > 0 else { return }
         let px = PaperFieldBaker.sizeBucket(pointSide: measuredSide, displayScale: displayScale)
         let scheme = PaperFieldBaker.scheme(for: colorScheme)
@@ -201,18 +220,21 @@ struct PaperSubstrate: View {
         }
 
         // Cold path: bake off-main, then publish (PaperFieldBaker is `nonisolated`).
+        // Capture live inputs as locals before the task so the detached closure
+        // bakes for the values current *now*, not a stale struct copy.
         let texture = self.texture
-        let requested = "\(bakeIdentity)-\(px)"
-        Task.detached(priority: .userInitiated) {
+        bakeTask = Task.detached(priority: .userInitiated) {
+            guard !Task.isCancelled else { return }
             let image = PaperFieldBaker.bakedImage(
                 texture: texture, tint: tint, scheme: scheme,
                 px: px, displayScale: scale
             )
             await MainActor.run {
-                // Only adopt if the inputs still match (avoid a stale async result
-                // overwriting a newer bake after a fast token/scheme/size change).
-                let current = "\(bakeIdentity)-\(PaperFieldBaker.sizeBucket(pointSide: measuredSide, displayScale: scale))"
-                if requested == current { selfBaked = image }
+                // Re-check inside the main-actor closure: cancellation and this
+                // closure are serialised on the main actor, so by the time a stale
+                // closure runs, isCancelled is already true.
+                guard !Task.isCancelled else { return }
+                selfBaked = image
             }
         }
     }
