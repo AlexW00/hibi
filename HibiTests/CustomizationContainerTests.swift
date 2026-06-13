@@ -37,4 +37,42 @@ struct CustomizationContainerTests {
         #expect(days.first?.textObjects?.count == 1)
         #expect(placed.sticker === sticker)
     }
+
+    /// Forward-compat: a future client writes rawValue 99 (unknown enum case).
+    /// An older client fetching that record must coalesce to the default — no crash, no silent drop.
+    @Test func unknownTextureRawCoalescesToDefault() throws {
+        let c = try memoryContainer()
+        let ctx = c.mainContext
+        let style = PaperStyle()
+        ctx.insert(style)
+        try ctx.save()
+
+        // Simulate a future client having written an unknown raw value into the column.
+        style.textureRaw = 99
+        try ctx.save()
+
+        let fetched = try ctx.fetch(FetchDescriptor<PaperStyle>())
+        #expect(fetched.count == 1)
+        // Unknown raw must coalesce to .smooth — the computed accessor ?? fallback.
+        #expect(fetched.first?.texture == .smooth)
+        // Raw stored value is preserved as-is (we don't mutate it back).
+        #expect(fetched.first?.textureRaw == 99)
+    }
+
+    /// Forward-compat: same coalescing guarantee for StructuralWidget.kindRaw.
+    @Test func unknownKindRawCoalescesToDefault() throws {
+        let c = try memoryContainer()
+        let ctx = c.mainContext
+        let widget = StructuralWidget()
+        ctx.insert(widget)
+        try ctx.save()
+
+        widget.kindRaw = 99
+        try ctx.save()
+
+        let fetched = try ctx.fetch(FetchDescriptor<StructuralWidget>())
+        #expect(fetched.count == 1)
+        #expect(fetched.first?.kind == .dayNumber)
+        #expect(fetched.first?.kindRaw == 99)
+    }
 }

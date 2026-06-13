@@ -4,17 +4,30 @@ import SwiftData
 @Model
 final class PaperStyle {
     var recordUUID: String = UUID().uuidString
-    var texture: PaperTexture = PaperTexture.smooth
-    var ruling: PaperRuling = PaperRuling.plain
-    var tint: PaperTint = PaperTint.cream
+    var textureRaw: Int = PaperTexture.smooth.rawValue
+    var rulingRaw: Int = PaperRuling.plain.rawValue
+    var tintRaw: Int = PaperTint.cream.rawValue
     var stylePayload: Data?
     var updatedAt: Date?
     init() {}
+    var texture: PaperTexture {
+        get { PaperTexture(rawValue: textureRaw) ?? .smooth }
+        set { textureRaw = newValue.rawValue }
+    }
+    var ruling: PaperRuling {
+        get { PaperRuling(rawValue: rulingRaw) ?? .plain }
+        set { rulingRaw = newValue.rawValue }
+    }
+    var tint: PaperTint {
+        get { PaperTint(rawValue: tintRaw) ?? .cream }
+        set { tintRaw = newValue.rawValue }
+    }
 }
 
 @Model
 final class StructuralWidget {
-    var kind: StructuralWidgetKind = StructuralWidgetKind.dayNumber
+    var recordUUID: String = UUID().uuidString
+    var kindRaw: Int = StructuralWidgetKind.dayNumber.rawValue
     var formatVariant: Int = 0
     var x: Double = 0
     var y: Double = 0
@@ -22,6 +35,10 @@ final class StructuralWidget {
     var stylePayload: Data?
     var updatedAt: Date?
     init() {}
+    var kind: StructuralWidgetKind {
+        get { StructuralWidgetKind(rawValue: kindRaw) ?? .dayNumber }
+        set { kindRaw = newValue.rawValue }
+    }
 }
 
 @Model
@@ -38,6 +55,7 @@ final class DayCustomization {
 
 @Model
 final class PlacedSticker {
+    var recordUUID: String = UUID().uuidString
     var x: Double = 0
     var y: Double = 0
     var scale: Double = 1
@@ -51,6 +69,7 @@ final class PlacedSticker {
 
 @Model
 final class TextObject {
+    var recordUUID: String = UUID().uuidString
     var text: String = ""
     var x: Double = 0
     var y: Double = 0
