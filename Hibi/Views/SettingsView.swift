@@ -17,6 +17,7 @@ struct SettingsView: View {
     @State private var settingsDestination: SettingsDestination?
     @State private var collapseProgress: CGFloat
     @AppStorage("settingsTipSeen", store: AppGroup.defaults) private var settingsTipSeen: Bool = false
+    @AppStorage("settingsLastSyncEpoch") private var lastSyncEpoch: Double = 0
 
     init(onReopenPermissions: @escaping () -> Void, expandPlus: Bool = false) {
         self.onReopenPermissions = onReopenPermissions
@@ -204,6 +205,11 @@ struct SettingsView: View {
                 }
             }
 
+            lastSyncText
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 4)
+
             #if DEBUG
             settingsSection("Debug") {
                 Toggle(isOn: Binding(
@@ -348,6 +354,21 @@ struct SettingsView: View {
 
     private var hasMissingPermission: Bool {
         !eventStore.hasCalendarAccess || !weatherStore.hasLocationAccess
+    }
+
+    private var lastSyncDate: Date? {
+        lastSyncEpoch == 0 ? nil : Date(timeIntervalSince1970: lastSyncEpoch)
+    }
+
+    private var lastSyncText: Text {
+        switch SyncStatus.phrase(lastSync: lastSyncDate, now: Date()) {
+        case .justNow:    Text("sync.status.justNow")
+        case .fewMinutes: Text("sync.status.fewMinutes")
+        case .fewHours:   Text("sync.status.fewHours")
+        case .fewDays:    Text("sync.status.fewDays")
+        case .aWhile:     Text("sync.status.aWhile")
+        case .never:      Text("sync.status.never")
+        }
     }
 
     private static var versionLabel: String {

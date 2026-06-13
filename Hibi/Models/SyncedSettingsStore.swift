@@ -38,21 +38,25 @@ final class SyncedSettingsStore {
     private let kvStore: KeyValueSyncStore
     private let appGroupDefaults: UserDefaults?
     private let standardDefaults: UserDefaults
+    private let now: () -> Date
 
-    /// Designated init for tests (inject all three stores).
+    /// Designated init for tests (inject all three stores + optional clock).
     init(kvStore: KeyValueSyncStore,
          appGroupDefaults: UserDefaults?,
-         standardDefaults: UserDefaults) {
+         standardDefaults: UserDefaults,
+         now: @escaping () -> Date = Date.init) {
         self.kvStore = kvStore
         self.appGroupDefaults = appGroupDefaults
         self.standardDefaults = standardDefaults
+        self.now = now
     }
 
     /// Production convenience init.
     convenience init() {
         self.init(kvStore: NSUbiquitousKeyValueStore.default,
                   appGroupDefaults: AppGroup.defaults,
-                  standardDefaults: .standard)
+                  standardDefaults: .standard,
+                  now: Date.init)
     }
 
     private func defaults(for home: SettingsHome) -> UserDefaults? {
@@ -82,7 +86,9 @@ final class SyncedSettingsStore {
 
     // MARK: Write-through (local → KVS)
 
-    func writeThroughToRemote(keys: [String] = registry.map(\.key)) {
+    @discardableResult
+    func writeThroughToRemote(keys: [String] = registry.map(\.key)) -> Int {
+        var written = 0
         for setting in Self.registry where keys.contains(setting.key) {
             guard let home = defaults(for: setting.home) else { continue }
             let local = home.object(forKey: setting.key)
@@ -90,22 +96,28 @@ final class SyncedSettingsStore {
             let remote = kvStore.object(forKey: setting.key)
             if !plistValuesEqual(local, remote) {
                 kvStore.set(local, forKey: setting.key)
+                written += 1
             }
         }
+        return written
     }
 
     // MARK: One-time seed-up of pre-existing local values
 
-    func seedUpIfNeeded() {
-        guard standardDefaults.bool(forKey: Self.seedFlagKey) != true else { return }
+    @discardableResult
+    func seedUpIfNeeded() -> Int {
+        guard standardDefaults.bool(forKey: Self.seedFlagKey) != true else { return 0 }
+        var written = 0
         for setting in Self.registry {
             guard let home = defaults(for: setting.home) else { continue }
             if kvStore.object(forKey: setting.key) == nil,
                let local = home.object(forKey: setting.key) {
                 kvStore.set(local, forKey: setting.key)
+                written += 1
             }
         }
         standardDefaults.set(true, forKey: Self.seedFlagKey)
+        return written
     }
 
     // MARK: Remote-change classification
@@ -116,6 +128,15 @@ final class SyncedSettingsStore {
 
     func eventStoreNeedsRefresh(changedKeys: Set<String>) -> Bool {
         changedKeys.contains(EventStore.hiddenIDsDefaultsKey)
+    }
+
+    // MARK: Sync timestamp
+
+    /// Records the current time as the last sync epoch in standard defaults.
+    /// Uses the injected `now` clock and `standardDefaults` — no singletons.
+    /// Key is per-device, not in the KVS registry (not synced).
+    private func recordSyncNow() {
+        standardDefaults.set(now().timeIntervalSince1970, forKey: "settingsLastSyncEpoch")
     }
 
     // MARK: Lifecycle / observers
@@ -139,13 +160,13 @@ final class SyncedSettingsStore {
         nc.addObserver(forName: UserDefaults.didChangeNotification,
                        object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated {
-                self?.writeThroughToRemote()
+                if self?.writeThroughToRemote() ?? 0 > 0 { self?.recordSyncNow() }
             }
         }
 
         kvStore.synchronize()
         reconcileFromRemote()      // pull down whatever KVS already has (KVS wins; never clears local)
-        seedUpIfNeeded()           // migrate existing users' current settings up (absent keys only)
+        if seedUpIfNeeded() > 0 { recordSyncNow() }  // migrate existing users' current settings up (absent keys only)
     }
 
     private func handleRemoteChange(_ note: Notification) {
@@ -160,6 +181,7 @@ final class SyncedSettingsStore {
 
         let changed = reconcileFromRemote(keys: changedFromKVS)
         guard !changed.isEmpty else { return }
+        recordSyncNow()
         if shouldReloadWidgets(changedKeys: changed) {
             WidgetCenter.shared.reloadAllTimelines()
         }
