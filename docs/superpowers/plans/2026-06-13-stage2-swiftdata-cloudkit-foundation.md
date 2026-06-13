@@ -230,6 +230,7 @@ import SwiftData
 
 @Model
 final class PaperStyle {
+    var recordUUID: String = UUID().uuidString   // synced convergent-dedup tie-break
     var texture: PaperTexture = PaperTexture.smooth
     var ruling: PaperRuling = PaperRuling.plain
     var tint: PaperTint = PaperTint.cream
@@ -252,6 +253,7 @@ final class StructuralWidget {
 
 @Model
 final class DayCustomization {
+    var recordUUID: String = UUID().uuidString   // synced convergent-dedup tie-break
     var dateKey: String = ""
     @Attribute(.externalStorage) var inkStrokes: Data?
     var stylePayload: Data?
@@ -436,8 +438,8 @@ final class CustomizationStore {
         }
         if all.count == 1 { return all[0] }
         // Dedup: keep convergent survivor, delete the rest.
-        let r = resolveDedup(all, id: { $0.persistentModelID.storeIdentifier ?? "" }, updatedAt: { $0.updatedAt })
-        let survivor = all.first { ($0.persistentModelID.storeIdentifier ?? "") == r.survivorID } ?? all[0]
+        let r = resolveDedup(all, id: { $0.recordUUID }, updatedAt: { $0.updatedAt })
+        let survivor = all.first { $0.recordUUID == r.survivorID } ?? all[0]
         for s in all where s !== survivor { context.delete(s) }
         try context.save()
         return survivor
@@ -458,8 +460,8 @@ final class CustomizationStore {
 
     /// MERGE same-date rows: reparent children onto survivor (union), LWW the ink blob, delete casualties.
     private func mergeDays(_ days: [DayCustomization]) throws -> DayCustomization {
-        let r = resolveDedup(days, id: { $0.persistentModelID.storeIdentifier ?? "" }, updatedAt: { $0.updatedAt })
-        let survivor = days.first { ($0.persistentModelID.storeIdentifier ?? "") == r.survivorID } ?? days[0]
+        let r = resolveDedup(days, id: { $0.recordUUID }, updatedAt: { $0.updatedAt })
+        let survivor = days.first { $0.recordUUID == r.survivorID } ?? days[0]
         for d in days where d !== survivor {
             for p in (d.placedStickers ?? []) { p.day = survivor }
             for t in (d.textObjects ?? []) { t.day = survivor }
@@ -472,7 +474,7 @@ final class CustomizationStore {
 }
 ```
 
-> Implementer note: `persistentModelID.storeIdentifier` may be nil before first save / has a specific shape — verify the exact API for a stable string id; if it differs, use whatever stable string the SDK provides (the dedup *contract* is "deterministic tie-break on a stable id", the exact accessor is an implementation detail). Keep the pure `resolveDedup`/`orderedByZIndex` functions id-type-generic so the tests don't depend on SwiftData.
+> Tie-break uses the synced `recordUUID` field (identical on every device after sync) — NOT `persistentModelID` (device-local, non-convergent). This is what makes same-date `DayCustomization` merges pick the same survivor on every device, so cascade children aren't mutually deleted. Keep the pure `resolveDedup`/`orderedByZIndex` functions id-type-generic so the tests don't depend on SwiftData.
 
 - [ ] **Step 4: Run → pass.**
 - [ ] **Step 5: Commit** — `feat(customization): dedup/ordering/dateKey helpers + CustomizationStore`

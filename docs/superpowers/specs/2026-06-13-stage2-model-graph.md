@@ -8,6 +8,10 @@
 
 That second bullet is the whole reason volatile/evolving styling lives in opaque `Data` blobs: their contents can change with zero schema change.
 
+> **Refinements applied during implementation (post-sign-off, still pre-deploy — so safe):**
+> 1. **Enum tokens are stored as `<name>Raw: Int`** (e.g. `textureRaw`, `rulingRaw`, `tintRaw`, `kindRaw`) with a **coalescing computed accessor** (`texture { PaperTexture(rawValue: textureRaw) ?? .smooth }`). This matches the existing house pattern (`TimeFormat`/`TemperatureUnit` store `…Raw`) and is **forward-compatible**: an older client that fetches a record carrying a future enum case it doesn't know falls back to the default instead of failing the fetch. The CloudKit field is the same Int64 either way; the *field name* is `…Raw`.
+> 2. **`recordUUID: String = UUID().uuidString` is on every independently-syncable record** — `PaperStyle`, `StructuralWidget`, `DayCustomization`, `PlacedSticker`, `TextObject` — as the synced, convergent tie-break for dedup and z-order. (`Sticker` uses its existing `stickerID` for this.) So the field tables below should be read with `recordUUID` present on those types and `texture`/`ruling`/`tint`/`kind` stored as `…Raw: Int`.
+
 ---
 
 ## Design rules applied (verified against CloudKit constraints)
@@ -28,6 +32,7 @@ That second bullet is the whole reason volatile/evolving styling lives in opaque
 ### 1. `PaperStyle` — global paper substrate (one logical row)
 | Field | Type | Default | Notes |
 |---|---|---|---|
+| `recordUUID` | `String` | `UUID().uuidString` | synced app-assigned id; **convergent dedup tie-break** (a value identical on every device after sync). NOT `.unique`. |
 | `texture` | `PaperTexture` enum (Int) | `.smooth` | smooth/linen/kraft/news/vellum |
 | `ruling` | `PaperRuling` enum (Int) | `.plain` | plain/lines/grid/dots |
 | `tint` | `PaperTint` enum (Int) | `.cream` | cream/blush/sky/sage/butter/lilac (the colour token) |
@@ -52,6 +57,7 @@ No relationships (standalone global set). Each widget is its own record; the glo
 ### 3. `DayCustomization` — per-day decoration (keyed by date)
 | Field | Type | Default | Notes |
 |---|---|---|---|
+| `recordUUID` | `String` | `UUID().uuidString` | synced app-assigned id; **convergent dedup tie-break** (critical: same-date merge must pick the same survivor on every device, else `.cascade` children are mutually deleted). NOT `.unique`. |
 | `dateKey` | `String` | `""` | canonical `"yyyy-MM-dd"`. **Built from civil year/month/day components the user navigated to — never from an `Date()` instant run through a timezone** (the key is the cross-device sync identity; "June 13" must land on June 13 on every device regardless of TZ). Sortable → supports range queries. NOT `.unique` → app dedups by this. |
 | `inkStrokes` | `Data?` `.externalStorage` | nil | the day's freeform ink, opaque blob (point arrays or PKDrawing — decided in Stage 7; schema is just `Data` either way) |
 | `stylePayload` | `Data?` | nil | future per-day settings |
@@ -165,8 +171,8 @@ let container = try ModelContainer(
 
 Because there's no uniqueness constraint, two devices can independently create the "same" logical record offline. Resolution must be **convergent** (every device picks the same survivor) and **non-destructive for user content**:
 
-- **`dedupSingleton(_:)`** (`PaperStyle`) — survivor = newest `updatedAt`, **tie-break on a stable id** (`persistentModelID` string) so clock-skew ties resolve identically on all devices; casualties deleted. PaperStyle has no children, so discard is safe.
-- **`dedupByDateKey(_:)`** (`DayCustomization`) — **MERGE, never discard.** Two same-date rows → choose a survivor (newest `updatedAt`, stable-id tie-break), then **reparent the casualties' `placedStickers` + `textObjects` onto the survivor (union)** before deleting the casualty rows. The **`inkStrokes` blob cannot auto-merge** → LWW it (keep the survivor's, i.e. newer/larger), and that's documented as the one acceptable loss. (Discarding a whole day's stickers/text would be silent, unrecoverable data loss — explicitly forbidden.)
+- **`dedupSingleton(_:)`** (`PaperStyle`) — survivor = newest `updatedAt`, **tie-break on `recordUUID`** (a synced app-assigned id, identical on every device after sync) so clock-skew ties resolve identically on all devices; casualties deleted. PaperStyle has no children, so discard is safe. *(Note: `persistentModelID` is device-local and NOT convergent — it must not be the tie-break.)*
+- **`dedupByDateKey(_:)`** (`DayCustomization`) — **MERGE, never discard.** Two same-date rows → choose a survivor (newest `updatedAt`, `recordUUID` tie-break), then **reparent the casualties' `placedStickers` + `textObjects` onto the survivor (union)** before deleting the casualty rows. The **`inkStrokes` blob cannot auto-merge** → LWW it (keep the survivor's, i.e. newer/larger), and that's documented as the one acceptable loss. (Discarding a whole day's stickers/text would be silent, unrecoverable data loss — explicitly forbidden.)
 - **`fetchOrCreateDay(dateKey:in:)`** — fetch the (deduped/merged) day for a key, or create one.
 - **`orderedByZIndex(_:)`** — reconstruct visual order from an **unordered** relationship + `zIndex` (stable sort; deterministic tie-break on id).
 
