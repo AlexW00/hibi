@@ -19,6 +19,7 @@ struct SettingsView: View {
     @AppStorage("settingsTipSeen", store: AppGroup.defaults) private var settingsTipSeen: Bool = false
     #if DEBUG
     @AppStorage("settingsLastSyncEpoch") private var lastSyncEpoch: Double = 0
+    @State private var ckSchemaAlertMessage: String?
     #endif
 
     init(onReopenPermissions: @escaping () -> Void, expandPlus: Bool = false) {
@@ -82,6 +83,16 @@ struct SettingsView: View {
         .background(Color(.systemGroupedBackground))
         .ignoresSafeArea(edges: .bottom)
         .navigationTitle(Text(verbatim: "Hibi"))
+        #if DEBUG
+        .alert("CloudKit Schema", isPresented: Binding(
+            get: { ckSchemaAlertMessage != nil },
+            set: { if !$0 { ckSchemaAlertMessage = nil } }
+        )) {
+            Button("OK") { ckSchemaAlertMessage = nil }
+        } message: {
+            Text(verbatim: ckSchemaAlertMessage ?? "")
+        }
+        #endif
         .navigationDestination(item: $settingsDestination) { destination in
             switch destination {
             case .appearance: AppearanceSettingsView()
@@ -259,6 +270,18 @@ struct SettingsView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
+
+                settingsDivider
+                settingsRow(action: {
+                    do {
+                        try CloudKitSchemaTool.initializeSchema()
+                        ckSchemaAlertMessage = "SUCCESS: CloudKit schema initialized in Development environment."
+                    } catch {
+                        ckSchemaAlertMessage = "ERROR: \(error)"
+                    }
+                }) {
+                    Label("Initialize CloudKit Schema", systemImage: "icloud.and.arrow.up")
+                }
             }
             #endif
         }
