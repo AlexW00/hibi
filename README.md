@@ -34,6 +34,11 @@ cd hibi
 
 Open `Local.xcconfig` and set your Apple Developer team ID, then open `Hibi.xcodeproj` and build.
 
+## Development
+
+- Architecture & file index: [AGENTS.md](AGENTS.md)
+- CloudKit schema deploy workflow (dev / TestFlight / prod — what's automatic vs. manual): [docs/cloudkit-schema-workflow.md](docs/cloudkit-schema-workflow.md)
+
 ## Privacy
 
 See [PRIVACY_POLICY.md](PRIVACY_POLICY.md).
