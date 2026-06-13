@@ -208,6 +208,7 @@ struct SettingsView: View {
             lastSyncText
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 4)
 
             #if DEBUG
