@@ -24,7 +24,7 @@ final class EventStore {
     private var loadedReminderMonths: Set<MonthKey> = []
     @ObservationIgnored nonisolated(unsafe) private var observerToken: NSObjectProtocol?
 
-    private static let hiddenIDsDefaultsKey = "hiddenCalendarIDs"
+    static let hiddenIDsDefaultsKey = "hiddenCalendarIDs"
     private static let demoModeDefaultsKey = "demoMode"
 
     /// Month/stream/day views use this instead of checking access alone so demo works without EventKit.
