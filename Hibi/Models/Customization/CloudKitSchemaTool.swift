@@ -39,7 +39,11 @@ enum CloudKitSchemaTool {
         guard let model = NSManagedObjectModel.makeManagedObjectModel(for: SchemaV1.models) else {
             throw SchemaToolError.modelBuildFailed
         }
-        let desc = NSPersistentStoreDescription(url: URL(fileURLWithPath: "/dev/null"))
+        // Use a real on-disk temp store: CloudKit mirroring requires persistent-history
+        // tracking, which an in-memory ("/dev/null") store can reject at loadPersistentStores.
+        let storeURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("HibiCustomizationSchema.sqlite")
+        let desc = NSPersistentStoreDescription(url: storeURL)
         desc.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
             containerIdentifier: CustomizationContainer.cloudKitContainerID
         )

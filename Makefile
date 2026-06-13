@@ -1,4 +1,5 @@
-APPLE_TEAM_ID ?= $(shell defaults read /dev/null 2>/dev/null; echo YOURTEAMID)
+# Override on the command line or via the environment: `make ck-check APPLE_TEAM_ID=ABCDE12345`
+APPLE_TEAM_ID ?= YOURTEAMID
 CONTAINER_ID := iCloud.com.weichart.hibi
 
 ck-export:
