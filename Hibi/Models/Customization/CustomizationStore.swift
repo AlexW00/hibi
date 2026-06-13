@@ -16,10 +16,8 @@ final class CustomizationStore {
         }
         if all.count == 1 { return all[0] }
         // Dedup: keep convergent survivor, delete the rest.
-        // Uses PersistentIdentifier directly (Comparable, per-record unique) rather than
-        // storeIdentifier (which is store-scoped and shared by all rows in the same store).
-        let r = resolveDedup(all, id: { $0.persistentModelID }, updatedAt: { $0.updatedAt })
-        let survivor = all.first { $0.persistentModelID == r.survivorID } ?? all[0]
+        let r = resolveDedup(all, id: { $0.recordUUID }, updatedAt: { $0.updatedAt })
+        let survivor = all.first { $0.recordUUID == r.survivorID } ?? all[0]
         for s in all where s !== survivor { context.delete(s) }
         try context.save()
         return survivor
@@ -40,10 +38,8 @@ final class CustomizationStore {
 
     /// MERGE same-date rows: reparent children onto survivor (union), LWW the ink blob, delete casualties.
     private func mergeDays(_ days: [DayCustomization]) throws -> DayCustomization {
-        // Uses PersistentIdentifier directly (Comparable, per-record unique) rather than
-        // storeIdentifier (which is store-scoped and shared by all rows in the same store).
-        let r = resolveDedup(days, id: { $0.persistentModelID }, updatedAt: { $0.updatedAt })
-        let survivor = days.first { $0.persistentModelID == r.survivorID } ?? days[0]
+        let r = resolveDedup(days, id: { $0.recordUUID }, updatedAt: { $0.updatedAt })
+        let survivor = days.first { $0.recordUUID == r.survivorID } ?? days[0]
         for d in days where d !== survivor {
             for p in (d.placedStickers ?? []) { p.day = survivor }
             for t in (d.textObjects ?? []) { t.day = survivor }

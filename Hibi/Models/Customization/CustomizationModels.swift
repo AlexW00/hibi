@@ -3,6 +3,7 @@ import SwiftData
 
 @Model
 final class PaperStyle {
+    var recordUUID: String = UUID().uuidString
     var texture: PaperTexture = PaperTexture.smooth
     var ruling: PaperRuling = PaperRuling.plain
     var tint: PaperTint = PaperTint.cream
@@ -25,6 +26,7 @@ final class StructuralWidget {
 
 @Model
 final class DayCustomization {
+    var recordUUID: String = UUID().uuidString
     var dateKey: String = ""
     @Attribute(.externalStorage) var inkStrokes: Data?
     var stylePayload: Data?
