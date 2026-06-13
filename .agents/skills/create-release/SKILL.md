@@ -45,7 +45,19 @@ Translation rules from AGENTS.md:
 - Rewrite idioms naturally, don't translate literally
 - Every locale must have a value — empty `localizations: {}` is a bug
 
-### 5. Commit, push, and tag
+### 5. CloudKit schema gate (if applicable)
+
+If this release adds or changes a CloudKit `@Model` field or type:
+
+1. Run `make ck-export` (requires `APPLE_TEAM_ID` set and a saved `xcrun cktool save-token`). This exports the Development schema to `CloudKit/schema.ckdb`.
+2. Inspect `CloudKit/schema.ckdb`: every enum field must be a scalar `Int(64)`; `maskedImage`/`inkStrokes` must be asset-backed; no reserved-name collisions.
+3. Commit `CloudKit/schema.ckdb`.
+4. In CloudKit Console, click **Deploy Schema Changes** (this is a one-way door — only after the `.ckdb` inspection passes).
+5. Run `make ck-check` — must print `✅ Production matches committed schema` before archiving.
+
+If no CloudKit model changes in this release, skip this step.
+
+### 6. Commit, push, and tag
 
 ```
 git add Hibi.xcodeproj/project.pbxproj Hibi/Models/WhatsNewContent.swift Hibi/Localizable.xcstrings
@@ -55,7 +67,7 @@ git tag vX.Y
 git push origin vX.Y
 ```
 
-### 6. App Store Connect "What's New" text
+### 7. App Store Connect "What's New" text
 
 Provide the release notes as copyable markdown code blocks in these languages:
 - English
